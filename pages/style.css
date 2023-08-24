@@ -1,0 +1,138 @@
+td{
+  padding: 5px;
+}
+.yellow{
+  background: yellow;
+}
+.list{
+  border: 1px solid black;
+  padding-left: 18px;
+}
+.claim-input{
+  border: none;
+  outline: none;
+  width: 100%;
+}
+.selected{
+  background: #a8c97c !important;
+}
+.claim-input:focus{
+  background: lightblue;
+}
+.container{
+  
+}
+.contents-list{
+  list-style-type: none;
+  margin: 5px;
+  padding: 0;
+  height: 500px;
+  overflow: scroll;
+}
+.contents-container{
+  border: 1px solid black;
+  margin: 5px;
+}
+.list-item{
+  position: relative;
+  padding: 5px;
+  background: #eee;
+  border: 1px solid black;
+}
+.list-item-backlink{
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  top: 0;
+  right: 5px;
+  height: 100%;
+}
+.list-item-backlink > *{
+  padding: 2px;
+  border: 1px solid black;
+}
+.title-input{
+  margin: 5px;
+  background: lightblue
+}
+.filtered{
+  filter: brightness(70%)
+}
+.button-container{
+  display: flex;
+}
+.search-input{
+  margin: 5px;
+  border: 1px solid black;
+}
+.filter-box{
+  border: 1px solid black;
+  margin: 5px;
+}
+.filter-item{
+  padding: 3px;
+}
+.filter-mode{
+  display: inline-block;
+  padding: 3px;
+  margin: 3px;
+  background: lemonchiffon;
+  border: 2px solid orange;
+}
+.select-menu{
+  display: inline-block;
+}
+.nebula-item{
+  border: 1px solid black;
+  height: 50px;
+}
+.condition-box{
+  display: inline-block;
+}
+.nebula-container{
+  display: inline;
+}
+a{
+  margin: 10px;
+  text-decoration: none;
+  color: black;
+}
+nav{
+  background: peachpuff;
+  padding: 3px;
+  width: 100%;
+  margin: 0;
+}
+body{
+  margin: 0;
+}
+.filter-item{
+  position: relative;
+  border: 1px solid black;
+}
+.arrow-button-container{
+  display: inline-grid;
+  width: 90px;
+  height: 60px;
+  grid-template-areas: ". up ." "left down right";
+}
+.up-arrow{
+  grid-area: up;
+}
+.left-arrow{
+  grid-area: left;
+}
+.down-arrow{
+  grid-area: down;
+}
+.right-arrow{
+  grid-area: right;
+}
+.close-button{
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: none;
+  border: none;
+}
