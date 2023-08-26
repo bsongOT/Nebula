@@ -1,5 +1,0 @@
-export * from "./CanvasObject.js"
-export * from "./CanvasScreen.js"
-export * from "./CanvasContainer.js"
-export * from "./Hexagon.js"
-export * from "./Line.js"

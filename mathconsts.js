@@ -1,1 +1,0 @@
-const r3 = Math.sqrt(3)
