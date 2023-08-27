@@ -1,5 +1,5 @@
-import {WebObject, ListView} from "../../objects/index.js"
-import {data, contents} from "../../data/Data.js"
+import {WebObject, ListView} from "../"
+import {data} from "../../data/Data"
 import {tour} from "../../utils/utils.js"
 
 export class ContentsTreePanel extends ListView{

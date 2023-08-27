@@ -1,5 +1,5 @@
-import {ListItem} from "../objects/index.js"
-import {data} from "../data/Data.js"
+import {ListItem} from "./"
+import {data} from "../data/Data"
 
 export class NebulaItem extends ListItem{
   nebula;

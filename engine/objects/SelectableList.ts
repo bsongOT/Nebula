@@ -1,12 +1,14 @@
 import {ListView, SelectableItem} from "./index"
+import {SelectableObjectOption} from "../types"
 
 export class SelectableList extends ListView{
   private selectedOne:SelectableItem;
-  children:SelectableItem[];
-  get selection(){
+  protected option:SelectableObjectOption;
+  public children:SelectableItem[]
+  public get selection(){
     return this.selectedOne;
   }
-  set selection(v){
+  public set selection(v){
     let changed = this.selection !== v;
     for (let i of this.children){
       i.selected = false;
@@ -17,7 +19,7 @@ export class SelectableList extends ListView{
     this.selectedOne = v;
     if (changed) this.onselect()
   }
-  constructor(option:WoOption, children:SelectableItem[]){
+  constructor(option:SelectableObjectOption, children:SelectableItem[]){
     super(option, children);
   }
   onselect(){

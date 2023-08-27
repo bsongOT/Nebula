@@ -1,11 +1,13 @@
-import {SelectableList} from "../../objects/index.js"
-import {ContentItem} from "./ContentItem.js"
+import {SelectableList} from "../"
+import {Filter, Search, ContentItem} from "./"
+import {Content} from "../../data/Data"
 
 export class ContentsList extends SelectableList{
-  filter;
-  search;
+  private filter:Filter;
+  private search:Search;
+  private contents:Content[];
   constructor(option){
-    super(option)
+    super(option, [])
     this.contents = option.contents;
     this.filter = option.filter;
     this.search = option.search;

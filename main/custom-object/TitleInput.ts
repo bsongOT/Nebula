@@ -1,4 +1,4 @@
-import {InputObject} from "../objects/index.js"
+import {InputObject} from "./"
 
 export class TitleInput extends InputObject{
   #nebula;

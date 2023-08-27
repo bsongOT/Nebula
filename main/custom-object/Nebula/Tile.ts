@@ -1,13 +1,16 @@
-import {Hexagon} from "../../objects/index.js"
-import {data} from "../../data/Data.js"
+import {Hexagon} from "../"
+import {data} from "../../data/Data"
+import {r3} from "../../../engine/utils/mathconsts";
 
 export class Tile extends Hexagon{
-  tree;
-  node;
+  private tree:TOCContainer;
+  private node:TreeItem;
   get isSelected(){
     return this.tree.selection === this.node
   }
-  isOrigin;
+  get isOrigin(){
+    return this.node.isOrigin;
+  }
   get isValid(){
     return !!this.node
   }
@@ -17,7 +20,7 @@ export class Tile extends Hexagon{
     if (this.isValid) return "#a2a9ca";
     return "#ffffff"
   }
-  constructor(pos,side,node,tree){
+  constructor(pos:Coord,side:number,node,tree){
     super(pos,side)
     this.node=node
     this.tree=tree

@@ -1,8 +1,10 @@
 import {WebObject} from "./WebObject"
+import {ChangableObjectOption} from "../types"
 
 export class StateBox extends WebObject {
   private states:string[];
   private displayingIndex:number;
+  protected option:ChangableObjectOption;
   get index():number{
     return this.displayingIndex;
   }
@@ -15,7 +17,7 @@ export class StateBox extends WebObject {
   get state(){
     return this.states[this.index]
   }
-  constructor(option:WoOption, states:string[]){
+  constructor(option:ChangableObjectOption, states:string[]){
     super("span", {class: "statebox"});
     this.states = states;
     this.index = 0;

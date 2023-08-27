@@ -1,4 +1,4 @@
-import {Navigator, HyperLink} from "../objects/index.js"
+import {Navigator, HyperLink} from "./"
 
 const paths = [
   "../main/index.html",

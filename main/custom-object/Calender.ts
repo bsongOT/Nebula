@@ -1,4 +1,6 @@
-class Calender extends WebObject{
+import {WebObject, emptyArr} from "./index"
+
+export class Calender extends WebObject{
   constructor(){
     super("table")
     let today = new Date();
@@ -8,7 +10,7 @@ class Calender extends WebObject{
     let days = [
       "일","월","화","수","목","금","토",
       ...Array(blank).fill(""),
-      ...Array(31).fill().map((v,i)=>i+1),
+      ...emptyArr(31).map((_,i)=>i+1),
     ];
 
     const week = emptyArr(7).map(v => "<td></td>").join("");

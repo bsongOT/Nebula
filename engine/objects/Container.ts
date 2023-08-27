@@ -1,7 +1,8 @@
 import {WebObject} from "./WebObject"
+import {WoOption} from "../types"
 
 export class Container extends WebObject{
-  constructor(option:WoOption, children:WebObject[]){
+  constructor(option?:WoOption, children?:WebObject[]){
     super("div", option, children);
     this.addClass("container");
     if (option?.value)

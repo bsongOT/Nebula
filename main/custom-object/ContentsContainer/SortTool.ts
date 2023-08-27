@@ -1,4 +1,4 @@
-import {Container, InputObject} from "../../objects/index.js"
+import {Container, InputObject} from "../"
 
 export class SortTool extends Container{
   constructor(){

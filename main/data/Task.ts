@@ -1,7 +1,7 @@
 export class Task{
   neededTasks;
   coincidable;
-  deadlineFunc; //t-손해 그래프
+  deadlineFunc:(day:number)=>number; //t-손해 그래프
   impossibleDays;
   content;
   constructor(content, coincidable, deadlineFunc, impossibleDays, neededTasks){
@@ -13,8 +13,8 @@ export class Task{
   }
 }
 export class FrequentTask extends Task{
-  repeatRule;
-  constructor(){
-    super();
+  repeatRule:"cycle";
+  constructor(content, coincidable, deadlineFunc, impossibleDays, neededTasks){
+    super(content, coincidable, deadlineFunc, impossibleDays, neededTasks);
   }
 }

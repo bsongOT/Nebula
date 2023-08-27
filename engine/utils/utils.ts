@@ -1,4 +1,4 @@
-export function emptyArr(size:number):any[]{
+export function emptyArr(size:number):undefined[]{
   return Array(size).fill(undefined);
 }
 export function tour(node, depth, privateIndex, func){
@@ -12,7 +12,7 @@ export function getLast(node){
   if (node.children.length <= 0) return node;
   return getLast(node.children[node.children.length - 1])
 }
-export function hangulSeperate(str){
+export function hangulSeperate(str:string):string{
   const chars = str.split("")
   const chos = [
     "ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ",

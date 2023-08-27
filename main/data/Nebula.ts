@@ -1,17 +1,20 @@
+import {Tree} from "../../engine/data-structure/tree"
+
+export type NebulaKind = "Type"|"Story"
 export class Nebula{
-  name;
-  id;
-  kind; //type, flow
-  origin;
+  name:string;
+  id:number;
+  kind:NebulaKind;
+  origin:number;
+  tree:Tree<number>
   contentIds;
   directChildren;
-  constructor(name, id, kind, first){
+  constructor(name:string, id:number, kind:NebulaKind, first:number){
     this.name = name;
     this.id = id;
     this.kind = kind;
-    this.origin = new NebulaNode(first)
-    this.contentIds = [first.id];
-    this.directChildren = [this.origin]
+    this.origin = first;
+    this.contentIds = [first];
   }
   link(parent, child){
     if (!this.contentIds.includes(child.id)) this.contentIds.push(child.id);
@@ -23,9 +26,9 @@ export class Nebula{
   }
 }
 export class NebulaNode {
-  id;
-  parent;
-  children;
+  id:number;
+  parent:NebulaNode;
+  children:NebulaNode[];
   constructor(content){
     this.id = content.id;
     this.children = [];

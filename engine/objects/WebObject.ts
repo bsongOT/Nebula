@@ -1,21 +1,17 @@
-type WoOption = {
-  class?:string,
-  onclick?:Function,
-}
-type WoTag = (keyof HTMLElementTagNameMap) | "none" | undefined
+import {WoOption, WoTag} from "../types"
 
 export class WebObject{
-  element:HTMLElement;
-  children:WebObject[];
-  parent:WebObject;
-  option:WoOption;
-  get value():string{
+  protected element:HTMLElement;
+  public children:WebObject[];
+  public parent:WebObject;
+  protected option:WoOption;
+  get value():any{
     return this.element.innerText;
   }
-  set value(v:string){
+  set value(v:any){
     this.element.innerText = v;
   }
-  constructor(tag: WoTag, option?: WoOption, children?: WebObject[]){
+  constructor(tag?: WoTag, option?: WoOption, children?: WebObject[]){
     this.children = [];
     this.option = option ?? {};
     if (tag === "none") return;
@@ -26,7 +22,7 @@ export class WebObject{
     for (let c of (children??[]))
       this.adopt(c)
   }
-  click():void{
+  protected click():void{
     this.option?.onclick?.();
   }
   get sibling():[WebObject?, WebObject?]{

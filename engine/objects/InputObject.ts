@@ -1,8 +1,10 @@
 import {WebObject} from "./WebObject"
+import {IoOption} from "../types"
 
 export class InputObject extends WebObject{
   element:HTMLInputElement
-  constructor(option:WoOption){
+  option:IoOption
+  constructor(option?:IoOption){
     super("input", option);
     if (option?.type){
       this.element.type = option.type;

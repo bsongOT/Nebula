@@ -1,4 +1,5 @@
-import {ButtonObject} from "../../../objects/index.js"
+import {ButtonObject} from "../../"
+import {Filter} from "../"
 
 export class AddFilterButton extends ButtonObject{
   filter:Filter;

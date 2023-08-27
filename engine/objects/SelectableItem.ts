@@ -1,17 +1,23 @@
-import {WebObject, ListItem} from "./index"
+import {WebObject, ListItem, SelectableList} from "./index"
+import {WoOption} from "../types"
 
 export class SelectableItem extends ListItem{
   private isSelected:boolean;
-  get selected(){
+  public parent:SelectableList;
+  public get selected(){
     return this.isSelected;
   }
-  set selected(v){
+  public set selected(v){
     if (v) this.addClass("selected");
     else this.removeClass("selected");
     this.isSelected = v;
   }
-  constructor(option:WoOption, children:WebObject[]){
+  public constructor(option:WoOption, children:WebObject[]){
     super(option, children);
     this.isSelected = false;
+  }
+  protected click(){
+    super.click()
+    this.parent.selection = this;
   }
 }

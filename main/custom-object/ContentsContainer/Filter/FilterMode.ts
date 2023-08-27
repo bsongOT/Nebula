@@ -1,9 +1,11 @@
-import {StateBox} from "../../../objects/index.js"
+import {StateBox} from "../../"
+import {Filter} from "../"
+import {Search} from "../"
 
 const filterModes = ["omit", "spoil"];
 export class FilterMode extends StateBox{
-  filter;
-  constructor(filter){
+  filter:Filter|Search;
+  constructor(filter:Filter|Search){
     super({}, filterModes);
     this.addClass("filter-mode")
     this.filter = filter;
