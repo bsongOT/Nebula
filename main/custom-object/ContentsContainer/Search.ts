@@ -1,10 +1,10 @@
-import {WebObject, InputObject} from "../"
+import {Container, InputObject} from "../"
 import {FilterMode} from "./Filter/FilterMode"
 import {hangulSeperate} from "../../../engine/utils/utils"
 import {Content} from "../../data/Data"
 import {ChangableObjectOption} from "../../../engine/types"
 
-export class Search extends WebObject{
+export class Search extends Container{
   private modeObject:FilterMode;
   private input:InputObject;
   protected option:ChangableObjectOption;

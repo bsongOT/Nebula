@@ -2,7 +2,7 @@ export * from "./Content"
 export * from "./Nebula"
 
 import {Content, ContentKind} from "./Content"
-import {Nebula} from "./Nebula"
+import {Nebula, NebulaKind} from "./Nebula"
 import {Playground} from "./Playground"
 import {Relation} from "./Relation"
 
@@ -42,9 +42,37 @@ export class Data {
     return this.contents[this.binarySearchContent(0, this.contents.length - 1, id)];
   }
   
-  public addContent(title:string, kind:ContentKind):void{
+  public addContent(title:string, kind:ContentKind):Content{
     const id = this.contents[this.contents.length - 1].id + 1;
     this.contents.push(new Content(title, kind, id))
+    $$("all-contents", JSON.stringify(this.contents))
+    return this.contents[this.contents.length - 1]
+  }
+
+  public removeContent(content:Content):void{
+    const id = content.id;
+    this.contents.splice(this.binarySearchContent(0, this.contents.length - 1, id), 1)
+    $$("all-contents", JSON.stringify(this.contents))
+  }
+
+  public addNebula(title:string, kind:NebulaKind, orient:number):Nebula{
+    const id = this.nebulas[this.nebulas.length - 1].id + 1;
+    this.nebulas.push(new Nebula(title, id, kind, orient))
+    $$("all-nebulas", JSON.stringify(this.nebulas))
+
+    return this.nebulas[this.nebulas.length - 1]
+  }
+
+  public removeNebula(nebula:Nebula):void{
+    
+  }
+
+  public getContents():Content[]{
+    return this.contents.map(c => c)
+  }
+
+  public getNebulas():Nebula[]{
+    return this.nebulas.map(n => n)
   }
 
   private binarySearchContent(start:number, end:number, value:number):number{

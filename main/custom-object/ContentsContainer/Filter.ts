@@ -1,27 +1,26 @@
-import {WebObject, Container} from "../../objects/index.js"
-import {FilterMode} from "./Filter/FilterMode.js"
-import {FilterItem} from "./Filter/FilterItem.js"
-import {AddFilterButton} from "./Filter/AddFilterButton.js"
+import {Container} from "../"
+import {FilterItem} from "./Filter/FilterItem"
+import {AddFilterButton} from "./Filter/AddFilterButton"
+import {Content} from "../../data/Data"
+import { ChangableObjectOption } from "../../../engine/types";
 
-export class Filter extends WebObject{
-  #box;
-  #change;
+export class Filter extends Container{
+  private box:Container;
+  protected option:ChangableObjectOption;
 
-  constructor(option){
-    super("div", {class: "filter-box"});
+  constructor(option:ChangableObjectOption){
+    super({class: "filter-box", ...option});
     
     [
-      this.#box = new Container(),
+      this.box = new Container(),
       new AddFilterButton(this)
     ].forEach(e => this.adopt(e))
-    
-    this.#change = option?.onchange;
   }
   change(){
-    this.#change?.()
+    this.option.onchange?.()
   }
-  test(content){
-    const filters = this.#box.children;
+  test(content:Content){
+    const filters = this.box.children as FilterItem[];
     let spoiled = false;
     
     for (let f of filters){
@@ -35,6 +34,7 @@ export class Filter extends WebObject{
     return spoiled ? "spoil" : true;
   }
   add(){
-    this.#box.adopt(new FilterItem(this))
+    this.box.adopt(new FilterItem(this))
+    this.change()
   }
 }

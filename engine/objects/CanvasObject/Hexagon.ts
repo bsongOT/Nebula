@@ -1,16 +1,15 @@
 import {CanvasObject} from "./CanvasObject"
+import {Coord} from "../../coord-system/"
+import { r3 } from "../../utils/mathconsts"
+import { PolygonForm } from "../../infos/PolygonForm"
 
-export class Hexagon extends CanvasObject{
-  private color:string
-  private side:number
-  constructor(pos:Coord, side:number, color?:string){
-    super(pos)
-    this.side = side;
-    if (color) this.color = color;
+export class Hexagon extends CanvasObject<PolygonForm>{
+  constructor(form:PolygonForm){
+    super(form);
   }
-  render(){
-    const size = this.side;
-    const center = this.pos;
+  public render(){
+    const size = this.form.side;
+    const center = this.form.position;
     const p = this.p;
     
     p.push()
@@ -23,19 +22,20 @@ export class Hexagon extends CanvasObject{
     p.vertex(-size * r3 / 2, -size * 1 / 2)
     p.vertex(0, -size)
     p.vertex(size * r3 / 2, -size * 1 / 2)
-    p.fill(this.color);
+    p.fill(this.form.color);
     
     p.endShape(p.CLOSE);
     p.pop()
+    return this;
   }
-  isIn(x:number,y:number):boolean{
+  public isIn(point:Coord):boolean{
     const r3 = Math.sqrt(3)
-    const [tx,ty] = [this.pos.x, this.pos.y]
-    const [dx,dy] = [x-tx, y-ty]
+    const [tx,ty] = [this.form.position.x, this.form.position.y]
+    const [dx,dy] = [point.x-tx, point.y-ty]
     
-    if (Math.abs(dx)>r3*this.side/2) return false;
-    if (Math.abs(dx+r3*dy)>r3*this.side) return false;
-    if (Math.abs(dx-r3*dy)>r3*this.side) return false;
+    if (Math.abs(dx)>r3*this.form.side/2) return false;
+    if (Math.abs(dx+r3*dy)>r3*this.form.side) return false;
+    if (Math.abs(dx-r3*dy)>r3*this.form.side) return false;
     return true;
   }
 }

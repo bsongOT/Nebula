@@ -1,8 +1,8 @@
 import {WebObject} from "./WebObject"
 import {IoOption} from "../types"
 
-export class InputObject extends WebObject{
-  element:HTMLInputElement
+export class InputObject extends WebObject<never,WebObject<any,any>>{
+  protected element:HTMLInputElement
   option:IoOption
   constructor(option?:IoOption){
     super("input", option);

@@ -4,7 +4,7 @@ import {Search} from "../"
 
 const filterModes = ["omit", "spoil"];
 export class FilterMode extends StateBox{
-  filter:Filter|Search;
+  private filter:Filter|Search;
   constructor(filter:Filter|Search){
     super({}, filterModes);
     this.addClass("filter-mode")

@@ -1,15 +1,17 @@
-import {CanvasObject} from "./index"
+import { Coord } from "../../coord-system";
+import { Form } from "../../infos/Form";
+import {CanvasObject} from "./"
 
-export class Line extends CanvasObject{
+export class Line extends CanvasObject<Form>{
   public start:Coord;
   public end:Coord;
   public color:string;
   constructor(start:Coord, end:Coord){
-    super(start);
+    super(new Form(start));
     this.start = start;
     this.end = end;
   }
-  render(){
+  public render():Line{
     const x1 = this.start.x;
     const y1 = this.start.y;
     const x2 = this.end.x;
@@ -25,5 +27,10 @@ export class Line extends CanvasObject{
     p.stroke("#ffffff")
     p.line(x1, y1, x2, y2)
     p.pop()
+
+    return this;
+  }
+  public isIn(_:Coord):boolean{
+    return false;
   }
 }

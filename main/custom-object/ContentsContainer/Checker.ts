@@ -1,4 +1,4 @@
-import {Container} from "../index"
+import {Container} from "../"
 
 export class Checker extends Container{
   constructor(){

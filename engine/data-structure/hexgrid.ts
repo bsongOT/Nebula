@@ -1,5 +1,5 @@
 import {emptyArr} from "../utils/utils"
-import {HexCoord} from "../utils/CoordConverter"
+import {HexCoord} from "../coord-system"
 
 export class HexGrid<T>{
   datas:(T|undefined)[][];
@@ -18,12 +18,21 @@ export class HexGrid<T>{
     this.datas[h.z+h.y][h.x+h.y] = val;
   }
   next(h:HexCoord):HexCoord|undefined{
-    const n = new HexCoord(h.x + 1, h.y, h.z);
     const s = this.size;
-    if (n.x + n.y >= s.x + s.y - 1){
-      //X = 0
-      //Z = y+z+1
-    }
+    const isOut = (c:HexCoord) => 
+      c.x + c.y > s.x + s.y - 2 ||
+      c.x + c.y < 0 ||
+      c.z - c.x < 1 - s.x ||
+      c.z - c.x > s.z - 1;
+
+    let n = h.add(new HexCoord(1, 0, 0));
+    
+    if (isOut(n))
+      n = new HexCoord(0, 0, n.y + n.z + 1)
+    if (isOut(n))
+      n = new HexCoord(1 - s.z, n.z, 0)
+    
+    return isOut(n) ? undefined : n;
   }
   get area():number{
     const [x, y, z] = [this.size.x, this.size.y, this.size.z]

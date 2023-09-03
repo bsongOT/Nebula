@@ -1,7 +1,9 @@
 import {WebObject} from "./WebObject"
 
-export class HyperLink extends WebObject{
-  element:HTMLAnchorElement
+export class HyperLink extends WebObject<never,WebObject<any,any>>{
+  protected element:HTMLAnchorElement;
+  public get value(){return this.element.href;}
+
   constructor(name:string, path:string){
     super("a")
     this.element.href = path;

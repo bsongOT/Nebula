@@ -1,8 +1,7 @@
 import {Container, ButtonObject, SelectableItem} from "../index"
 import {Content} from "../../data/Content"
 
-export class ContentItem extends SelectableItem {
-  content:Content;
+export class ContentItem extends SelectableItem<Content> {
   constructor(content:Content) {
     super({}, [
       new Container({value: content.title}),
@@ -12,6 +11,6 @@ export class ContentItem extends SelectableItem {
         new ButtonObject(content.nebulas.length.toString())
       ])
     ]);
-    this.content = content;
+    this.value = content;
   }
 }

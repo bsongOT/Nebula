@@ -1,10 +1,13 @@
 import {WebObject} from "./WebObject"
 
-export class BodyObject extends WebObject{
-  constructor(children:WebObject[]){
+export class BodyObject extends WebObject<any,any>{
+  constructor(children:WebObject<any,any>[]){
     super("none");
     this.element = document.body;
     for (let c of children ?? [])
       this.adopt(c)
+  }
+  public get value(){
+    return
   }
 }

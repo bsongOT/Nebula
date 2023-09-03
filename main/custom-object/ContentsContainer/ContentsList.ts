@@ -1,36 +1,37 @@
 import {SelectableList} from "../"
-import {Filter, Search, ContentItem} from "./"
+import {ContentItem} from "./"
+import {ContentsListOption} from "../../types"
 import {Content} from "../../data/Data"
 
-export class ContentsList extends SelectableList{
-  private filter:Filter;
-  private search:Search;
-  private contents:Content[];
-  constructor(option){
+export class ContentsList extends SelectableList<Content>{
+  protected option:ContentsListOption;
+  public constructor(option:ContentsListOption){
     super(option, [])
-    this.contents = option.contents;
-    this.filter = option.filter;
-    this.search = option.search;
     this.addClass("contents-list")
     this.update()
   }
-  update(){
+  public update(){
     this.empty();
 
-    for (let c of this.contents){
+    for (let c of this.option.contents){
       let spoiled = false;
       
-      const sm = this.search.mode;
-      if (!this.search.test(c)){
-        if (sm === "omit") continue;
-        if (sm === "spoil") spoiled = true;
+      if (this.option.search){
+        const sm = this.option.search.mode;
+
+        if (!this.option.search.test(c)){
+          if (sm === "omit") continue;
+          if (sm === "spoil") spoiled = true;
+        }
       }
       
-      const fr = this.filter.test(c)
+      if (this.option.filter){
+        const fr = this.option.filter.test(c)
 
-      if (fr !== true){
-        if (fr === "omit") continue;
-        if (fr === "spoil") spoiled = true;
+        if (fr !== true){
+          if (fr === "omit") continue;
+          if (fr === "spoil") spoiled = true;
+        }
       }
       
       const item = this.adopt(new ContentItem(c))

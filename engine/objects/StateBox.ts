@@ -1,7 +1,13 @@
 import {WebObject} from "./WebObject"
 import {ChangableObjectOption} from "../types"
 
-export class StateBox extends WebObject {
+export class StateBox extends WebObject<WebObject<any,any>,WebObject<any,any>> {
+  public get value(): string {
+    return this.element.innerText;
+  }
+  protected set value(v:string){
+    this.element.innerText = v;
+  }
   private states:string[];
   private displayingIndex:number;
   protected option:ChangableObjectOption;

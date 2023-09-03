@@ -1,8 +1,7 @@
-import {WebObject, Option} from "./index"
+import {WebObject, Option} from "./"
 
-export class SelectMenu<T> extends WebObject {
+export class SelectMenu<T> extends WebObject<Option<T>,any> {
   element:HTMLSelectElement;
-  children:Option<T>[]
   get value(){
     return this.children[this.element.selectedIndex].data;
   }

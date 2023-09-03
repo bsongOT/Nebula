@@ -1,22 +1,25 @@
-import {ContentsList} from "./ContentsContainer/ContentsList"
+import {ContentsList, Search, Filter, SortTool, Checker, ContentItem}
+from "./ContentsContainer/"
 import {Container} from "./"
+import { Content } from "../data/Data";
 
 export class ContentsContainer extends Container{
-  contentsList:ContentsList;
-  search:Search;
-  filter:Filter;
-  sort:SortTool;
-  checker:Checker;
-  public get selection(){
+  private contentsList:ContentsList;
+  public get selection():ContentItem{
     return this.contentsList.selection;
   }
-  constructor(option){
-    super({class: "contents-container", ...option}, [
-      
-    ]);
-
+  constructor(option:{contents:Content[]}){
+    super({class: "contents-container"});
+    [
+      new Search({onchange: ()=>this.update()}),
+      new Filter({onchange: ()=>this.update()}),
+      new SortTool(),
+      new Checker(),
+      this.contentsList = new ContentsList({contents: option.contents})
+    ].forEach(e => this.adopt(e))
   }
-  update(){
-    this.contentsList?.update?.();
+  public update():ContentsContainer{
+    this.contentsList.update();
+    return this;
   }
 }

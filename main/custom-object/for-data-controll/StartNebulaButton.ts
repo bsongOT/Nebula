@@ -7,9 +7,9 @@ export class StartNebulaButton extends ButtonObject {
     super("start nebula");
     this.target = target;
   }
-  click(){
+  protected click(){
     data.selectedNebula = data.addNebula(
-      this.target.title, "Story", this.target)
+      this.target.title, "Story", this.target.id)
 
     window.open("../nebula/nebula.html", "_self")
   }

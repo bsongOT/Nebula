@@ -1,5 +1,5 @@
 import {Nebula} from "./Nebula"
-import {HexCoord} from "../../engine/utils/CoordConverter"
+import {HexCoord} from "../../engine/coord-system"
 
 export class Playground {
   nebulaInfos:NebulaInfo[];

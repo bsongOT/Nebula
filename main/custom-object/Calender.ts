@@ -1,6 +1,12 @@
 import {WebObject, emptyArr} from "./index"
 
-export class Calender extends WebObject{
+export class Calender extends WebObject<any,any>{
+  public get value(): any {
+    throw new Error("Method not implemented.");
+  }
+  public set value(v: any) {
+    throw new Error("Method not implemented.");
+  }
   constructor(){
     super("table")
     let today = new Date();

@@ -1,14 +1,13 @@
 import {WebObject, Option} from "./index"
 import {IoOption} from "../types"
 
-export class MultiSelectMenu<T> extends WebObject {
-  element:HTMLSelectElement;
-  children:Option<T>[];
+export class MultiSelectMenu<T> extends WebObject<Option<T>, any> {
+  protected element:HTMLSelectElement;
   option:IoOption;
-  get value():(T|string)[]{
+  public get value():(T|string)[]{
     return this.children.filter(o => o.selected).map(o => o.data)
   }
-  set value(v:T[]){
+  set value(_:(T|string)[]){
     throw "Wrong Access";
   }
   constructor(option:IoOption, children?:Option<T>[]){
@@ -17,6 +16,7 @@ export class MultiSelectMenu<T> extends WebObject {
     for (let o of children??[]){
       this.adopt(o);
     }
+    
     this.element.onchange = ()=>this.change()
   }
   change(){

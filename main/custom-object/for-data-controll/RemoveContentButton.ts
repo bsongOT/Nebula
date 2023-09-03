@@ -2,8 +2,8 @@ import {ButtonObject} from "../"
 import {Content, data} from "../../data/Data.js"
 
 export class RemoveContentButton extends ButtonObject{
-  target:Content;
-  constructor(option){
+  public target:Content;
+  public constructor(option){
     super("🗑", option);
     this.target = option.target;
   }

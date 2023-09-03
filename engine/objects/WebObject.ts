@@ -1,17 +1,28 @@
 import {WoOption, WoTag} from "../types"
 
-export class WebObject{
+export abstract class WebObject<C extends WebObject<any, any>, P extends WebObject<any, any>>{
   protected element:HTMLElement;
-  public children:WebObject[];
-  public parent:WebObject;
+
+  private $children:C[];
+  public get children():C[]{
+    return this.$children;
+  };
+  protected set children(v:C[]){
+    this.$children = v;
+  }
+
+  private $parent:P;
+  public get parent():P{
+    return this.$parent;
+  };
+  protected set parent(v:P){
+    this.$parent = v;
+  }
+
   protected option:WoOption;
-  get value():any{
-    return this.element.innerText;
-  }
-  set value(v:any){
-    this.element.innerText = v;
-  }
-  constructor(tag?: WoTag, option?: WoOption, children?: WebObject[]){
+  public abstract get value();
+  public abstract set value(v:any);
+  public constructor(tag?: WoTag, option?: WoOption, children?: C[]){
     this.children = [];
     this.option = option ?? {};
     if (tag === "none") return;
@@ -25,7 +36,7 @@ export class WebObject{
   protected click():void{
     this.option?.onclick?.();
   }
-  get sibling():[WebObject?, WebObject?]{
+  public get sibling():[WebObject<any,any>?, WebObject<any,any>?]{
     const c = this.parent?.children;
     if (!c) return [undefined, undefined]
     const tl = this.element;
@@ -36,32 +47,34 @@ export class WebObject{
       c.find(o => o.element === nx)
     ]
   }
-  remove():void{
+  public remove():void{
     const c = this.parent?.children;
     this.element.remove()
     if (!c) return;
     c.splice(c.indexOf(this), 1)
   }
-  adopt(obj:WebObject):WebObject{
+  public adopt(obj:C):C{
     this.element.appendChild(obj.element)  
     obj.parent.children = obj.parent.children.filter(o => o !== obj)
     obj.parent = this;
     this.children.push(obj)
     return obj;
   }
-  empty():void{
+  public empty():WebObject<any,any>{
     this.element.innerHTML = "";
     this.children = []
+    return this;
   }
-  bringDown(obj:WebObject):void{
+  public bringDown(obj:WebObject<any,any>):WebObject<any,any>{
     this.element.insertAdjacentElement("afterend", obj.element)
     if (obj.parent)
       obj.parent.children = obj.parent.children.filter(a => a !== obj)
     obj.parent = this.parent;
     
     this.parent.children.splice(this.parent.children.indexOf(this) + 1, 0, obj)
+    return this;
   }
-  promote():WebObject{
+  public promote():WebObject<any,any>{
     if (!this.element.previousElementSibling) return this;
     if (!this.element.parentElement) return this;
     this.element.parentElement.insertBefore(this.element, this.element.previousElementSibling)
@@ -70,7 +83,7 @@ export class WebObject{
     this.parent.children[index - 1] = this;
     return this;
   }
-  demote():WebObject{
+  public demote():WebObject<any,any>{
     if (!this.element.nextElementSibling) return this;
     if (!this.element.parentElement) return this;
     this.element.parentElement.insertBefore(this.element.nextElementSibling, this.element)
@@ -79,10 +92,12 @@ export class WebObject{
     this.parent.children[index + 1] = this;
     return this;
   }
-  addClass(className:string):void{
+  public addClass(className:string):WebObject<any,any>{
     this.element.classList.add(className)
+    return this;
   }
-  removeClass(className:string):void{
+  public removeClass(className:string):WebObject<any,any>{
     this.element.classList.remove(className)
+    return this;
   }
 }

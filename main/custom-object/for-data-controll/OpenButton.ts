@@ -1,14 +1,15 @@
 import {ButtonObject} from "../"
 import {data, Content, Nebula} from "../../data/Data"
+import { no_open_target } from "../../messages";
 
 export class OpenButton extends ButtonObject{
-  target:Content|Nebula;
-  constructor(target:Content|Nebula){
+  public target:Content|Nebula|undefined;
+  constructor(target:Content|Nebula|undefined){
     super("Open");
     this.target = target;
   }
-  click(){
-    if (!this.target) return;
+  protected click(){
+    if (!this.target) return alert(no_open_target)
     if (this.target instanceof Content){
       data.selectedContent = this.target;
       window.open("../../pages/content-page/content-page.html", "_self")

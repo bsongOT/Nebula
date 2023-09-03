@@ -1,0 +1,1 @@
+export const no_open_target = "오픈할 대상을 선택해주세요."

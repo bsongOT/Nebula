@@ -1,5 +1,5 @@
 import {
-  WebObject, Container, SelectMenu, Option,
+  Container, SelectMenu, Option,
   MultiSelectMenu, InputObject, StateBox, ButtonObject
 } 
 from "../../"
@@ -7,11 +7,10 @@ import {Filter} from "../"
 import {FilterMode} from "./FilterMode"
 import {data, Content} from "../../../data/Data"
 
-export class FilterItem extends WebObject {
+export class FilterItem extends Container {
   private modeObject:FilterMode;
   private typeObject:SelectMenu<string>;
   private condBox:Container;
-  private closeButton:ButtonObject;
   public get mode(){
     return this.modeObject.value;
   }
@@ -22,13 +21,13 @@ export class FilterItem extends WebObject {
       "nebula": [
         new MultiSelectMenu(
           {onchange: ()=>filter.change()},
-          data.nebulas.map(n => new Option(n.name, n))
+          data.getNebulas().map(n => new Option(n.name, n))
         )
       ],
       "parent": [
         new MultiSelectMenu(
           {onchange: ()=>filter.change()},
-          data.contents.filter(c => c.children.length >= 1).map(c => new Option(c.title, c))
+          data.getContents().filter(c => c.children.length >= 1).map(c => new Option(c.title, c))
         )
       ],
       "nebula count": [
@@ -50,7 +49,7 @@ export class FilterItem extends WebObject {
         new Option("parent count")
       ]),
       this.condBox = new Container({class: "condition-box"}, condUI["nebula"]),
-      this.closeButton = new ButtonObject("X", {
+      new ButtonObject("X", {
           class: "close-button", 
           onclick: ()=>{
             this.remove()
