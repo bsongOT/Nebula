@@ -3,7 +3,7 @@ import { Form } from "../../infos/Form";
 import {CanvasObject} from "./CanvasObject"
 
 export class CanvasContainer extends CanvasObject<Form>{
-  constructor(children:CanvasObject<any>[]){
+  constructor(children?:CanvasObject<any>[]){
     super(new Form(new Coord(0,0)), children);
   }
   public render():CanvasContainer{

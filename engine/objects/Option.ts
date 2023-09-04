@@ -2,14 +2,15 @@ import {WebObject} from "./WebObject.js"
 import { SelectMenu } from "./";
 
 export class Option<T> extends WebObject<never,SelectMenu<T>>{
-  public get value():T|string {
-    return this.data;
+  public get value(): string {
+    return this.element.innerText;
   }
-  public set value(v:T|string) {
-    this.data = v;
+  public set value(v: string) {
+    this.element.innerText = v;
   }
   element:HTMLOptionElement;
-  data:T|string;
+  public data:T|string;
+
   get selected(){
     return this.element.selected
   }

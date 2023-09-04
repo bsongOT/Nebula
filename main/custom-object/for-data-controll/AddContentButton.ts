@@ -2,16 +2,19 @@ import {ButtonObject} from "../"
 import {data} from "../../data/Data"
 
 export class AddContentButton extends ButtonObject{
-  constructor(option){
-    super("+", option);
+  public constructor(){
+    super("+");
+    this.onclick(()=>{})
   }
-  click() {
-    super.click();
-    const title = prompt("컨텐츠 제목을 입력하세요", "content")
-    if (title === null || title === "") return;
+  public onclick(onclick:()=>void) {
+    super.onclick(()=>{
+      const title = prompt("컨텐츠 제목을 입력하세요", "content")
+      if (title === null || title === "") return;
     
-    data.addContent(title, "Story")
+      data.addContent(title, "Story")
     
-    this.option.onadded?.()
+      onclick()
+    })
+    return this;
   }
 }

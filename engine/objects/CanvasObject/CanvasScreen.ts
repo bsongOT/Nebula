@@ -13,7 +13,7 @@ export class CanvasScreen extends WebObject<CanvasObject<any>, any>{
   public get value(){
     return;
   }
-  adopt(obj:CanvasObject<any>):CanvasObject<any>{
+  public adopt<T extends CanvasObject<any>>(obj:T):T{
     this.children.push(obj)
     obj.parent = this;
     obj.p = this.p

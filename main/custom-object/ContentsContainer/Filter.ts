@@ -1,25 +1,34 @@
-import {Container} from "../"
+import {ButtonObject, Container, Detail} from "../"
 import {FilterItem} from "./Filter/FilterItem"
 import {AddFilterButton} from "./Filter/AddFilterButton"
 import {Content} from "../../data/Data"
-import { ChangableObjectOption } from "../../../engine/types";
 
 export class Filter extends Container{
   private box:Container;
-  protected option:ChangableObjectOption;
+  private $onchange:()=>void;
 
-  constructor(option:ChangableObjectOption){
-    super({class: "filter-box", ...option});
-    
+  constructor(){
+    super();
+    this.addClass("filter-box");
     [
-      this.box = new Container(),
-      new AddFilterButton(this)
+      new Detail([
+        new ButtonObject("Filter"),
+        new Container([
+          this.box = new Container(),
+          new AddFilterButton(this)
+        ])
+      ])
     ].forEach(e => this.adopt(e))
   }
-  change(){
-    this.option.onchange?.()
+  public update(){
+    this.$onchange();
+    return this;
   }
-  test(content:Content){
+  public onchange(onchange:()=>void){
+    this.$onchange = onchange;
+    return this;
+  }
+  public test(content:Content){
     const filters = this.box.children as FilterItem[];
     let spoiled = false;
     
@@ -33,8 +42,8 @@ export class Filter extends Container{
     
     return spoiled ? "spoil" : true;
   }
-  add(){
+  public add(){
     this.box.adopt(new FilterItem(this))
-    this.change()
+    this.update()
   }
 }

@@ -8,7 +8,8 @@ export class TitleInput extends InputObject{
     this.value = nebula.name;
     this.addClass("title-input")
   }
-  typing(){
+  onchange(onchange:()=>void){
     this.#nebula.name = this.value;
+    return this;
   }
 }

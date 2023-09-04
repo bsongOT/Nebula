@@ -1,5 +1,4 @@
 import {WebObject, ListItem} from "./index"
-import {WoOption} from "../types"
 
 export class ListView<T, C extends ListItem<T, ListView<T,any>>> extends WebObject<C,any>{
   public get value(): any {
@@ -8,8 +7,8 @@ export class ListView<T, C extends ListItem<T, ListView<T,any>>> extends WebObje
   public set value(v: any) {
     throw new Error("Method not implemented.");
   }
-  constructor(option?:WoOption, children?:C[]){
-    super("ul", option, children);
+  constructor(children?:C[]){
+    super("ul", children);
     this.addClass("list")
   }
 }

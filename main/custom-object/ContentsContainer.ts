@@ -8,18 +8,23 @@ export class ContentsContainer extends Container{
   public get selection():ContentItem{
     return this.contentsList.selection;
   }
-  constructor(option:{contents:Content[]}){
-    super({class: "contents-container"});
+  constructor(contents:Content[]){
+    super();
+    this.addClass("contents-container");
     [
-      new Search({onchange: ()=>this.update()}),
-      new Filter({onchange: ()=>this.update()}),
+      new Search().onchange(()=>this.update()),
+      new Filter().onchange(()=>this.update()),
       new SortTool(),
       new Checker(),
-      this.contentsList = new ContentsList({contents: option.contents})
+      this.contentsList = new ContentsList().ready(contents)
     ].forEach(e => this.adopt(e))
   }
   public update():ContentsContainer{
     this.contentsList.update();
+    return this;
+  }
+  public onselect(onselect:()=>void){
+    this.contentsList.onselect(onselect);
     return this;
   }
 }

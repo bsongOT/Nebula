@@ -1,10 +1,9 @@
 import {WebObject} from "./WebObject"
-import {WoOption} from "../types"
 
 export class ButtonObject extends WebObject<any,any>{
-  constructor(name:string, option?:WoOption){
-    super("button", option);
-    this.element.innerText = name
+  constructor(name:string){
+    super("button");
+    this.value = name
   }
   public get value():string{
     if (this.children.length === 0)

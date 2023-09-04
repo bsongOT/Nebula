@@ -9,7 +9,7 @@ const paths = [
 
 export class UpperMenu extends Navigator{
   constructor(){
-    super({}, [
+    super([
       new HyperLink("Home", paths[0]),
       new HyperLink("Todo", paths[1]),
       new HyperLink("Nebula", paths[2]),

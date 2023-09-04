@@ -20,51 +20,44 @@ export class FilterItem extends Container {
     const condUI = {
       "nebula": [
         new MultiSelectMenu(
-          {onchange: ()=>filter.change()},
           data.getNebulas().map(n => new Option(n.name, n))
-        )
+        ).onchange(()=>filter.update())
       ],
       "parent": [
         new MultiSelectMenu(
-          {onchange: ()=>filter.change()},
           data.getContents().filter(c => c.children.length >= 1).map(c => new Option(c.title, c))
-        )
+        ).onchange(()=>filter.update())
       ],
       "nebula count": [
-        new InputObject({type: "number", onchange: ()=>filter.change()}),
-        new StateBox({onchange: ()=>filter.change()}, ["↑", "↓"])
+        new InputObject().setType("number").onchange(()=>filter.update()),
+        new StateBox(["↑", "↓"]).onchange(()=>filter.update())
       ],
       "parent count": [
-        new InputObject({type: "number", onchange: ()=>filter.change()}),
-        new StateBox({onchange: ()=>filter.change()}, ["↑", "↓"])
+        new InputObject().setType("number").onchange(()=>filter.update()),
+        new StateBox(["↑", "↓"]).onchange(()=>filter.update())
       ]
     };
     
     [
       this.modeObject = new FilterMode(filter),
-      this.typeObject = new SelectMenu([
+      this.typeObject = new SelectMenu<string>([
         new Option("nebula"),
         new Option("parent"),
         new Option("nebula count"),
         new Option("parent count")
-      ]),
-      this.condBox = new Container({class: "condition-box"}, condUI["nebula"]),
-      new ButtonObject("X", {
-          class: "close-button", 
-          onclick: ()=>{
-            this.remove()
-            filter.change()
-          }
-      })
+      ]).onchange(() => {
+        this.condBox.empty()
+        condUI[this.typeObject.value].forEach(c => this.condBox.adopt(c))
+        filter.update()
+      }),
+      this.condBox = new Container(condUI["nebula"]).addClass("conditional-box"),
+      new ButtonObject("X")
+        .addClass("close-button")
+        .onclick(()=>{
+          this.remove()
+          filter.update()
+        })
     ].forEach(e => this.adopt(e))
-    
-    const cd = this.condBox;
-  
-    this.typeObject.change = function(){
-      cd.empty();
-      condUI[this.value].forEach(c => cd.adopt(c))
-      filter.change()
-    }
   }
   test(content:Content){
     switch(this.typeObject.value){

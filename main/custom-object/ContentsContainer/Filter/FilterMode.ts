@@ -6,12 +6,9 @@ const filterModes = ["omit", "spoil"];
 export class FilterMode extends StateBox{
   private filter:Filter|Search;
   constructor(filter:Filter|Search){
-    super({}, filterModes);
+    super(filterModes);
     this.addClass("filter-mode")
     this.filter = filter;
-  }
-  click(){
-    super.click()
-    this.filter.change()
+    this.onchange(()=>filter.update())
   }
 }

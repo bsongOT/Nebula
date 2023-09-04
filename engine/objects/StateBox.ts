@@ -1,5 +1,4 @@
 import {WebObject} from "./WebObject"
-import {ChangableObjectOption} from "../types"
 
 export class StateBox extends WebObject<WebObject<any,any>,WebObject<any,any>> {
   public get value(): string {
@@ -9,26 +8,36 @@ export class StateBox extends WebObject<WebObject<any,any>,WebObject<any,any>> {
     this.element.innerText = v;
   }
   private states:string[];
-  private displayingIndex:number;
-  protected option:ChangableObjectOption;
+  private $index:number;
   get index():number{
-    return this.displayingIndex;
+    return this.$index;
   }
   set index(v){
     if (isNaN(v)) return;
-    this.displayingIndex = v % this.states.length;
+    this.$index = v % this.states.length;
     this.value = this.state;
-    this.option?.onchange?.()
+    this.$onchange?.()
   }
   get state(){
     return this.states[this.index]
   }
-  constructor(option:ChangableObjectOption, states:string[]){
-    super("span", {class: "statebox"});
+  private $onchange:()=>void;
+  constructor(states:string[]){
+    super("span");
+    this.addClass("statebox");
     this.states = states;
     this.index = 0;
+    this.onclick(()=>{})
   }
-  click(){
-    this.index++;
+  public onchange(onchange:()=>void){
+    this.$onchange = onchange;
+    return this;
+  }
+  public onclick(onclick:()=>void){
+    this.element.onclick = ()=>{
+      this.index++;
+      onclick()
+    }
+    return this;
   }
 }

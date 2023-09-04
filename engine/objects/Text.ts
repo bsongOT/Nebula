@@ -1,14 +1,14 @@
 import { WebObject } from ".";
 
 export class Text extends WebObject<never, any>{
-  public get value(): any {
-      throw new Error("Method not implemented.");
+  public get value(): string {
+    return this.element.innerText;
   }
-  public set value(v: any) {
-      throw new Error("Method not implemented.");
+  public set value(v: string) {
+    this.element.innerText = v;
   }
   constructor(text:string){
     super();
-    this.element.innerText = text;
+    this.value = text;
   }
 }

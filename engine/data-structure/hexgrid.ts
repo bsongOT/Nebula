@@ -17,7 +17,7 @@ export class HexGrid<T>{
     if (!this.datas[h.z+h.y]) return
     this.datas[h.z+h.y][h.x+h.y] = val;
   }
-  next(h:HexCoord):HexCoord|undefined{
+  next(h:HexCoord):HexCoord{
     const s = this.size;
     const isOut = (c:HexCoord) => 
       c.x + c.y > s.x + s.y - 2 ||
@@ -32,7 +32,7 @@ export class HexGrid<T>{
     if (isOut(n))
       n = new HexCoord(1 - s.z, n.z, 0)
     
-    return isOut(n) ? undefined : n;
+    return n;
   }
   get area():number{
     const [x, y, z] = [this.size.x, this.size.y, this.size.z]

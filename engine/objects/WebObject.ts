@@ -1,4 +1,4 @@
-import {WoOption, WoTag} from "../types"
+import {WoTag} from "../types"
 
 export abstract class WebObject<C extends WebObject<any, any>, P extends WebObject<any, any>>{
   protected element:HTMLElement;
@@ -15,26 +15,22 @@ export abstract class WebObject<C extends WebObject<any, any>, P extends WebObje
   public get parent():P{
     return this.$parent;
   };
-  protected set parent(v:P){
+  public set parent(v:P){
     this.$parent = v;
   }
 
-  protected option:WoOption;
   public abstract get value();
   public abstract set value(v:any);
-  public constructor(tag?: WoTag, option?: WoOption, children?: C[]){
+  public constructor(tag?: WoTag, children?: C[]){
     this.children = [];
-    this.option = option ?? {};
     if (tag === "none") return;
     this.element = document.createElement(tag ?? "div");
-    this.element.onclick = ()=>this.click();
-    if (option?.class) 
-      this.addClass(option.class)
     for (let c of (children??[]))
       this.adopt(c)
   }
-  protected click():void{
-    this.option?.onclick?.();
+  public onclick(onclick:()=>void){
+    this.element.onclick = onclick;
+    return this;
   }
   public get sibling():[WebObject<any,any>?, WebObject<any,any>?]{
     const c = this.parent?.children;
@@ -53,7 +49,7 @@ export abstract class WebObject<C extends WebObject<any, any>, P extends WebObje
     if (!c) return;
     c.splice(c.indexOf(this), 1)
   }
-  public adopt(obj:C):C{
+  public adopt<T extends C>(obj:T):T{
     this.element.appendChild(obj.element)  
     obj.parent.children = obj.parent.children.filter(o => o !== obj)
     obj.parent = this;
@@ -74,18 +70,18 @@ export abstract class WebObject<C extends WebObject<any, any>, P extends WebObje
     this.parent.children.splice(this.parent.children.indexOf(this) + 1, 0, obj)
     return this;
   }
-  public promote():WebObject<any,any>{
-    if (!this.element.previousElementSibling) return this;
-    if (!this.element.parentElement) return this;
+  public promote(){
+    if (!this.element.previousElementSibling) return false;
+    if (!this.element.parentElement) return false;
     this.element.parentElement.insertBefore(this.element, this.element.previousElementSibling)
     const index = this.parent.children.indexOf(this)
     this.parent.children[index] = this.parent.children[index - 1]
     this.parent.children[index - 1] = this;
     return this;
   }
-  public demote():WebObject<any,any>{
-    if (!this.element.nextElementSibling) return this;
-    if (!this.element.parentElement) return this;
+  public demote(){
+    if (!this.element.nextElementSibling) return false;
+    if (!this.element.parentElement) return false;
     this.element.parentElement.insertBefore(this.element.nextElementSibling, this.element)
     const index = this.parent.children.indexOf(this)
     this.parent.children[index] = this.parent.children[index + 1]
@@ -98,6 +94,10 @@ export abstract class WebObject<C extends WebObject<any, any>, P extends WebObje
   }
   public removeClass(className:string):WebObject<any,any>{
     this.element.classList.remove(className)
+    return this;
+  }
+  public toggleClass(className:string){
+    this.element.classList.toggle(className)
     return this;
   }
 }

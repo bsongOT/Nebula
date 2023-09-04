@@ -1,15 +1,18 @@
-import {ListItem} from "./"
-import {data} from "../data/Data"
+import {ListItem, Text} from "./"
+import {Nebula, data} from "../data/Data"
 
-export class NebulaItem extends ListItem{
-  nebula;
-  constructor(nebula){
+export class NebulaItem extends ListItem<Nebula,any>{
+  constructor(nebula:Nebula){
     super();
-    this.value = nebula.name;
-    this.nebula = nebula;
+    this.value = nebula;
+    this.adopt(new Text(nebula.name))
   }
-  click(){
-    data.selectedNebula = this.nebula
-    window.open("../nebula/nebula.html", "_self")
+  onclick(onclick:()=>void){
+    super.onclick(()=>{
+      data.selectedNebula = this.value
+      window.open("../nebula/nebula.html", "_self")
+      onclick()
+    })
+    return this;
   }
 }

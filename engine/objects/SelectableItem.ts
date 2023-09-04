@@ -1,5 +1,4 @@
 import {WebObject, ListItem, SelectableList} from "./index"
-import {WoOption} from "../types"
 
 export class SelectableItem<T> extends ListItem<T, SelectableList<T>>{
   private isSelected:boolean;
@@ -11,12 +10,16 @@ export class SelectableItem<T> extends ListItem<T, SelectableList<T>>{
     else this.removeClass("selected");
     this.isSelected = v;
   }
-  public constructor(option?:WoOption, children?:WebObject<any,any>[]){
-    super(option, children);
+  public constructor(children?:WebObject<any,any>[]){
+    super(children);
     this.isSelected = false;
+    this.onclick(()=>{});
   }
-  protected click(){
-    super.click()
-    this.parent.selection = this;
+  public onclick(onclick:()=>void){
+    this.element.onclick = ()=>{
+      this.parent.selection = this;
+      onclick()
+    }
+    return this;
   }
 }

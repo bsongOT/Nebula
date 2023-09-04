@@ -1,9 +1,7 @@
 import {ListView, SelectableItem} from "./index"
-import {SelectableObjectOption} from "../types"
 
 export class SelectableList<T> extends ListView<T, SelectableItem<T>>{
   private selectedOne:SelectableItem<T>;
-  protected option:SelectableObjectOption;
   public get selection():SelectableItem<T>{
     return this.selectedOne;
   }
@@ -16,12 +14,14 @@ export class SelectableList<T> extends ListView<T, SelectableItem<T>>{
       }
     }
     this.selectedOne = v;
-    if (changed) this.onselect()
+    if (changed) this.$onselect()
   }
-  constructor(option?:SelectableObjectOption, children?:SelectableItem<T>[]){
-    super(option, children);
+  private $onselect:()=>void;
+  constructor(children?:SelectableItem<T>[]){
+    super(children);
   }
-  onselect(){
-    this.option?.onselect?.()
+  public onselect(onselect:()=>void){
+    this.$onselect = onselect;
+    return this;
   }
 }

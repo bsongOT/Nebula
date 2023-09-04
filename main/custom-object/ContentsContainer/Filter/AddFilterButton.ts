@@ -6,9 +6,8 @@ export class AddFilterButton extends ButtonObject{
   constructor(filter:Filter){
     super("add filter");
     this.filter = filter;
-  }
-  protected click(){
-    super.click()
-    this.filter.add()
+    this.onclick(()=>{
+      this.filter.add()
+    })
   }
 }

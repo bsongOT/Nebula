@@ -1,5 +1,4 @@
 import {WebObject, ListView} from "./"
-import {WoOption} from "../types"
 
 export class ListItem<T, P extends ListView<T, any>> extends WebObject<WebObject<any,any>,P>{
   public get value(): T {
@@ -9,8 +8,8 @@ export class ListItem<T, P extends ListView<T, any>> extends WebObject<WebObject
     this.data = v;
   }
   private data:T;
-  constructor(option?:WoOption, children?:WebObject<any,any>[]){
-    super("li", option, children)
+  constructor(children?:WebObject<any,any>[]){
+    super("li", children)
     this.addClass("list-item")
   }
 }

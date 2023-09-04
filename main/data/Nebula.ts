@@ -1,5 +1,4 @@
 import {Tree} from "../../engine/data-structure/tree"
-import { Content } from "./Data";
 
 export type NebulaKind = "Type"|"Story"
 export class Nebula{
@@ -14,14 +13,5 @@ export class Nebula{
     this.kind = kind;
     this.orient = first;
     this.tree = new Tree()
-  }
-}
-export class NebulaNode {
-  id:number;
-  parent:NebulaNode;e
-  children:NebulaNode[];
-  constructor(content:Content){
-    this.id = content.id;
-    this.children = [];
   }
 }

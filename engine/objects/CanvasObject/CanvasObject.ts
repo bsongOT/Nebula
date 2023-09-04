@@ -11,10 +11,10 @@ export abstract class CanvasObject<F extends Form> extends WebObject<CanvasObjec
   }
   public set value(_){}
   public constructor(form:F, children?:CanvasObject<any>[]){
-    super("none",{},children);
+    super("none",children);
     this.form = form;
   }
-  public adopt(obj:CanvasObject<any>):CanvasObject<any>{
+  public adopt<T extends CanvasObject<any>>(obj:T):T{
     this.children.push(obj)
     obj.parent = this;
     obj.p = this.p;

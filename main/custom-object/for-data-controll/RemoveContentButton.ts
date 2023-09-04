@@ -2,17 +2,19 @@ import {ButtonObject} from "../"
 import {Content, data} from "../../data/Data.js"
 
 export class RemoveContentButton extends ButtonObject{
-  public target:Content;
-  public constructor(option){
-    super("🗑", option);
-    this.target = option.target;
+  public target:Content|undefined;
+  public constructor(target?:Content){
+    super("🗑");
+    this.target = target;
+    this.onclick(()=>{})
   }
-  click() {
-    super.click();
+  public onclick(onclick:()=>void) {
+    super.onclick(()=>{
+      if (!this.target) return;
+      data.removeContent(this.target)
+      onclick()
+    })
     
-    if (!this.target) return;
-    data.removeContent(this.target)
-    
-    this.option.onremoved?.()
+    return this;
   }
 }
