@@ -2,7 +2,7 @@ import {StateBox} from "../../"
 import {Filter} from "../"
 import {Search} from "../"
 
-const filterModes = ["omit", "spoil"];
+export const filterModes = ["omit", "spoil"];
 export class FilterMode extends StateBox{
   private filter:Filter|Search;
   constructor(filter:Filter|Search){

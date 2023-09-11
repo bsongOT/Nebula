@@ -1,4 +1,4 @@
-import {WebObject, ListView} from "./"
+import {WebObject, ListView} from ".."
 
 export class ListItem<T, P extends ListView<T, any>> extends WebObject<WebObject<any,any>,P>{
   public get value(): T {

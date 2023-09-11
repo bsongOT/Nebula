@@ -1,4 +1,4 @@
-import {ListView, SelectableItem} from "./index"
+import {ListView, SelectableItem} from "../index"
 
 export class SelectableList<T> extends ListView<T, SelectableItem<T>>{
   private selectedOne:SelectableItem<T>;

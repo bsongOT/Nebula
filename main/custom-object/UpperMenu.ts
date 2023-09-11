@@ -1,10 +1,11 @@
-import {Navigator, HyperLink} from "./"
+import {Navigator, HyperLink} from "../../engine/objects/"
 
-const paths = [
-  "../main/index.html",
-  "../todo/todo.html",
-  "../nebula-menu/nebula-menu.html",
-  "../playground-menu/playground-menu.html"
+export const paths = [
+  "./index.html",
+  "./todo.html",
+  "./nebula-menu.html",
+  "./playground-menu.html",
+  "./relation.html"
 ];
 
 export class UpperMenu extends Navigator{

@@ -1,5 +1,5 @@
-import {ButtonObject} from "./index"
-import {ContentsContainer, StarListContainer} from "./index"
+import {ButtonObject} from "./"
+import {ContentsContainer, StarListContainer} from "./"
 
 export class AddInTreeButton extends ButtonObject {
   private from:ContentsContainer;

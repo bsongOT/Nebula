@@ -1,5 +1,5 @@
 import {ButtonObject} from "../"
-import {Content, data} from "../../data/Data.js"
+import {Content, data} from "../../data/Data"
 
 export class RemoveContentButton extends ButtonObject{
   public target:Content|undefined;

@@ -1,15 +1,19 @@
 import {InputObject} from "./"
 
 export class TitleInput extends InputObject{
-  #nebula;
+  private nebula;
   constructor(nebula){
     super();
-    this.#nebula = nebula;
+    this.nebula = nebula;
     this.value = nebula.name;
     this.addClass("title-input")
+    this.onchange(()=>{})
   }
   onchange(onchange:()=>void){
-    this.#nebula.name = this.value;
+    super.onchange(()=>{
+      this.nebula.name = this.value;
+      onchange()
+    })
     return this;
   }
 }

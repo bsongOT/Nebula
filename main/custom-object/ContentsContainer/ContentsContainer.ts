@@ -1,7 +1,8 @@
 import {ContentsList, Search, Filter, SortTool, Checker, ContentItem}
-from "./ContentsContainer/"
-import {Container} from "./"
-import { Content } from "../data/Data";
+from "."
+import {Container} from ".."
+import { Content } from "../../data/Data";
+import "../../styles/Tool-box.css"
 
 export class ContentsContainer extends Container{
   private contentsList:ContentsList;
@@ -10,12 +11,15 @@ export class ContentsContainer extends Container{
   }
   constructor(contents:Content[]){
     super();
+    
     this.addClass("contents-container");
     [
       new Search().onchange(()=>this.update()),
-      new Filter().onchange(()=>this.update()),
-      new SortTool(),
-      new Checker(),
+      new Container([
+        new Filter().onchange(()=>this.update()),
+        new SortTool(),
+        new Checker(),
+      ]).addClass("contents-container-tool-box"),
       this.contentsList = new ContentsList().ready(contents)
     ].forEach(e => this.adopt(e))
   }

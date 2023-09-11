@@ -6,6 +6,7 @@ from "../../"
 import {Filter} from "../"
 import {FilterMode} from "./FilterMode"
 import {data, Content} from "../../../data/Data"
+import { InputText } from "../../../../engine/objects/input/InputText";
 
 export class FilterItem extends Container {
   private modeObject:FilterMode;
@@ -17,6 +18,7 @@ export class FilterItem extends Container {
   public constructor(filter:Filter){
     super()
     this.addClass("filter-item")
+    
     const condUI = {
       "nebula": [
         new MultiSelectMenu(
@@ -29,11 +31,11 @@ export class FilterItem extends Container {
         ).onchange(()=>filter.update())
       ],
       "nebula count": [
-        new InputObject().setType("number").onchange(()=>filter.update()),
+        new InputText("number").onchange(()=>filter.update()),
         new StateBox(["↑", "↓"]).onchange(()=>filter.update())
       ],
       "parent count": [
-        new InputObject().setType("number").onchange(()=>filter.update()),
+        new InputText("number").onchange(()=>filter.update()),
         new StateBox(["↑", "↓"]).onchange(()=>filter.update())
       ]
     };
@@ -50,7 +52,7 @@ export class FilterItem extends Container {
         condUI[this.typeObject.value].forEach(c => this.condBox.adopt(c))
         filter.update()
       }),
-      this.condBox = new Container(condUI["nebula"]).addClass("conditional-box"),
+      this.condBox = new Container(condUI["nebula"]).addClass("condition-box"),
       new ButtonObject("X")
         .addClass("close-button")
         .onclick(()=>{

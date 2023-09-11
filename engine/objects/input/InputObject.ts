@@ -1,6 +1,6 @@
-import {WebObject} from "./WebObject"
+import {WebObject} from "../WebObject"
 
-export class InputObject extends WebObject<never,WebObject<any,any>>{
+export abstract class InputObject extends WebObject<never,WebObject<any,any>>{
   protected element:HTMLInputElement
   public constructor(){
     super("input");

@@ -1,5 +1,5 @@
 import {ButtonObject} from "../"
-import {data, Content, Nebula} from "../../data/Data.js"
+import {data, Content, Nebula} from "../../data/Data"
 
 export class StartNebulaButton extends ButtonObject {
   public target:Content|undefined;

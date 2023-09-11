@@ -1,6 +1,6 @@
-import {SelectableList} from "../"
-import {ContentItem, Filter, Search} from "./"
-import {Content} from "../../data/Data"
+import {SelectableList} from "../.."
+import {ContentItem, Filter, Search} from "../"
+import {Content} from "../../../data/Data"
 
 export class ContentsList extends SelectableList<Content>{
   private contents:Content[]
@@ -9,10 +9,10 @@ export class ContentsList extends SelectableList<Content>{
   public constructor(){
     super([])
     this.addClass("contents-list")
-    this.update()
   }
   public ready(contents:Content[]){
     this.contents = contents;
+    this.update()
     return this;
   }
   public setSearch(search:Search){

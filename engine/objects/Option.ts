@@ -1,4 +1,4 @@
-import {WebObject} from "./WebObject.js"
+import {WebObject} from "./WebObject"
 import { SelectMenu } from "./";
 
 export class Option<T> extends WebObject<never,SelectMenu<T>>{

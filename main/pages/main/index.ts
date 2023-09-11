@@ -5,20 +5,21 @@ import {BodyObject,
   RemoveContentButton,
   OpenButton,
   StartNebulaButton
-} from "../../custom-object"
+} from "../../custom-object/"
 import {data} from "../../data/Data"
+import "../style.css"
 
 let cc;
 let obtn, snbtn, acbtn, rmcbtn;
+
 new BodyObject([
   new UpperMenu(),
   cc = new ContentsContainer(data.getContents())
-     .onselect(function(){
+      .onselect(function(){
         rmcbtn.target = this.selection?.content
         obtn.target = this.selection?.content
-        obtn.kind = "content"
         snbtn.target = this.selection?.content
-     }),
+      }),
   obtn = new OpenButton(),
   snbtn = new StartNebulaButton(),
   acbtn = new AddContentButton().onclick(()=>cc.update()),

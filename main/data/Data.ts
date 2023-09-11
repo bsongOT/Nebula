@@ -6,8 +6,8 @@ import {Nebula, NebulaKind} from "./Nebula"
 import {Playground} from "./Playground"
 import {Relation} from "./Relation"
 
-const $ = (name:string) => localStorage.getItem(name)
-const $$ = (name:string, value:string) => localStorage.setItem(name, value)
+export const $ = (name:string) => localStorage.getItem(name)
+export const $$ = (name:string, value:string) => localStorage.setItem(name, value)
 
 export class Data {
   private contents:Content[];
@@ -15,7 +15,7 @@ export class Data {
   private playgrounds:Playground[];
   private relations:Relation[];
   
-  get selectedContent():Content|undefined{
+  get selectedContent():Content|undefined{   
     const id = Number($("selected-content"))
     return this.getContent(id)
   }
@@ -39,6 +39,10 @@ export class Data {
   
   public getContent(id:number):Content|undefined{
     if (isNaN(id)) return;
+    if (this.contents.length <= 0) return;
+    if (this.contents[this.contents.length - 1].id < id) return;
+    if (this.contents[0].id > id) return;
+
     return this.contents[this.binarySearchContent(0, this.contents.length - 1, id)];
   }
   

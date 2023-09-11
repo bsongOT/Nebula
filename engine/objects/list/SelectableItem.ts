@@ -1,4 +1,4 @@
-import {WebObject, ListItem, SelectableList} from "./index"
+import {WebObject, ListItem, SelectableList} from "../index"
 
 export class SelectableItem<T> extends ListItem<T, SelectableList<T>>{
   private isSelected:boolean;

@@ -1,3 +1,4 @@
+import { HyperLink } from ".";
 import {WoTag} from "../types"
 
 export abstract class WebObject<C extends WebObject<any, any>, P extends WebObject<any, any>>{
@@ -18,7 +19,18 @@ export abstract class WebObject<C extends WebObject<any, any>, P extends WebObje
   public set parent(v:P){
     this.$parent = v;
   }
-
+  public get style(){
+    return this.element.style;
+  }
+  public get scrollHeight(){
+    return this.element.scrollHeight
+  }
+  public get offsetHeight(){
+    return this.element.offsetHeight;
+  }
+  public get clientHeight(){
+    return this.element.clientHeight;
+  }
   public abstract get value();
   public abstract set value(v:any);
   public constructor(tag?: WoTag, children?: C[]){
@@ -50,13 +62,14 @@ export abstract class WebObject<C extends WebObject<any, any>, P extends WebObje
     c.splice(c.indexOf(this), 1)
   }
   public adopt<T extends C>(obj:T):T{
-    this.element.appendChild(obj.element)  
-    obj.parent.children = obj.parent.children.filter(o => o !== obj)
+    this.element.appendChild(obj.element)
+    if (obj.parent)
+      obj.parent.children = obj.parent.children.filter(o => o !== obj)
     obj.parent = this;
     this.children.push(obj)
     return obj;
   }
-  public empty():WebObject<any,any>{
+  public empty(this:any){
     this.element.innerHTML = "";
     this.children = []
     return this;
@@ -88,15 +101,15 @@ export abstract class WebObject<C extends WebObject<any, any>, P extends WebObje
     this.parent.children[index + 1] = this;
     return this;
   }
-  public addClass(className:string):WebObject<any,any>{
+  public addClass<T extends WebObject<any,any>>(this:T, className:string):T{
     this.element.classList.add(className)
     return this;
   }
-  public removeClass(className:string):WebObject<any,any>{
+  public removeClass<T extends WebObject<any,any>>(this:T, className:string):T{
     this.element.classList.remove(className)
     return this;
   }
-  public toggleClass(className:string){
+  public toggleClass<T extends WebObject<any,any>>(this:T, className:string):T{
     this.element.classList.toggle(className)
     return this;
   }

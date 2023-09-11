@@ -20,7 +20,7 @@ export abstract class CanvasObject<F extends Form> extends WebObject<CanvasObjec
     obj.p = this.p;
     return obj;
   }
-  public empty():CanvasObject<F>{
+  public empty(this:CanvasObject<F>){
     this.children = [];
     return this;
   }

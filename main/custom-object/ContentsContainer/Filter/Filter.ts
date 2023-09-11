@@ -1,24 +1,25 @@
-import {ButtonObject, Container, Detail} from "../"
-import {FilterItem} from "./Filter/FilterItem"
-import {AddFilterButton} from "./Filter/AddFilterButton"
-import {Content} from "../../data/Data"
+import {ButtonObject, Container, Detail} from "../.."
+import {FilterItem, AddFilterButton} from "./"
+import {Content} from "../../../data/Data"
+import "../../../styles/Filter.css"
 
-export class Filter extends Container{
+export class Filter extends Detail{
   private box:Container;
   private $onchange:()=>void;
 
   constructor(){
-    super();
-    this.addClass("filter-box");
-    [
-      new Detail([
-        new ButtonObject("Filter"),
-        new Container([
-          this.box = new Container(),
-          new AddFilterButton(this)
-        ])
+    let box:Container;
+    let btn:AddFilterButton;
+    super([
+      new ButtonObject("Filter"),
+      new Container([
+        btn = new AddFilterButton().addClass("add-filter-button"),
+        box = new Container().addClass("filter-box")
       ])
-    ].forEach(e => this.adopt(e))
+    ]);
+    this.addClass("filter");
+    this.box = box;
+    btn.ready(this)
   }
   public update(){
     this.$onchange();
@@ -28,7 +29,7 @@ export class Filter extends Container{
     this.$onchange = onchange;
     return this;
   }
-  public test(content:Content){
+  public test(content:Content):boolean|string{
     const filters = this.box.children as FilterItem[];
     let spoiled = false;
     
