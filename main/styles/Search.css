@@ -1,0 +1,23 @@
+.search {
+  margin-bottom: 5px;
+  border: 1px solid #66666680;
+  border-radius: 20px;
+  display: flex;
+  background: #fff;
+  filter:drop-shadow(2px 2px 0 #ccc);
+}
+.search > input {
+  margin: 0 5px;
+  width: 100%;
+  border: none;
+}
+.search > input:focus{
+  outline: none;
+}
+.search > .filter-mode {
+  margin-right: 20px;
+}
+.search-icon {
+  margin: auto 0;
+  margin-left: 5px;
+}

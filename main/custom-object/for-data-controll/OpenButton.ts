@@ -1,4 +1,4 @@
-import {ButtonObject} from "../"
+import {ButtonObject} from "@/objects"
 import {data, Content, Nebula} from "../../data/Data"
 import { no_open_target } from "../../messages";
 

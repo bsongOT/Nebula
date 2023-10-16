@@ -7,6 +7,9 @@ export class Hexagon extends CanvasObject<PolygonForm>{
   constructor(form:PolygonForm){
     super(form);
   }
+  public update(){
+    return this;
+  }
   public render(){
     const size = this.form.side;
     const center = this.form.position;

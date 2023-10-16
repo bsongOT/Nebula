@@ -1,4 +1,6 @@
-import {WebObject, ListView} from ".."
+import { ListView } from ".";
+import {WebObject} from ".."
+import "../../styles/ListItem.css"
 
 export class ListItem<T, P extends ListView<T, any>> extends WebObject<WebObject<any,any>,P>{
   public get value(): T {

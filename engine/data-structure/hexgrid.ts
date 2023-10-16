@@ -2,8 +2,15 @@ import {emptyArr} from "../utils/utils"
 import {HexCoord} from "../coord-system"
 
 export class HexGrid<T>{
+  private $size:HexCoord
   datas:(T|undefined)[][];
-  size:HexCoord;
+  public get size():HexCoord{
+    const s = this.$size;
+    return new HexCoord(s.x, s.y, s.z)
+  }
+  protected set size(v:HexCoord){
+    this.$size = new HexCoord(v.x, v.y, v.z)
+  }
   constructor(size:HexCoord){
     const [x, y, z] = [size.x, size.y, size.z]
     this.size = size
@@ -13,8 +20,9 @@ export class HexGrid<T>{
   at(h:HexCoord):T|undefined{
     return this.datas[h.y+h.z]?.[h.x+h.y]
   }
-  setVal(h:HexCoord, val:T){
+  setVal(h:HexCoord, val:T|undefined){
     if (!this.datas[h.z+h.y]) return
+    if (this.datas[h.z+h.y].length <= h.x+h.y) return
     this.datas[h.z+h.y][h.x+h.y] = val;
   }
   next(h:HexCoord):HexCoord{

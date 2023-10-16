@@ -5,9 +5,6 @@ export class MultiSelectMenu<T> extends WebObject<Option<T>, any> {
   public get value():(T|string)[]{
     return this.children.filter(o => o.selected).map(o => o.data)
   }
-  set value(_:(T|string)[]){
-    throw "Wrong Access";
-  }
   constructor(children?:Option<T>[]){
     super("select")
     this.element.multiple = true;

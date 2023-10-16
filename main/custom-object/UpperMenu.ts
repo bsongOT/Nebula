@@ -1,4 +1,4 @@
-import {Navigator, HyperLink} from "../../engine/objects/"
+import {Navigator, HyperLink} from "@/objects/"
 
 export const paths = [
   "./index.html",

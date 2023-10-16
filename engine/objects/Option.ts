@@ -8,6 +8,12 @@ export class Option<T> extends WebObject<never,SelectMenu<T>>{
   public set value(v: string) {
     this.element.innerText = v;
   }
+  public get disabled():boolean{
+    return this.element.disabled;
+  }
+  public set disabled(v:boolean){
+    this.element.disabled = v;
+  }
   element:HTMLOptionElement;
   public data:T|string;
 

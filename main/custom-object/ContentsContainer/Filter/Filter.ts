@@ -1,4 +1,4 @@
-import {ButtonObject, Container, Detail} from "../.."
+import {ButtonObject, Container, Detail} from "@/objects"
 import {FilterItem, AddFilterButton} from "./"
 import {Content} from "../../../data/Data"
 import "../../../styles/Filter.css"

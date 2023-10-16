@@ -1,4 +1,5 @@
 import {WebObject} from "./WebObject"
+import "../styles/all.css"
 
 export class BodyObject extends WebObject<any,any>{
   constructor(children:WebObject<any,any>[]){

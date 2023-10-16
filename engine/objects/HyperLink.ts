@@ -1,4 +1,5 @@
 import {WebObject} from "./WebObject"
+import "../styles/HyperLink.css"
 
 export class HyperLink extends WebObject<never,WebObject<any,any>>{
   protected element:HTMLAnchorElement;

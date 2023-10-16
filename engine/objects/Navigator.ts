@@ -1,5 +1,5 @@
-import { HyperLink } from "./HyperLink"
 import {WebObject} from "./WebObject"
+import "../styles/Navigator.css"
 
 export class Navigator extends WebObject<WebObject<any,any>,WebObject<any,any>> {
   public get value(){

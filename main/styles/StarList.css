@@ -1,0 +1,27 @@
+.star-list-container{
+    padding: 5px;
+}
+.star-list{
+    border: 1px solid #ccc;
+    height: 200px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+.arrow-button-container{
+    display: inline-grid;
+    width: 90px;
+    height: 60px;
+    grid-template-areas: ". up ." "left down right";
+}
+.up-arrow{
+    grid-area: up;
+}
+.down-arrow{
+    grid-area: down;
+}
+.left-arrow{
+    grid-area: left;
+}
+.right-arrow{
+    grid-area: right;
+}

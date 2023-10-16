@@ -1,11 +1,5 @@
-export function emptyArr(size:number):undefined[]{
+export function emptyArr(size:number):any[]{
   return Array(size).fill(undefined);
-}
-export function tour(node, depth, privateIndex, func){
-  func(node, depth, privateIndex);
-  for (let n of node.children)
-    tour(n, depth + 1, privateIndex++, func)
-  privateIndex = 0;
 }
 export function getLast(node){
   if (!node?.children) return node;

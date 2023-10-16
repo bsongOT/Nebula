@@ -1,4 +1,4 @@
-import {StateBox} from "../../"
+import {StateBox} from "@/objects"
 import {Filter} from "../"
 import {Search} from "../"
 

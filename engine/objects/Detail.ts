@@ -15,10 +15,16 @@ export class Detail extends Container{
     if (v){
       this.removeClass("detail-openned");
       content.style.maxHeight = "0";
+      content.style.paddingTop = "0";
+      content.style.margin = "0";
+      content.style.border = "0";
     }
     else{
       this.addClass("detail-openned");
       content.style.maxHeight = content.scrollHeight + "px";
+      content.style.paddingTop = "";
+      content.style.margin = "";
+      content.style.border = "";
     }
   }
   constructor(children:[ButtonObject, WebObject<any,any>]){

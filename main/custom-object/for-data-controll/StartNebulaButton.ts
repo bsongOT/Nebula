@@ -1,5 +1,5 @@
-import {ButtonObject} from "../"
-import {data, Content, Nebula} from "../../data/Data"
+import {ButtonObject} from "@/objects"
+import {data, Content} from "../../data/Data"
 
 export class StartNebulaButton extends ButtonObject {
   public target:Content|undefined;
@@ -12,9 +12,9 @@ export class StartNebulaButton extends ButtonObject {
     super.onclick(()=>{
       if (!this.target) return;
       data.selectedNebula = data.addNebula(
-      this.target.title, "Story", this.target.id)
+      this.target.title, "Story", this.target)
 
-      window.open("../nebula/nebula.html", "_self")
+      window.open("./nebula.html", "_self")
       onclick()
     })
     return this;

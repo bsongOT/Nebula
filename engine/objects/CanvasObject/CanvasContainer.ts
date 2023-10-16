@@ -3,10 +3,13 @@ import { Form } from "../../infos/Form";
 import {CanvasObject} from "./CanvasObject"
 
 export class CanvasContainer extends CanvasObject<Form>{
+  public update() {
+    return this; 
+  }
   constructor(children?:CanvasObject<any>[]){
     super(new Form(new Coord(0,0)), children);
   }
-  public render():CanvasContainer{
+  public render(){
     return this;
   }
   public isIn(_:Coord):boolean{

@@ -1,5 +1,6 @@
-import {ButtonObject, Text, Detail, DraggableItem, DraggableList} from "../"
-import { Checkbox } from "../../../engine/objects/input/Checkbox";
+import { Detail, ButtonObject, Text } from "@/objects";
+import { Checkbox } from "@/objects/input/";
+import { DraggableList, DraggableItem } from "@/objects/list";
 
 export class SortTool extends Detail{
   constructor(){

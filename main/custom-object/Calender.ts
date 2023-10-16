@@ -1,4 +1,6 @@
-import {WebObject, emptyArr} from "./index"
+import { WebObject } from "@/objects";
+import { emptyArr } from "@/utils/utils";
+
 
 export class Calender extends WebObject<any,any>{
   public get value(): any {

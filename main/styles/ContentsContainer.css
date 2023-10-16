@@ -1,0 +1,27 @@
+.contents-container{
+    padding: 5px;
+}
+.contents-list{
+    height: 500px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: white;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+.list-item-backlink {
+    position: absolute;
+    display:flex;
+    align-items: center;
+    top: 0;
+    height: 100%;
+    right: 5px;
+    gap: 5px;
+}
+.list-item-backlink > * {
+    padding: 2px;
+    border: 1px solid black;
+}
+.filtered{
+    filter: brightness(70%);
+}

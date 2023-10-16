@@ -8,7 +8,8 @@ export class Text extends WebObject<never, any>{
     this.element.innerText = v;
   }
   constructor(text:string){
-    super();
+    super("span");
+    this.addClass("text")
     this.value = text;
   }
 }

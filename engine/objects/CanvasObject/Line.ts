@@ -3,6 +3,9 @@ import { Form } from "../../infos/Form";
 import {CanvasObject} from "./"
 
 export class Line extends CanvasObject<Form>{
+  public update():Line {
+    return this;
+  }
   public start:Coord;
   public end:Coord;
   public color:string;

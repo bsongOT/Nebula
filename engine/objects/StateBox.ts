@@ -1,4 +1,5 @@
 import {WebObject} from "./WebObject"
+import "../styles/StateBox.css"
 
 export class StateBox extends WebObject<WebObject<any,any>,WebObject<any,any>> {
   public get value(): string {
@@ -24,7 +25,7 @@ export class StateBox extends WebObject<WebObject<any,any>,WebObject<any,any>> {
   private $onchange:()=>void;
   constructor(states:string[]){
     super("span");
-    this.addClass("statebox");
+    this.addClass("state-box");
     this.states = states;
     this.index = 0;
     this.onclick(()=>{})

@@ -1,8 +1,10 @@
-import {Container, InputObject, Text} from "../"
+import {Container, Text} from "@/objects"
 import {FilterMode} from "./Filter/FilterMode"
-import {hangulSeperate} from "../../../engine/utils/utils"
+import {hangulSeperate} from "@/utils/utils"
 import {Content} from "../../data/Data"
-import { InputText } from "../../../engine/objects/input/InputText";
+import { InputText } from "@/objects/input/InputText";
+import "../../styles/Search.css"
+import { InputObject } from "@/objects/input";
 
 export class Search extends Container{
   private $mode:FilterMode;
@@ -17,7 +19,7 @@ export class Search extends Container{
   }
   public constructor(){
     super();
-    this.addClass("search-input");
+    this.addClass("search");
     [
       new Text("🔍").addClass("search-icon"),
       this.input = new InputText().ontyping(() => this.update()),

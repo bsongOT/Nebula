@@ -1,4 +1,4 @@
-import {ButtonObject} from "../"
+import {ButtonObject} from "@/objects"
 import {Content, data} from "../../data/Data"
 
 export class RemoveContentButton extends ButtonObject{
@@ -11,7 +11,7 @@ export class RemoveContentButton extends ButtonObject{
   public onclick(onclick:()=>void) {
     super.onclick(()=>{
       if (!this.target) return;
-      data.removeContent(this.target)
+      data.contents.remove(this.target.id)
       onclick()
     })
     

@@ -1,4 +1,4 @@
-import {ButtonObject} from "../../"
+import {ButtonObject} from "@/objects"
 import {Filter} from "../"
 
 export class AddFilterButton extends ButtonObject{

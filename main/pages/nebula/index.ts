@@ -1,12 +1,9 @@
 import {
-  BodyObject,
-  SelectMenu,
-  Option,
   CanvasScreen,
   CanvasContainer,
-  Line
+  Hexagon
 } 
-from "../../../engine/objects"
+from "@/objects/CanvasObject"
 import {
   UpperMenu,
   ContentsContainer,
@@ -16,119 +13,104 @@ import {
   StarListContainer
 } 
 from "../../custom-object"
-import {Coord, HexCoord} from "../../../engine/coord-system"
-import {tour} from "../../../engine/utils/utils.js"
-import {HexGrid} from "../../../engine/data-structure/hexgrid.js"
-import {selectedNebula, data} from "../../data/Data"
-import p5 from "p5"
-import { PolygonForm } from "../../../engine/infos/PolygonForm"
+import {Coord, HexCoord} from "@/coord-system"
+import {HexWorld} from "@/data-structure/hexworld"
+import {selectedNebula, data, Content} from "../../data/Data"
+import { PolygonForm } from "@/infos/PolygonForm"
+import { Radio, RadioBox } from "@/objects/input/"
+import { Popup } from "@/objects/Popup"
+import { StarLeafItem } from "../../custom-object/StarListContainer/StarLeafItem"
+import { BodyObject, ButtonObject } from "@/objects"
 
-const p = new p5((pp)=> {
-  pp.setup = () => {
-    init()
-  },
-  pp.draw = () => {
-    update();
-  }
-  pp.mousePressed = () => {
-    tour(canvas, 0, 0, (n)=>{
-      if (n === canvas) return;
-      if (n.isIn(p.mouseX, p.mouseY)){
-        n.click();
-      }
-    })
-  }
-})
-
-let grid = new HexGrid(new HexCoord(6,6,6));
+let grid = new HexWorld<StarLeafItem>();
 let nebula = selectedNebula;
-let cc;
-let slc;
+let cc:ContentsContainer;
+let slc:StarListContainer;
+let adit:AddInTreeButton;
+let popup:Popup;
+let selectDisplay:ButtonObject;
+let canvas:CanvasScreen;
+let effectBox:CanvasContainer;
+let tileBox:CanvasContainer;
 
 if (!nebula) throw "Error";
 
-const body = new BodyObject([
+new BodyObject([
   new UpperMenu(),
-  new TitleInput(nebula),
-  new SelectMenu([
-    new Option("flow"),
-    new Option("type")
+  new RadioBox([
+    new Radio("kind").label("Story"),
+    new Radio("kind").label("Type")
   ]),
-  cc = new ContentsContainer(data.getContents()),
+  new TitleInput(nebula),
+  popup = new Popup([
+    selectDisplay = new ButtonObject("*** Not Selected ***"),
+    cc = new ContentsContainer(data.contents)
+              .onselect(()=>{
+                popup.hide()
+                selectDisplay.value = cc.selection.value.title;
+              })
+  ]),
+  adit = new AddInTreeButton(),
   slc = new StarListContainer(nebula),
-  new AddInTreeButton(cc, slc)
-]);
-
-let canvas;
-let effectBox;
-let tileBox;
-
-const init = () => {
   canvas = new CanvasScreen(
-    p, p.windowWidth, p.windowWidth,
-    [
-      effectBox = new CanvasContainer(),
-      tileBox = new CanvasContainer()
-    ]
-  )
-  p.background("#aaaaaa")
-}
-const setGrid = (size) => {
-  tileBox.empty()
-  grid = new HexGrid(size)
+  window.innerWidth, window.innerWidth,
+  [
+    effectBox = new CanvasContainer(),
+    tileBox = new CanvasContainer(),
+    (()=>{
+      const u = new CanvasContainer()
+      u.update = ()=>{
+        update();
+        return u;
+      }
+      return u;
+    })()
+  ])
+])
 
+adit.ready(cc,slc)
+
+const dropGrid = () => {
+  tileBox.empty()
+  const size = grid.size.x;
   const pivot = new HexCoord(size-1,0,size-1)
   let pos = new HexCoord(0,0,0)
 
   for (let i = 0; i < grid.area; i++) {
-    const star = tileBox.adopt(
-      new StarTile(
-        new PolygonForm(
-        pos.sub(pivot).toCoord(20).add(new Coord(p.width/2,p.height/2)),
-        20, "#ffffff00"
-        )
-      ))
-    grid.setVal(pos, star)
+    const item = grid.at(pos);
+
+    if (item)
+      tileBox.adopt(
+        new StarTile(item, new PolygonForm(
+          pos.sub(pivot).toCoord(20).add(new Coord(1,1).scale(canvas.width/2)),
+          20, "#ffffff"
+        ))
+      )
+    else 
+      tileBox.adopt(
+        new Hexagon(new PolygonForm(
+          pos.sub(pivot).toCoord(20).add(new Coord(1,1).scale(canvas.width/2)),
+          20, "#ffffff"
+        ))
+      )
+
     pos = grid.next(pos);
   }
 }
 const update = () => {
-  //data update
-  
-  let nodePoses:{node:any, pos:HexCoord}[] = [];
   let pos = new HexCoord(0,-1,0)
-  let prevD = 1;
-  for (let t of tileBox.children){
-    t.node = undefined;
-  }
-  tour(nebula?.tree.root, 0, 0, (n, d, i)=>{
-    if (n === nebula?.tree.root) return;
-    
+  let prevD = 0;
+
+  grid = new HexWorld()
+  
+  slc.list.tree.tourNode((n, d)=>{
     if (prevD < d) pos.z += d - prevD
     else if (prevD === d) pos.y++;
     else pos.x += prevD - d
     
-    nodePoses.push({ node: n, pos: pos })
+    grid.setVal(pos, n.data)
     prevD = d;
   })
-  
-  pos.x += pos.y;
-  pos.z += pos.y;
-  pos.y = 0;
-  
-  const size = Math.ceil(Math.max(pos.x/2, pos.z/2, Math.abs(pos.x - pos.z))) + 1;
-  setGrid(size)
-  
-  nodePoses.forEach(v => {
-    grid.at(v.pos)
-  })
-  
-  //
-  p.background("#aaaaaa")
 
-  canvas.children.forEach((c)=>{
-    tour(c, 0, 0, (o)=>{
-      o.render()
-    })
-  })
+  dropGrid()
 }

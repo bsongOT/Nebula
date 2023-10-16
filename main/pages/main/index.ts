@@ -1,11 +1,11 @@
-import {BodyObject,
-  UpperMenu,
+import { BodyObject } from "@/objects/";
+import {UpperMenu,
   ContentsContainer,
   AddContentButton,
   RemoveContentButton,
   OpenButton,
   StartNebulaButton
-} from "../../custom-object/"
+} from "../../custom-object"
 import {data} from "../../data/Data"
 import "../style.css"
 
@@ -14,11 +14,11 @@ let obtn, snbtn, acbtn, rmcbtn;
 
 new BodyObject([
   new UpperMenu(),
-  cc = new ContentsContainer(data.getContents())
+  cc = new ContentsContainer(data.contents)
       .onselect(function(){
-        rmcbtn.target = this.selection?.content
-        obtn.target = this.selection?.content
-        snbtn.target = this.selection?.content
+        rmcbtn.target = this.selection?.value
+        obtn.target = this.selection?.value
+        snbtn.target = this.selection?.value
       }),
   obtn = new OpenButton(),
   snbtn = new StartNebulaButton(),

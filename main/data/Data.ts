@@ -1,96 +1,83 @@
 export * from "./Content"
 export * from "./Nebula"
 
+import { Tree, TreeNode } from "@/data-structure/tree"
+import { Coord } from "../../engine/coord-system"
+import { nebulaSpaceSize } from "../consts"
 import {Content, ContentKind} from "./Content"
+import { DataCollection } from "./DataCollection"
+import { Dust } from "./Dust"
 import {Nebula, NebulaKind} from "./Nebula"
 import {Playground} from "./Playground"
 import {Relation} from "./Relation"
 
 export const $ = (name:string) => localStorage.getItem(name)
 export const $$ = (name:string, value:string) => localStorage.setItem(name, value)
-
 export class Data {
-  private contents:Content[];
-  private nebulas:Nebula[];
-  private playgrounds:Playground[];
-  private relations:Relation[];
+  private $contents:DataCollection<Content>;
+  private $nebulas:DataCollection<Nebula>;
+  private $playgrounds:DataCollection<Playground>;
+  private $relations:DataCollection<Relation>;
+  private $dusts:DataCollection<Dust>;
+
+  public get contents(){return this.$contents}
+  public get nebulas(){return this.$nebulas}
+  public get playgrounds(){return this.$playgrounds}
+  public get relations(){return this.$relations}
+  public get dusts(){return this.$dusts}
   
   get selectedContent():Content|undefined{   
     const id = Number($("selected-content"))
-    return this.getContent(id)
+    return this.contents.get(id)
   }
   set selectedContent(value:Content){
     $$("selected-content", value.id.toString())
   }
   get selectedNebula():Nebula|undefined{
     const id = Number($("selected-nebula"))
-    return this.nebulas.find(n => n.id===id)
+    return this.nebulas.get(id)
   }
   set selectedNebula(value:Nebula){
     $$("selected-nebula", value.id.toString())
   }
   
   constructor(){
-    this.contents = JSON.parse($("all-contents") ?? "[]");
-    this.nebulas = JSON.parse($("all-nebulas") ?? "[]");
-    this.playgrounds = JSON.parse($("all-playgrounds") ?? "[]");
-    this.relations = JSON.parse($("all-relations") ?? "[]")
-  }
-  
-  public getContent(id:number):Content|undefined{
-    if (isNaN(id)) return;
-    if (this.contents.length <= 0) return;
-    if (this.contents[this.contents.length - 1].id < id) return;
-    if (this.contents[0].id > id) return;
-
-    return this.contents[this.binarySearchContent(0, this.contents.length - 1, id)];
+    this.$contents = new DataCollection(JSON.parse($("all-contents") ?? "[]").map(c => Content.load(c)));
+    this.$nebulas = new DataCollection(JSON.parse($("all-nebulas") ?? "[]").map(n => Nebula.load(n, this.contents)));
+    this.$playgrounds = new DataCollection(JSON.parse($("all-playgrounds") ?? "[]")/*.map(p => Playground.load(p))*/);
+    this.$relations = new DataCollection(JSON.parse($("all-relations") ?? "[]")/*.map(r => Relation.load(r))*/);
+    this.$dusts = new DataCollection(JSON.parse($("all-dusts") ?? "[]")/*.map(d => Dust.load(d))*/);
   }
   
   public addContent(title:string, kind:ContentKind):Content{
-    const id = this.contents[this.contents.length - 1].id + 1;
-    this.contents.push(new Content(title, kind, id))
-    $$("all-contents", JSON.stringify(this.contents))
-    return this.contents[this.contents.length - 1]
+    const content = this.contents.add(new Content(title, kind, NaN))
+    $$("all-contents", JSON.stringify(this.$contents.map(c => c.pack())))
+    return content;
+  }
+  public addNebula(name:string, kind:NebulaKind, first:Content){
+    const tree = new Tree<Content>();
+    tree.insert(tree.root, new TreeNode<Content>(tree, first))
+    const nebula = this.nebulas.add(
+      new Nebula(name, NaN, kind, this.findPos(), tree, 0)
+    )
+    $$("all-nebulas", JSON.stringify(this.nebulas.map(n => n.pack())))
+    return nebula;
   }
 
-  public removeContent(content:Content):void{
-    const id = content.id;
-    this.contents.splice(this.binarySearchContent(0, this.contents.length - 1, id), 1)
-    $$("all-contents", JSON.stringify(this.contents))
-  }
-
-  public addNebula(title:string, kind:NebulaKind, orient:number):Nebula{
-    const id = this.nebulas[this.nebulas.length - 1].id + 1;
-    this.nebulas.push(new Nebula(title, id, kind, orient))
-    $$("all-nebulas", JSON.stringify(this.nebulas))
-
-    return this.nebulas[this.nebulas.length - 1]
-  }
-
-  public removeNebula(nebula:Nebula):void{
-    
-  }
-
-  public getContents():Content[]{
-    return this.contents.map(c => c)
-  }
-
-  public getNebulas():Nebula[]{
-    return this.nebulas.map(n => n)
-  }
-
-  private binarySearchContent(start:number, end:number, value:number):number{
-    const cs = this.contents;
-    if (cs[start].id > value) return -1;
-    if (cs[end].id < value) return -1;
-    if (cs[start].id === value) return start
-    if (cs[end].id === value) return end
-  
-    const t = Math.floor((start + end) / 2);
-    if (cs[t].id >= value) 
-      return this.binarySearchContent(start, t, value)
+  private findPos():Coord{
+    let maxx = Math.max(...this.nebulas.map(n => n.position.x));
+    if (maxx < 0) maxx = 0;
+    let maxy = Math.max(...this.nebulas.filter(n => n.position.x === maxx).map(n => n.position.y));
+    if (maxy < 0) maxy = 0;
+    if (maxy < nebulaSpaceSize - 2)
+      return new Coord(maxx, maxy + 2)
     else
-      return this.binarySearchContent(t, end, value)
+      return new Coord(maxx + 2, 0)
+  }
+  public getNebulaSpaceTotalPage(){
+    const total = Math.ceil(Math.max(...this.nebulas.map(n => n.position.x)) / nebulaSpaceSize);
+    if (total < 0) return 1;
+    return total + 1;
   }
 }
 

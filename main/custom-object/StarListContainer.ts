@@ -1,7 +1,8 @@
-import {Container, ButtonObject} from "."
+import {Container, ButtonObject} from "@/objects"
 import {StarList} from "./StarListContainer/StarList"
 import { StarLeafItem } from "./StarListContainer/StarLeafItem";
 import {Nebula, Content} from "../data/Data"
+import "../styles/StarList.css"
 
 export class StarListContainer extends Container{
   list:StarList;
@@ -12,7 +13,7 @@ export class StarListContainer extends Container{
   constructor(nebula:Nebula){
     super();
     [
-    new StarList(nebula),
+    this.list = new StarList(nebula),
     new Container([
       new ButtonObject("↑").addClass("up-arrow").onclick(this.moveUp),
       new ButtonObject("←").addClass("left-arrow").onclick(this.moveLeft),
@@ -20,15 +21,14 @@ export class StarListContainer extends Container{
       new ButtonObject("→").addClass("right-arrow").onclick(this.moveRight)
     ]).addClass("arrow-button-container")
     ].forEach(e => this.adopt(e));
+    this.addClass("star-list-container")
     this.nebula = nebula;
   }
-  moveUp = () => this.selection.promote()
-  moveDown = () => this.selection.demote()
+  moveUp = () => this.selection.updent()
+  moveDown = () => this.selection.downdent()
   moveLeft = () => this.selection.outdent()
   moveRight = () => this.selection.indent()
   add = (content:Content) => {
-    this.list.adopt(
-      new StarLeafItem(content.id)
-    )
+    this.list.add(content)
   }
 }

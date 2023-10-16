@@ -1,5 +1,6 @@
-import {Text, Container, ButtonObject, SelectableItem} from "../../index"
+import {Text, Container, ButtonObject} from "@/objects"
 import {Content} from "../../../data/Content"
+import { SelectableItem } from "@/objects/list";
 
 export class ContentItem extends SelectableItem<Content> {
   constructor(content:Content) {

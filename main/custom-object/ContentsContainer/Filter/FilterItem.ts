@@ -1,12 +1,12 @@
 import {
   Container, SelectMenu, Option,
-  MultiSelectMenu, InputObject, StateBox, ButtonObject
+  MultiSelectMenu, StateBox, ButtonObject
 } 
-from "../../"
+from "@/objects"
 import {Filter} from "../"
 import {FilterMode} from "./FilterMode"
 import {data, Content} from "../../../data/Data"
-import { InputText } from "../../../../engine/objects/input/InputText";
+import { InputText } from "@/objects/input/";
 
 export class FilterItem extends Container {
   private modeObject:FilterMode;
@@ -22,12 +22,12 @@ export class FilterItem extends Container {
     const condUI = {
       "nebula": [
         new MultiSelectMenu(
-          data.getNebulas().map(n => new Option(n.name, n))
+          data.nebulas.map(n => new Option(n.name, n))
         ).onchange(()=>filter.update())
       ],
       "parent": [
         new MultiSelectMenu(
-          data.getContents().filter(c => c.children.length >= 1).map(c => new Option(c.title, c))
+          data.contents.filter(c => c.children.length >= 1).map(c => new Option(c.title, c))
         ).onchange(()=>filter.update())
       ],
       "nebula count": [

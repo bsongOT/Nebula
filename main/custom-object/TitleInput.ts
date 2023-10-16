@@ -1,4 +1,4 @@
-import {InputObject} from "./"
+import {InputObject} from "@/objects/input"
 
 export class TitleInput extends InputObject{
   private nebula;

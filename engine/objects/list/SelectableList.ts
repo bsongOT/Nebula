@@ -1,24 +1,25 @@
-import {ListView, SelectableItem} from "../index"
+import { SelectableSpace } from "../../virtual spaces/SelectableSpace";
+import {ListView, SelectableItem} from "."
 
 export class SelectableList<T> extends ListView<T, SelectableItem<T>>{
-  private selectedOne:SelectableItem<T>;
+  private space:SelectableSpace<SelectableItem<T>>
   public get selection():SelectableItem<T>{
-    return this.selectedOne;
+    return this.space.selection;
   }
-  public set selection(v){
+  public set selection(v:SelectableItem<T>){
     let changed = this.selection !== v;
-    for (let i of this.children){
-      i.selected = false;
-      if (i === v) {
-        i.selected = true;
-      }
-    }
-    this.selectedOne = v;
-    if (changed) this.$onselect()
+    this.space.selection = v;
+    if (changed) this.$onselect?.()
   }
-  private $onselect:()=>void;
+  private $onselect?:()=>void;
   constructor(children?:SelectableItem<T>[]){
     super(children);
+    this.space = new SelectableSpace<SelectableItem<T>>();
+  }
+  public adopt<C extends SelectableItem<T>>(obj:C){
+    super.adopt(obj);
+    this.space.regist(obj);
+    return obj;
   }
   public onselect(onselect:()=>void){
     this.$onselect = onselect;

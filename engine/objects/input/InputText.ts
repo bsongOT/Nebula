@@ -1,4 +1,4 @@
-import { InputObject } from "..";
+import { InputObject } from ".";
 
 export class InputText extends InputObject{
     constructor(limit?:"number"){

@@ -1,5 +1,5 @@
 import { data } from "../data/Data"
-import {WebObject} from "./"
+import {WebObject} from "@/objects"
 
 export class TaskContainer extends WebObject<any,any>{
   public get value(): any {
