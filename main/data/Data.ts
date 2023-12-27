@@ -19,6 +19,7 @@ export class Data {
   private $playgrounds:DataCollection<Playground>;
   private $relations:DataCollection<Relation>;
   private $dusts:DataCollection<Dust>;
+  public readonly test=new DataCollection<Dust>();
 
   public get contents(){return this.$contents}
   public get nebulas(){return this.$nebulas}
@@ -42,9 +43,18 @@ export class Data {
   }
   
   constructor(){
-    this.$contents = new DataCollection(JSON.parse($("all-contents") ?? "[]").map(c => Content.load(c)));
-    this.$nebulas = new DataCollection(JSON.parse($("all-nebulas") ?? "[]").map(n => Nebula.load(n, this.contents)));
-    this.$playgrounds = new DataCollection(JSON.parse($("all-playgrounds") ?? "[]")/*.map(p => Playground.load(p))*/);
+    this.$contents = new DataCollection(
+      Array.from(
+        JSON.parse($("all-contents") ?? "[]"))
+        .map(c => Content.load(c)));
+    this.$nebulas = new DataCollection(
+      Array.from(
+        JSON.parse($("all-nebulas") ?? "[]"))
+        .map(n => Nebula.load(n, this.contents)));
+    this.$playgrounds = new DataCollection(
+      Array.from(
+        JSON.parse($("all-playgrounds") ?? "[]"))
+        /*.map(p => Playground.load(p))*/);
     this.$relations = new DataCollection(JSON.parse($("all-relations") ?? "[]")/*.map(r => Relation.load(r))*/);
     this.$dusts = new DataCollection(JSON.parse($("all-dusts") ?? "[]")/*.map(d => Dust.load(d))*/);
   }

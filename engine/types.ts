@@ -1,1 +1,1 @@
-export type WoTag = (keyof HTMLElementTagNameMap) | "none" | undefined;
+export type WoTag = keyof HTMLElementTagNameMap;

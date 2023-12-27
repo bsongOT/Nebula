@@ -4,7 +4,6 @@ export type TreeLike<T> = {
 }
 export type TreeNodeLike<T> = {
   data?:T,
-  parent:TreeNodeLike<T>,
   children:TreeNodeLike<T>[]
 }
 
@@ -43,6 +42,7 @@ export class Tree<T>{
   }
   insertAsLeftFriend(member:TreeNode<T>, left:TreeNode<T>){
     this.remove(left)
+    if (!member.parent) return;
     member.parent.children.splice(
       member.parent.children.indexOf(member),
       0, left
@@ -52,6 +52,7 @@ export class Tree<T>{
   }
   insertAsRightFriend(member:TreeNode<T>, right:TreeNode<T>){
     this.remove(right)
+    if (!member.parent) return;
     member.parent.children.splice(
       member.parent.children.indexOf(member) + 1,
       0, right
@@ -97,18 +98,18 @@ export class Tree<T>{
     const tour = (n:TreeNode<T>, depth?:number) => {
       for(let c of n.children){
         func(c, depth)
-        tour(c, depth + 1)
+        tour(c, depth??0 + 1)
       }
     }
     return tour(this.root, 0)
   }
-  tour(func:(n:T, depth?:number)=>void){
+  tour(func:(n:T|undefined, depth?:number)=>void){
     return this.tourNode((node, depth)=>func(node.data, depth))
   }
-  every(condition:(n:T)=>boolean){
+  every(condition:(n:T|undefined)=>boolean){
     return this.nodes.map(n => n.data).every(condition)
   }
-  map<U>(func:(data:T, beforNode?:TreeNode<T>, node?:TreeNode<U>, index?:number)=>U){
+  map<U>(func:(data:T|undefined, beforNode?:TreeNode<T>, node?:TreeNode<U>, index?:number)=>U){
     const tree = new Tree<U>()
     let index = 0;
     const mapping = (node:TreeNode<T>, target:TreeNode<U>) => {
@@ -130,11 +131,13 @@ export class TreeNode<T>{
   tree:Tree<T>;
   parent?:TreeNode<T>;
   children:TreeNode<T>[];
-  get leftFriend(){
+  get leftFriend():TreeNode<T>|undefined{
+    if (!this.parent) return undefined;
     const cren = this.parent.children;
     return cren[cren.indexOf(this) - 1]
   }
-  get rightFriend(){
+  get rightFriend():TreeNode<T>|undefined{
+    if (!this.parent) return undefined;
     const cren = this.parent.children;
     return cren[cren.indexOf(this) + 1]
   }

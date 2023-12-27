@@ -1,28 +1,41 @@
 import { SelectableSpace } from "../../virtual spaces/SelectableSpace";
-import {ListView, SelectableItem} from "."
+import { WListView, SelectableItem } from "."
+import { DOMFamily } from "@/factors/families/DOMFamily";
+import { DOMObject, WebObject } from "../WebObject";
+import { EventInvoker, EventQueue } from "@/factors/events/Event";
 
-export class SelectableList<T> extends ListView<T, SelectableItem<T>>{
-  private space:SelectableSpace<SelectableItem<T>>
-  public get selection():SelectableItem<T>{
-    return this.space.selection;
-  }
-  public set selection(v:SelectableItem<T>){
-    let changed = this.selection !== v;
-    this.space.selection = v;
-    if (changed) this.$onselect?.()
-  }
-  private $onselect?:()=>void;
-  constructor(children?:SelectableItem<T>[]){
-    super(children);
-    this.space = new SelectableSpace<SelectableItem<T>>();
-  }
-  public adopt<C extends SelectableItem<T>>(obj:C){
+export class SelectableListFamily<C extends SelectableItem<any>, P extends DOMObject, T extends SelectableList<any>> extends DOMFamily<C, P, T>{
+  public adopt<T1 extends WebObject>(obj:T1){
     super.adopt(obj);
-    this.space.regist(obj);
+    (this.me as any).space.regist(obj);
     return obj;
   }
-  public onselect(onselect:()=>void){
-    this.$onselect = onselect;
-    return this;
+}
+export class SelectableListEvent<T extends SelectableList<any>> extends EventInvoker<T>{
+  public readonly select:EventQueue;
+  constructor(obj:T, element:HTMLElement){
+    super(obj, element)
+    this.select = new EventQueue()
+  }
+  public onselect(func:()=>void){
+    this.select.modify(func)
+    return this.obj;
+  }
+}
+export class SelectableList<T> extends WListView<T>{
+  public family!:SelectableListFamily<SelectableItem<T>, DOMObject, this>
+  public event!:SelectableListEvent<this>;
+  private space:SelectableSpace<SelectableItem<T>>
+  public get selection(){
+    return this.space.selection;
+  }
+  public set selection(v:SelectableItem<T>|undefined){
+    let changed = this.selection !== v;
+    this.space.selection = v;
+    if (changed) this.event.select.invoke()
+  }
+  protected constructor(){
+    super();
+    this.space = new SelectableSpace<SelectableItem<T>>();
   }
 }

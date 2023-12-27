@@ -1,27 +1,27 @@
 import { Coord } from "@/coord-system";
-import { PolygonForm } from "@/infos/PolygonForm";
-import { CanvasContainer, CanvasScreen, Square } from "@/objects/CanvasObject/";
+import { PolygonForm } from "@/factors/forms/PolygonForm";
+import { CanvasContainer, WCanvas, Square } from "@/objects/CanvasObject/";
 import { Radio, RadioBox } from "@/objects/input/";
 import { nebulaSpaceSize } from "../../consts";
 import {UpperMenu} from "../../custom-object/"
 import {NebulaTile} from "../../custom-object/NebulaTile"
 import {data} from "../../data/Data"
 import "../../styles/NebulaSpace.css"
-import { BodyObject, Text, ButtonObject, Container } from "@/objects";
+import { WBody, WText, WButton, WContainer } from "@/objects";
 import { emptyArr } from "@/utils/utils";
 
 const size = nebulaSpaceSize;
 const canvasSize = window.innerWidth - 80;
 const scale = canvasSize / size;
-new BodyObject([
+new WBody([
   new UpperMenu(),
   new RadioBox([
     new Radio("tab").label("Nebula").check(),
     new Radio("tab").label("Universe")
   ]),
-  new Container([
-    new ButtonObject("<"),
-    new CanvasScreen(canvasSize, canvasSize,
+  new WContainer([
+    new WButton("<"),
+    new WCanvas(canvasSize, canvasSize,
     [
       new CanvasContainer(
         (()=> {
@@ -45,7 +45,7 @@ new BodyObject([
         })()
       )
     ]),
-    new ButtonObject(">")
-  ]).addClass("nebula-space"),
-  new Text("1 / " + data.getNebulaSpaceTotalPage())
+    new WButton(">")
+  ]).class.add("nebula-space"),
+  new WText("1 / " + data.getNebulaSpaceTotalPage())
 ]);

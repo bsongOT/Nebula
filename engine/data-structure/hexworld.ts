@@ -19,19 +19,12 @@ export class HexWorld<T> extends HexGrid<T> {
                 this.datas.push(emptyArr(y+z-1), emptyArr(y+z-1))
                 this.datas.forEach(l => l.push(undefined, undefined))
             }
-        /*
-        for (let i=0;i<x-newSize;i++){
-            this.datas.pop();
-            this.datas.pop();
-            this.datas.forEach(l => {l.pop();l.pop()})
-        }*/
             if (newSize > x)
                 this.size = new HexCoord(1,1,1).scale(newSize)
             super.setVal(h, v)
         }
         else {
             super.setVal(h, v)
-
         }
     }
 }

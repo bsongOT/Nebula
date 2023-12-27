@@ -1,116 +1,53 @@
-import { HyperLink } from ".";
-import {WoTag} from "../types"
+import { WoTag } from "../types"
+import { Family } from "@/factors/families/Family";
+import { Input } from "@/factors/events/Input";
+import { Classifier } from "@/factors/class/Classifier";
 
-export abstract class WebObject<C extends WebObject<any, any>, P extends WebObject<any, any>>{
-  protected element:HTMLElement;
-
-  private $children:C[];
-  public get children():C[]{
-    return this.$children;
-  };
-  protected set children(v:C[]){
-    this.$children = v;
+export abstract class WebObject{
+  public readonly family:Family<WebObject, WebObject, this>;
+  public readonly input:Input<this>;
+  constructor(){
+    this.family = Family.new(this)
+    this.input = Input.new(this)
   }
-
-  private $parent:P;
-  public get parent():P{
-    return this.$parent;
-  };
-  public set parent(v:P){
-    this.$parent = v;
+}
+export abstract class HTMLObject extends WebObject {
+  protected abstract readonly element:HTMLElement;
+  public abstract readonly class:Classifier<this>;
+  public readonly family!:Family<WebObject, HTMLObject, this>;
+  constructor(){
+    super()
+    this.family.event
+      .remove.register(()=>{
+        this.element.remove()
+      })
+    this.family.event
+      .adopt.register((member)=>{
+        if (!(member instanceof HTMLObject)) return;
+        this.element.appendChild(member.element)
+      })
+    this.family.event
+      .bringDown.register((obj: WebObject)=>{
+        if (!(obj instanceof HTMLObject)) return;
+        this.element.insertAdjacentElement('afterend', obj.element)
+      })
+    this.family.event
+      .bringUp.register((obj: WebObject)=>{
+        if (!(obj instanceof HTMLObject)) return;
+        this.element.insertAdjacentElement('beforebegin', obj.element)
+      })
   }
-  public get style(){
-    return this.element.style;
-  }
+}
+export abstract class DOMObject extends HTMLObject {
+  protected readonly element:HTMLElement;
+  public readonly class:Classifier<this>;
+  public get style(){ return this.element.style;}
   public get scrollHeight(){
-    return this.element.scrollHeight
+    return this.element.scrollHeight;
   }
-  public get offsetHeight(){
-    return this.element.offsetHeight;
-  }
-  public get clientHeight(){
-    return this.element.clientHeight;
-  }
-  public abstract get value();
-  public abstract set value(v:any);
-  public constructor(tag?: WoTag, children?: C[]){
-    this.children = [];
-    if (tag === "none") return;
+  constructor(tag?:WoTag){
+    super()
     this.element = document.createElement(tag ?? "div");
-    for (let c of (children??[]))
-      this.adopt(c)
-  }
-  public onclick(onclick:()=>void){
-    this.element.onclick = onclick;
-    return this;
-  }
-  public get sibling():[WebObject<any,any>?, WebObject<any,any>?]{
-    const c = this.parent?.children;
-    if (!c) return [undefined, undefined]
-    const tl = this.element;
-    const pv = tl.previousElementSibling;
-    const nx = tl.nextElementSibling;
-    return [
-      c.find(o => o.element === pv),
-      c.find(o => o.element === nx)
-    ]
-  }
-  public remove():void{
-    const c = this.parent?.children;
-    this.element.remove()
-    if (!c) return;
-    c.splice(c.indexOf(this), 1)
-  }
-  public adopt<T extends C>(obj:T):T{
-    this.element.appendChild(obj.element)
-    if (obj.parent)
-      obj.parent.children = obj.parent.children.filter(o => o !== obj)
-    obj.parent = this;
-    this.children.push(obj)
-    return obj;
-  }
-  public empty(this:any){
-    this.element.innerHTML = "";
-    this.children = []
-    return this;
-  }
-  public bringDown(obj:WebObject<any,any>):WebObject<any,any>{
-    this.element.insertAdjacentElement("afterend", obj.element)
-    if (obj.parent)
-      obj.parent.children = obj.parent.children.filter(a => a !== obj)
-    obj.parent = this.parent;
-    
-    this.parent.children.splice(this.parent.children.indexOf(this) + 1, 0, obj)
-    return this;
-  }
-  public promote(){
-    if (!this.element.previousElementSibling) return false;
-    if (!this.element.parentElement) return false;
-    this.element.parentElement.insertBefore(this.element, this.element.previousElementSibling)
-    const index = this.parent.children.indexOf(this)
-    this.parent.children[index] = this.parent.children[index - 1]
-    this.parent.children[index - 1] = this;
-    return this;
-  }
-  public demote(){
-    if (!this.element.nextElementSibling) return false;
-    if (!this.element.parentElement) return false;
-    this.element.parentElement.insertBefore(this.element.nextElementSibling, this.element)
-    const index = this.parent.children.indexOf(this)
-    this.parent.children[index] = this.parent.children[index + 1]
-    this.parent.children[index + 1] = this;
-    return this;
-  }
-  public addClass<T extends WebObject<any,any>>(this:T, className:string):T{
-    this.element.classList.add(className)
-    return this;
-  }
-  public removeClass<T extends WebObject<any,any>>(this:T, className:string):T{
-    this.element.classList.remove(className)
-    return this;
-  }
-  public toggleClass<T extends WebObject<any,any>>(this:T, className:string):T{
-    this.element.classList.toggle(className)
-    return this;
+    this.class = new Classifier(this, this.element)
   }
 }

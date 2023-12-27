@@ -1,14 +1,8 @@
-import { WebObject } from "@/objects";
+import { DOMObject } from "@/objects";
 import { emptyArr } from "@/utils/utils";
 
 
-export class Calender extends WebObject<any,any>{
-  public get value(): any {
-    throw new Error("Method not implemented.");
-  }
-  public set value(v: any) {
-    throw new Error("Method not implemented.");
-  }
+export class Calender extends DOMObject{
   constructor(){
     super("table")
     let today = new Date();

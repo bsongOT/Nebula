@@ -1,38 +1,28 @@
-import {Container, Text} from "@/objects"
+import {WContainer, WText} from "@/objects"
 import {FilterMode} from "./Filter/FilterMode"
 import {hangulSeperate} from "@/utils/utils"
 import {Content} from "../../data/Data"
-import { InputText } from "@/objects/input/InputText";
+import { InputText } from "@/objects/input/WInputText";
 import "../../styles/Search.css"
-import { InputObject } from "@/objects/input";
 
-export class Search extends Container{
+export class Search extends WContainer{
   private $mode:FilterMode;
-  private input:InputObject;
-  private $onchange:()=>void;
+  private $input:InputText;
 
   public get value(){
-    return this.input.value;
+    return this.$input.value;
   }
   public get mode(){
     return this.$mode.value;
   }
   public constructor(){
     super();
-    this.addClass("search");
+    this.class.add("search");
     [
-      new Text("🔍").addClass("search-icon"),
-      this.input = new InputText().ontyping(() => this.update()),
+      new WText("🔍").class.add("search-icon"),
+      this.$input = new InputText().event.ontyping(() => this.event.change.invoke()),
       this.$mode = new FilterMode(this)
-    ].forEach(e => this.adopt(e));
-  }
-  update(){
-    this.$onchange?.()
-    return this;
-  }
-  onchange(onchange:()=>void){
-    this.$onchange = onchange;
-    return this;
+    ].forEach(e => this.family.adopt(e));
   }
   test(content:Content){
     const sepTitle = hangulSeperate(content.title)

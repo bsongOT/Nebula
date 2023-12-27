@@ -1,22 +1,18 @@
-import {ButtonObject} from "@/objects"
-import {data, Content} from "../../data/Data"
+import { WButton } from "@/objects"
+import { data, Content } from "../../data/Data"
 
-export class StartNebulaButton extends ButtonObject {
+export class StartNebulaButton extends WButton {
   public target:Content|undefined;
   constructor(target?:Content){
     super("start nebula");
     this.target = target;
-    this.onclick(()=>{})
-  }
-  public onclick(onclick:()=>void){
-    super.onclick(()=>{
+    this.event.click.register(()=>{
       if (!this.target) return;
       data.selectedNebula = data.addNebula(
       this.target.title, "Story", this.target)
 
       window.open("./nebula.html", "_self")
-      onclick()
     })
-    return this;
+    this.event.click.register(()=>{})
   }
 }

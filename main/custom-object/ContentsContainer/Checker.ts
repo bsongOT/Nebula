@@ -1,14 +1,14 @@
-import {ButtonObject, Container, Detail, SelectMenu} from "@/objects/"
-import { Checkbox } from "@/objects/input/";
+import { WButton, WContainer, WDetail, SelectMenu} from "@/objects/"
+import { WCheckbox } from "@/objects/input/";
 
-export class Checker extends Detail{
+export class Checker extends WDetail{
   constructor(){
     super([
-      new ButtonObject("Checker"),
-      new Container([
-        new Checkbox().label("Nebula"),
+      new WButton("Checker"),
+      new WContainer([
+        new WCheckbox().label("Nebula"),
         new SelectMenu([]),
-        new Checkbox().label("Parent"),
+        new WCheckbox().label("Parent"),
         new SelectMenu([]), // nebula
         new SelectMenu([]) //stars
       ])

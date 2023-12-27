@@ -5,6 +5,6 @@ export class ContentBody{
   claimTree:Tree<Dust>;
   
   constructor(){
-    
+    this.claimTree = new Tree<Dust>()
   }
 }

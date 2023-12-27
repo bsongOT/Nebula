@@ -1,7 +1,8 @@
 import {Hexagon} from "@/objects/CanvasObject"
 import {r3} from "@/utils/mathconsts";
-import { PolygonForm } from "@/infos/PolygonForm";
+import { PolygonForm } from "@/factors/forms/PolygonForm";
 import { StarLeafItem } from "../StarListContainer/StarLeafItem";
+import p5 from "p5";
 
 export class StarTile extends Hexagon{
   public listItem:StarLeafItem;
@@ -24,13 +25,11 @@ export class StarTile extends Hexagon{
   public constructor(listItem:StarLeafItem, form:PolygonForm){
     super(form)
     this.listItem = listItem;
-    this.onclick(()=>{})
   }
-  public render(){
+  public render(p:p5){
     this.form.color = this.color
-    super.render();
+    super.render(p);
 
-    const p = this.p
     const s = this.form.side;
     const [x, y] = [this.form.position.x, this.form.position.y]
     
@@ -49,13 +48,6 @@ export class StarTile extends Hexagon{
   public click(){
     if (this.listItem)
     this.listItem.list.selection = this.listItem;
-    return this;
-  }
-  public onclick(onclick:()=>void){
-    super.onclick(()=>{
-      
-      onclick()
-    })
     return this;
   }
 }

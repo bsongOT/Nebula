@@ -1,9 +1,9 @@
-import { ButtonObject } from "./ButtonObject"
-import { Container } from "./Container"
-import { WebObject } from "./WebObject"
+import { WButton } from "./WButton"
+import { WContainer } from "./Container"
+import { DOMObject } from "./WebObject"
 import "../styles/Detail.css"
 
-export class Detail extends Container{
+export class WDetail extends WContainer{
   private height:number;
   private $collapsed:boolean;
   public get collapsed(){
@@ -11,32 +11,38 @@ export class Detail extends Container{
   }
   private set collapsed(v:boolean){
     this.$collapsed = v;
-    const content = this.children[1]
+    const content = this.family.children[1]
     if (v){
-      this.removeClass("detail-openned");
+      this.class.remove("detail-openned");
       content.style.maxHeight = "0";
       content.style.paddingTop = "0";
       content.style.margin = "0";
       content.style.border = "0";
     }
     else{
-      this.addClass("detail-openned");
+      this.class.add("detail-openned");
       content.style.maxHeight = content.scrollHeight + "px";
       content.style.paddingTop = "";
       content.style.margin = "";
       content.style.border = "";
     }
   }
-  constructor(children:[ButtonObject, WebObject<any,any>]){
+  protected constructor(children:[WButton, DOMObject]){
     const [toggle, content] = children
-    super([
-      toggle.addClass("detail-toggle").onclick(()=>{
-        this.collapsed = !this.collapsed;
-      }),
-      content.addClass("detail-content")
+    
+    super()
+    
+    this.family.adoptAll([
+      toggle.class.add("detail-toggle")
+            .event.onclick(() => {
+              this.collapsed = !this.collapsed;
+            }),
+      content.class.add("detail-content")
     ])
+    
+    this.$collapsed = true;
     this.collapsed = true;
-    this.addClass("detail")
+    this.class.add("detail")
     this.height = content.scrollHeight;
 
     const iter = setInterval(()=>{

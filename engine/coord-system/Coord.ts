@@ -1,27 +1,28 @@
 
 export class Coord{
-  x:number;
-  y:number;
+  public x:number;
+  public y:number;
+
   constructor(x:number, y:number){
     this.x = x;
     this.y = y;
   }
-  add(c2:Coord):Coord{
+  public add(c2:Coord){
     return new Coord(
       this.x + c2.x, 
       this.y + c2.y
     )
   }
-  sub(c2:Coord):Coord{
+  public sub(c2:Coord){
     return new Coord(
       this.x - c2.x,
       this.y - c2.y
     )
   }
-  eq(c2:Coord):boolean{
+  public eq(c2:Coord):boolean{
     return this.x === c2.x && this.y === c2.y;
   }
-  scale(s:number){
+  public scale(s:number){
     return new Coord(this.x * s, this.y * s)
   }
 }

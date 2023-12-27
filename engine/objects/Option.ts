@@ -1,7 +1,12 @@
-import {WebObject} from "./WebObject"
+import {DOMObject} from "./WebObject"
 import { SelectMenu } from "./";
+import { EventInvoker } from "@/factors/events/Event";
+import { Family } from "@/factors/families/Family";
+import { DOMFamily } from "@/factors/families/DOMFamily";
 
-export class Option<T> extends WebObject<never,SelectMenu<T>>{
+export class Option<T> extends DOMObject{
+  public readonly family!: DOMFamily<never, SelectMenu<T>, Option<T>>;
+  public readonly event: EventInvoker<Option<T>>;
   public get value(): string {
     return this.element.innerText;
   }
@@ -14,7 +19,7 @@ export class Option<T> extends WebObject<never,SelectMenu<T>>{
   public set disabled(v:boolean){
     this.element.disabled = v;
   }
-  element:HTMLOptionElement;
+  protected element!:HTMLOptionElement;
   public data:T|string;
 
   get selected(){
@@ -25,6 +30,7 @@ export class Option<T> extends WebObject<never,SelectMenu<T>>{
   }
   constructor(name:string, data?:T){
     super("option");
+    this.event = new EventInvoker(this, this.element)
     this.value = name;
     this.data = data ?? name;
   }

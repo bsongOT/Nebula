@@ -10,10 +10,9 @@ export class TitleInput extends InputObject{
     this.onchange(()=>{})
   }
   onchange(onchange:()=>void){
-    super.onchange(()=>{
+    return super.onchange(()=>{
       this.nebula.name = this.value;
       onchange()
     })
-    return this;
   }
 }

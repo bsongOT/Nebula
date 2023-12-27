@@ -7,14 +7,10 @@ export class ContentsList extends SelectableList<Content>{
   private contents:DataCollection<Content>
   private search:Search|undefined;
   private filter:Filter|undefined;
-  public constructor(){
+  public constructor(contents:DataCollection<Content>){
     super([])
-    this.addClass("contents-list")
-  }
-  public ready(contents:DataCollection<Content>){
+    this.class.add("contents-list")
     this.contents = contents;
-    this.update()
-    return this;
   }
   public setSearch(search:Search){
     this.search = search;
@@ -25,7 +21,7 @@ export class ContentsList extends SelectableList<Content>{
     return this;
   }
   public update(){
-    this.empty();
+    this.family.empty();
 
     for (let c of this.contents.all()){
       let spoiled = false;
@@ -49,7 +45,7 @@ export class ContentsList extends SelectableList<Content>{
       }
       
       const item = this.adopt(new ContentItem(c))
-      if (spoiled) item.addClass("filtered")
+      if (spoiled) item.class.add("filtered")
     }
     return this;
   }

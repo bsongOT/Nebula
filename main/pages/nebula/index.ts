@@ -1,5 +1,5 @@
 import {
-  CanvasScreen,
+  WCanvas,
   CanvasContainer,
   Hexagon
 } 
@@ -7,52 +7,64 @@ from "@/objects/CanvasObject"
 import {
   UpperMenu,
   ContentsContainer,
-  TitleInput,
-  AddInTreeButton,
   StarTile,
-  StarListContainer
+  StarListContainer,
+  ContentsList
 } 
 from "../../custom-object"
 import {Coord, HexCoord} from "@/coord-system"
 import {HexWorld} from "@/data-structure/hexworld"
-import {selectedNebula, data, Content} from "../../data/Data"
-import { PolygonForm } from "@/infos/PolygonForm"
-import { Radio, RadioBox } from "@/objects/input/"
+import {selectedNebula, data} from "../../data/Data"
+import { PolygonForm } from "@/factors/forms/PolygonForm"
+import { InputText, Radio, RadioBox } from "@/objects/input/"
 import { Popup } from "@/objects/Popup"
 import { StarLeafItem } from "../../custom-object/StarListContainer/StarLeafItem"
-import { BodyObject, ButtonObject } from "@/objects"
+import { WBody, WButton, WContainer } from "@/objects"
 
 let grid = new HexWorld<StarLeafItem>();
 let nebula = selectedNebula;
-let cc:ContentsContainer;
-let slc:StarListContainer;
-let adit:AddInTreeButton;
+let clist:ContentsList;
+let slc:WContainer;
 let popup:Popup;
-let selectDisplay:ButtonObject;
-let canvas:CanvasScreen;
+let selectDisplay:WButton;
+let canvas:WCanvas;
 let effectBox:CanvasContainer;
 let tileBox:CanvasContainer;
 
 if (!nebula) throw "Error";
 
-new BodyObject([
+const titleInput = 
+  new InputText()
+    .setValue(nebula.name).event
+    .onchange(()=>{
+      nebula!.name = titleInput.value;
+    })
+const addInTreeButton = 
+  new WButton("+").event
+  .onclick(()=>starList.add(clist.selection.value))
+    
+
+new WBody([
   new UpperMenu(),
   new RadioBox([
     new Radio("kind").label("Story"),
     new Radio("kind").label("Type")
   ]),
-  new TitleInput(nebula),
+  titleInput,
   popup = new Popup([
-    selectDisplay = new ButtonObject("*** Not Selected ***"),
-    cc = new ContentsContainer(data.contents)
-              .onselect(()=>{
-                popup.hide()
-                selectDisplay.value = cc.selection.value.title;
-              })
+    selectDisplay = new WButton("*** Not Selected ***"),
+    new ContentsContainer(data.contents).useComponents(({list})=>{
+      clist = list!;
+      list!.event.onselect(()=>{
+        if (!list?.selection?.value) return;
+        popup.hide()
+        selectDisplay.value = list.selection.value.title;
+      })
+    })
   ]),
-  adit = new AddInTreeButton(),
-  slc = new StarListContainer(nebula),
-  canvas = new CanvasScreen(
+  addInTreeButton,
+  slc = StarListContainer(nebula),
+  canvas = new WCanvas(
   window.innerWidth, window.innerWidth,
   [
     effectBox = new CanvasContainer(),
@@ -68,10 +80,8 @@ new BodyObject([
   ])
 ])
 
-adit.ready(cc,slc)
-
 const dropGrid = () => {
-  tileBox.empty()
+  tileBox.family.empty()
   const size = grid.size.x;
   const pivot = new HexCoord(size-1,0,size-1)
   let pos = new HexCoord(0,0,0)
@@ -80,14 +90,14 @@ const dropGrid = () => {
     const item = grid.at(pos);
 
     if (item)
-      tileBox.adopt(
+      tileBox.family.adopt(
         new StarTile(item, new PolygonForm(
           pos.sub(pivot).toCoord(20).add(new Coord(1,1).scale(canvas.width/2)),
           20, "#ffffff"
         ))
       )
     else 
-      tileBox.adopt(
+      tileBox.family.adopt(
         new Hexagon(new PolygonForm(
           pos.sub(pivot).toCoord(20).add(new Coord(1,1).scale(canvas.width/2)),
           20, "#ffffff"

@@ -1,20 +1,15 @@
-import {ButtonObject} from "@/objects"
+import { WButton } from "@/objects"
 import {Content, data} from "../../data/Data"
 
-export class RemoveContentButton extends ButtonObject{
+export class RemoveContentButton extends WButton{
   public target:Content|undefined;
   public constructor(target?:Content){
     super("🗑");
     this.target = target;
-    this.onclick(()=>{})
-  }
-  public onclick(onclick:()=>void) {
-    super.onclick(()=>{
+    this.event.click.register(()=>{
       if (!this.target) return;
       data.contents.remove(this.target.id)
-      onclick()
     })
-    
-    return this;
+    this.event.click.register(()=>{})
   }
 }

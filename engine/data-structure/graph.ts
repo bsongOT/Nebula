@@ -37,9 +37,10 @@ export class Edge<T>{
   next:Node<T>;
   weight:number;
   relation:string;
-  constructor(prev:Node<T>, next:Node<T>, weight:number){
+  constructor(prev:Node<T>, next:Node<T>, weight:number, relation:string){
     this.prev = prev;
     this.next = next;
     this.weight = weight;
+    this.relation = relation;
   }
 }

@@ -1,7 +1,9 @@
+import { TreeNode } from "@/data-structure/tree";
+
 export function emptyArr(size:number):any[]{
   return Array(size).fill(undefined);
 }
-export function getLast(node){
+export function getLast<T>(node:TreeNode<T>){
   if (!node?.children) return node;
   if (node.children.length <= 0) return node;
   return getLast(node.children[node.children.length - 1])

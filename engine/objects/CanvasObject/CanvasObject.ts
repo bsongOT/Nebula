@@ -1,40 +1,19 @@
-import {WebObject} from "../WebObject"
-import {Form} from "../../infos/Form"
+import {Form} from "../../factors/forms/Form"
 import { Coord } from "../../coord-system";
 import p5 from "p5";
+import { WebObject } from "../WebObject";
+import { CanvasFamily } from "@/factors/families/CanvasFamily";
+import { CanvasEventInvoker } from "@/factors/events/CanvasEventInvoker";
 
-export abstract class CanvasObject<F extends Form> extends WebObject<CanvasObject<any>, WebObject<any,any>>{
-  private $onclick:()=>void;
-  public p:p5;
-  public form:F;
-  public get value(){
-    return;
+export abstract class CanvasObject extends WebObject{
+  public event!:CanvasEventInvoker<this>;
+  public family!:CanvasFamily<CanvasObject, CanvasObject, this>;
+  public abstract readonly form:Form;
+  protected constructor(){
+    super()
   }
-  public set value(_){}
-  public constructor(form:F, children?:CanvasObject<any>[]){
-    super("none",children);
-    this.form = form;
-    (children??[]).forEach(c => this.adopt(c))
-  }
-  public adopt<T extends CanvasObject<any>>(obj:T):T{
-    this.children.push(obj)
-    obj.parent = this;
-    return obj;
-  }
-  public empty(this:CanvasObject<F>){
-    this.children = [];
-    return this;
-  }
-  public onclick(onclick:()=>void){
-    this.$onclick = onclick;
-    return this;
-  }
-  public click(){
-    this.$onclick?.();
-    return this;
-  }
-  public abstract update():CanvasObject<F>;
-  public abstract render():CanvasObject<F>;
+  protected init(){}
+  public abstract update():this;
+  public abstract render(p:p5):this;
   public abstract isIn(point:Coord):boolean;
-  protected mouseOver():void{}
 }

@@ -1,16 +1,13 @@
-import {ButtonObject} from "@/objects"
+import {WButton} from "@/objects"
 import {data, Content, Nebula} from "../../data/Data"
 import { no_open_target } from "../../messages";
 
-export class OpenButton extends ButtonObject{
+export class OpenButton extends WButton{
   public target:Content|Nebula|undefined;
   constructor(target?:Content|Nebula){
     super("Open");
     this.target = target;
-    this.onclick(()=>{})
-  }
-  public onclick(onclick:()=>void){
-    super.onclick(()=>{
+    this.event.click.register(()=>{
       if (!this.target) return alert(no_open_target)
       if (this.target instanceof Content){
         data.selectedContent = this.target;
@@ -20,8 +17,7 @@ export class OpenButton extends ButtonObject{
         data.selectedNebula = this.target;
         window.open("../../pages/nebula/nebula.html", "_self")
       }
-      onclick()
     })
-    return this;
+    this.event.click.register(()=>{})
   }
 }

@@ -1,10 +1,9 @@
 import { Tree } from "../../data-structure/tree";
-import { ListItem } from "./ListItem";
-import { ListView } from "./ListView";
+import { WListView } from "./WListView";
 
-export class TreeList<T> extends ListView<T, ListItem<T, any>>{
+export class TreeList<T> extends WListView<T>{
   protected tree:Tree<T>;
-  constructor(tree:Tree<T>){
+  protected constructor(tree:Tree<T>){
     super()
     this.tree = tree;
     

@@ -1,9 +1,16 @@
-import {WebObject} from "./WebObject"
+import { DOMObject } from "./WebObject"
 
-export class Container extends WebObject<WebObject<any,any>,WebObject<any,any>>{
-  public get value():any{return;}
-  constructor(children?:WebObject<any,any>[]){
-    super("div", children);
-    this.addClass("container");
+export abstract class AbstractContainer extends DOMObject{
+  public abstract readonly components: Record<string, DOMObject>;
+  protected constructor(){
+    super("div")
+  }
+}
+export class WContainer extends AbstractContainer{
+  public readonly components: Record<string, DOMObject>;
+  constructor(){
+    super();
+    this.class.add("container");
+    this.components = {};
   }
 }

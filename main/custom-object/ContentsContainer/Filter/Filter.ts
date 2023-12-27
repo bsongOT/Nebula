@@ -1,36 +1,27 @@
-import {ButtonObject, Container, Detail} from "@/objects"
-import {FilterItem, AddFilterButton} from "./"
+import {WButton, WContainer, WDetail} from "@/objects"
+import {FilterItem} from "./"
 import {Content} from "../../../data/Data"
 import "../../../styles/Filter.css"
 
-export class Filter extends Detail{
-  private box:Container;
-  private $onchange:()=>void;
+export class Filter extends WDetail{
+  private box:WContainer;
 
   constructor(){
-    let box:Container;
-    let btn:AddFilterButton;
+    let box:WContainer;
     super([
-      new ButtonObject("Filter"),
-      new Container([
-        btn = new AddFilterButton().addClass("add-filter-button"),
-        box = new Container().addClass("filter-box")
+      new WButton("Filter"),
+      new WContainer([
+        new WButton("add filter")
+            .class.add("add-filter-button")
+            .event.onclick(()=>this.add()),
+  box=  new WContainer().class.add("filter-box")
       ])
     ]);
-    this.addClass("filter");
+    this.class.add("filter");
     this.box = box;
-    btn.ready(this)
-  }
-  public update(){
-    this.$onchange();
-    return this;
-  }
-  public onchange(onchange:()=>void){
-    this.$onchange = onchange;
-    return this;
   }
   public test(content:Content):boolean|string{
-    const filters = this.box.children as FilterItem[];
+    const filters = this.box.family.children as FilterItem[];
     let spoiled = false;
     
     for (let f of filters){
@@ -44,7 +35,7 @@ export class Filter extends Detail{
     return spoiled ? "spoil" : true;
   }
   public add(){
-    this.box.adopt(new FilterItem(this))
-    this.update()
+    this.box.family.adopt(new FilterItem(this))
+    this.event.change.invoke()
   }
 }

@@ -13,7 +13,7 @@ export class HexGrid<T>{
   }
   constructor(size:HexCoord){
     const [x, y, z] = [size.x, size.y, size.z]
-    this.size = size
+    this.$size = size
     this.datas = emptyArr(x+y-1)
                 .map(v => emptyArr(y+z-1))
   }

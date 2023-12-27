@@ -5,7 +5,7 @@ import { SelectableSpace } from "@/virtual spaces/SelectableSpace";
 import {Content, Nebula} from "../../data/Data"
 import { StarLeafItem } from "./StarLeafItem";
 
-export class StarList extends ListView<Content, StarLeafItem>{
+export class StarList extends ListView<Content>{
   private space:SelectableSpace<ISelectable>;
   private $tree:Tree<StarLeafItem>;
   public get tree(){
@@ -22,18 +22,18 @@ export class StarList extends ListView<Content, StarLeafItem>{
   }
   public constructor(nebula:Nebula){
     super();
-    this.addClass("star-list")
+    this.class.add("star-list")
     this.space = new SelectableSpace();
-    this.tree = nebula.tree.map((c, bn, an) => new StarLeafItem(c, this, an, nebula.orient === bn));
+    this.$tree = nebula.tree.map((c, bn, an) => new StarLeafItem(c!, this, an!, nebula.orient === bn));
     this.tree.tourNode(n => {
-      this.space.regist(n.data)
+      this.space.regist(n.data!)
       if (n.parent === this.tree.root){
-        this.adopt(n.data)
+        this.family.adopt(n.data!)
         return;
       }
-      n.data.parent.children[1].adopt(n.data)
+      n.data!.family.parent!.family.children[1].family.adopt(n.data!)
       if (n.children.length > 0){
-        n.data.adopt(new ListView<Content, StarLeafItem>())
+        n.data!.family.adopt(new ListView<Content>())
       }
     })
   }
@@ -42,7 +42,7 @@ export class StarList extends ListView<Content, StarLeafItem>{
     const item = new StarLeafItem(content, this, node, false)
     node.data = item;
 
-    this.adopt(item);
+    this.family.adopt(item);
     this.space.regist(item);
     this.tree.insert(this.tree.root, node)
   }

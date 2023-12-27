@@ -1,27 +1,30 @@
-import { BodyObject } from "@/objects/";
+import { WBody } from "@/objects/";
 import {UpperMenu,
   ContentsContainer,
   AddContentButton,
   RemoveContentButton,
   OpenButton,
-  StartNebulaButton
+  StartNebulaButton,
+  ContentsList
 } from "../../custom-object"
 import {data} from "../../data/Data"
 import "../style.css"
 
-let cc;
+let cl:ContentsList;
 let obtn, snbtn, acbtn, rmcbtn;
 
-new BodyObject([
+new WBody([
   new UpperMenu(),
-  cc = new ContentsContainer(data.contents)
-      .onselect(function(){
-        rmcbtn.target = this.selection?.value
-        obtn.target = this.selection?.value
-        snbtn.target = this.selection?.value
-      }),
+  new ContentsContainer(data.contents).useComponents(({list})=>{
+    cl = list!;
+    cl.onselect(() => {
+        rmcbtn.target = cl.selection?.value
+        obtn.target = cl.selection?.value
+        snbtn.target = cl.selection?.value
+    })
+  }),
   obtn = new OpenButton(),
   snbtn = new StartNebulaButton(),
-  acbtn = new AddContentButton().onclick(()=>cc.update()),
-  rmcbtn = new RemoveContentButton().onclick(()=>cc.update())
+  acbtn = new AddContentButton().onclick(()=>cl.update()),
+  rmcbtn = new RemoveContentButton().event.onclick(()=>cl.update())
 ])

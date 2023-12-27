@@ -1,26 +1,23 @@
-import { Detail, ButtonObject, Text } from "@/objects";
-import { Checkbox } from "@/objects/input/";
+import { WDetail, WButton } from "@/objects";
+import { WCheckbox } from "@/objects/input/";
 import { DraggableList, DraggableItem } from "@/objects/list";
 
-export class SortTool extends Detail{
+export class SortTool extends WDetail{
   constructor(){
     super([
-      new ButtonObject("Sort"),
+      new WButton("Sort"),
       new DraggableList([
         new DraggableItem([
-          new Checkbox(),
-          new Text("가나다순")
+          new WCheckbox().label("가나다순")
         ]),
         new DraggableItem([
-          new Checkbox(),
-          new Text("생성일자순")
+          new WCheckbox().label("생성일자순")
         ]),
         new DraggableItem([
-          new Checkbox(),
-          new Text("수정일자순")
+          new WCheckbox().label("수정일자순")
         ])
       ])
     ]);
-    this.addClass("sort-tool");
+    this.class.add("sort-tool");
   }
 }
