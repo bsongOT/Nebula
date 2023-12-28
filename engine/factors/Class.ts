@@ -1,9 +1,12 @@
 import { HTMLObject } from "@/objects";
 
-export class Classifier<T extends HTMLObject> {
+export class Class<T extends HTMLObject> {
     private class:DOMTokenList;
     private obj:T;
-    constructor(obj:T, element:HTMLElement){
+    public static new<T extends HTMLObject>(obj:T, element:HTMLElement){
+        return new Class(obj, element)
+    }
+    private constructor(obj:T, element:HTMLElement){
         this.class = element.classList;
         this.obj = obj;
     }

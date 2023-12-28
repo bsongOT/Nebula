@@ -1,12 +1,10 @@
-import { DOMObject, WebObject } from "../WebObject";
+import { WebObject } from "../WebObject";
+import { DOMObject } from "../DOMObject";
 import { WInput } from "./WInput";
 import { WText } from "../WText"
-import { DOMFamily, HTMLFamily } from "@/factors/families/DOMFamily";
-import { EventQueue } from "@/factors/events/Event";
-import { NeverOccuredEvent } from "@/factors/events/NeverOccurredEvent";
+import { EventQueue } from "@/factors/Event";
 
 export class SimpleRadio extends WInput{
-  public family!:DOMFamily<never, DOMObject, SimpleRadio>;
   public get name(){
     return this.element.name;
   }
@@ -23,8 +21,6 @@ export class SimpleRadio extends WInput{
   }
 }
 export class WRadio extends DOMObject{
-    public readonly family!: DOMFamily<DOMObject, DOMObject, WRadio>;
-    public readonly event: NeverOccuredEvent<WRadio>;
     private $radio:SimpleRadio;
     private $label:WText|undefined;
     public get value(){return this.$radio.value;}
@@ -33,10 +29,9 @@ export class WRadio extends DOMObject{
     }
     constructor(name: string){
         super("label")
-        this.event = new NeverOccuredEvent()
         this.$radio = new SimpleRadio(name);
         this.class.add("radio")
-        this.$radio.event.change.register(()=>{
+        this.$radio.change.register(()=>{
           if (this.checked) this.class.add("checked")
           else this.class.remove("checked")
         })

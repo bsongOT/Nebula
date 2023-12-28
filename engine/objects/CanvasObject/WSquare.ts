@@ -3,29 +3,9 @@ import { Coord } from "../../coord-system";
 import { PolygonForm } from "../../factors/forms/PolygonForm";
 import { CanvasObject } from "./CanvasObject";
 import p5 from "p5";
-import { CanvasEventInvoker } from "@/factors/events/CanvasEventInvoker";
-import { CanvasFamily } from "@/factors/families/CanvasFamily";
 
 export class WSquare extends CanvasObject{
-  public event!: CanvasEventInvoker<this>;
-  public family!: CanvasFamily<CanvasObject, CanvasObject, this>;
   public form!: PolygonForm;
-  public static new(){
-    const s = new WSquare()
-    
-    s.family = new CanvasFamily(s)
-    s.event = new CanvasEventInvoker(s)
-    s.form = new PolygonForm()
-    s.init()
-
-    return s;
-  }
-  protected constructor(){
-    super()
-  }
-  protected init(){
-    super.init()
-  }
   public update() {
     return this
   }

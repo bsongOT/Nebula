@@ -17,16 +17,13 @@ export class Input<T> {
     }
     public onclick(onclick: () => void) {
         this.click.modify(onclick);
-        this.element.onclick = () => this.click.invoke();
         return this.obj;
     }
     public oncontextmenu(oncontextmenu: () => void) {
         this.contextmenu.modify(oncontextmenu);
-        this.element.oncontextmenu = () => this.contextmenu.invoke();
         return this.obj;
     }
     public ondoubleclick(ondoubleclick: () => void) {
         this.doubleclick.modify(ondoubleclick);
-        this.element.ondblclick = () => this.doubleclick.invoke();
     }
 }

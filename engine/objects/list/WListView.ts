@@ -1,16 +1,13 @@
-import { ListItem } from ".";
-import {DOMObject} from ".."
+import { Family } from "@/factors/Family";
+import { WListItem } from ".";
 import "../../styles/List.css"
-import { DOMFamily } from "@/factors/families/DOMFamily";
-import { NeverOccuredEvent } from "@/factors/events/NeverOccurredEvent";
+import { DOMObject } from "../DOMObject";
+import { HTMLObject } from "../WebObject";
 
 export class WListView<T> extends DOMObject{
-  public readonly event:NeverOccuredEvent<WListView<T>>;
-  public readonly family!:DOMFamily<ListItem<T>, DOMObject, this>
-  constructor(children?:ListItem<T>[]){
+  public readonly family!:Family<WListItem<T>, HTMLObject, this>
+  constructor(){
     super("ul");
-    this.event = new NeverOccuredEvent()
-    this.family.adoptAll(children)
     this.class.add("list")
   }
 }

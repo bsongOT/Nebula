@@ -1,11 +1,9 @@
-import { EventInvoker } from "@/factors/events/Event";
-import { DOMObject } from ".";
-import { Family } from "@/factors/families/Family";
-import { DOMFamily } from "@/factors/families/DOMFamily";
+import { Family } from "@/factors/Family";
+import { DOMObject } from "./DOMObject";
+import { HTMLObject } from "./WebObject";
 
 export class WText extends DOMObject{
-  public readonly family!: DOMFamily<never, DOMObject, this>
-  public readonly event: EventInvoker<this>;
+  public readonly family!: Family<never, HTMLObject, this>
   public get value(): string {
     return this.element.innerText;
   }
@@ -16,6 +14,5 @@ export class WText extends DOMObject{
     super("span");
     this.class.add("text")
     this.value = text;
-    this.event = new EventInvoker(this, this.element)
   }
 }

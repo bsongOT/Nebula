@@ -1,7 +1,7 @@
-import { WoTag } from "../types"
-import { Family } from "@/factors/families/Family";
-import { Input } from "@/factors/events/Input";
-import { Classifier } from "@/factors/class/Classifier";
+import { Family } from "@/factors/Family";
+import { Input } from "@/factors/Input";
+import { Class } from "@/factors/Class";
+import { Style } from "@/factors/Style";
 
 export abstract class WebObject{
   public readonly family:Family<WebObject, WebObject, this>;
@@ -13,41 +13,38 @@ export abstract class WebObject{
 }
 export abstract class HTMLObject extends WebObject {
   protected abstract readonly element:HTMLElement;
-  public abstract readonly class:Classifier<this>;
+  public abstract readonly class:Class<this>;
   public readonly family!:Family<WebObject, HTMLObject, this>;
+  public abstract readonly style:Style;
   constructor(){
     super()
-    this.family.event
-      .remove.register(()=>{
-        this.element.remove()
-      })
-    this.family.event
-      .adopt.register((member)=>{
-        if (!(member instanceof HTMLObject)) return;
-        this.element.appendChild(member.element)
-      })
-    this.family.event
-      .bringDown.register((obj: WebObject)=>{
-        if (!(obj instanceof HTMLObject)) return;
-        this.element.insertAdjacentElement('afterend', obj.element)
-      })
-    this.family.event
-      .bringUp.register((obj: WebObject)=>{
-        if (!(obj instanceof HTMLObject)) return;
-        this.element.insertAdjacentElement('beforebegin', obj.element)
-      })
+    this.initFamily()
   }
-}
-export abstract class DOMObject extends HTMLObject {
-  protected readonly element:HTMLElement;
-  public readonly class:Classifier<this>;
-  public get style(){ return this.element.style;}
-  public get scrollHeight(){
-    return this.element.scrollHeight;
+  protected initFamily(){
+    const event = this.family.event;
+    
+    const onremove = () => this.element.remove()
+    const onadopt = <T>(member:T) => {
+      if (!(member instanceof HTMLObject)) return;
+      this.element.appendChild(member.element)
+    }
+    const onbringDown = (obj: WebObject) => {
+      if (!(obj instanceof HTMLObject)) return;
+      this.element.insertAdjacentElement('afterend', obj.element)
+    }
+    const onbringUp = (obj: WebObject)=>{
+      if (!(obj instanceof HTMLObject)) return;
+      this.element.insertAdjacentElement('beforebegin', obj.element)
+    }
+
+    event.remove.register(onremove)
+    event.adopt.register(onadopt)
+    event.bringDown.register(onbringDown)
+    event.bringUp.register(onbringUp)
   }
-  constructor(tag?:WoTag){
-    super()
-    this.element = document.createElement(tag ?? "div");
-    this.class = new Classifier(this, this.element)
+  protected initInput(){
+    this.element.onclick = () => this.input.click.invoke()
+    this.element.oncontextmenu = () => this.input.contextmenu.invoke()
+    this.element.ondblclick = () => this.input.doubleclick.invoke()
   }
 }

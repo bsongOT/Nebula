@@ -1,13 +1,9 @@
-import { DOMObject, WText } from "..";
+import { Family } from "@/factors/Family";
+import { HTMLObject, WText } from "..";
 import { WInput } from "./WInput";
-import { Classifier } from "@/factors/class/Classifier";
-import { InputEventInvoker } from "@/factors/events/InputEventInvoker";
-import { NeverOccuredEvent } from "@/factors/events/NeverOccurredEvent";
-import { DOMFamily } from "@/factors/families/DOMFamily";
+import { DOMObject } from "../DOMObject";
 
 export class WSimpleCheckbox extends WInput{
-  public family!: DOMFamily<never, DOMObject, WSimpleCheckbox>;
-  public readonly event!: InputEventInvoker<WSimpleCheckbox>;
   public get checked(){
     return this.element.checked;
   }
@@ -17,9 +13,6 @@ export class WSimpleCheckbox extends WInput{
   }
 }
 export class WCheckbox extends DOMObject{
-  public readonly family!:DOMFamily<DOMObject, DOMObject, this>
-  public readonly event: NeverOccuredEvent<WCheckbox>
-  public readonly class!: Classifier<this>
   public get value():string{
     return this.$checkbox.value;
   }
@@ -35,12 +28,10 @@ export class WCheckbox extends DOMObject{
     super("label")
     this.$checkbox = new WSimpleCheckbox();
     this.class.add("checkbox")
-    this.event = new NeverOccuredEvent();
-    this.$checkbox.event.change.register(()=>{
+    this.$checkbox.change.register(()=>{
       if (this.checked) this.class.add("checked")
       else this.class.add("checked")
     })
-    this.$checkbox.event.change.register(()=>{})
   }
   public label(text:string){
     if (!this.$label)

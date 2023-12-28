@@ -1,24 +1,14 @@
-import { DOMObject } from "..";
+import { Family } from "@/factors/Family";
 import { WDraggableList } from "./WDraggableList";
-import { ListItem } from "./WListItem";
-import { DOMFamily } from "@/factors/families/DOMFamily";
-import { EventInvoker } from "@/factors/events/Event";
+import { WListItem } from "./WListItem";
+import { DOMObject } from "../DOMObject";
 
-export class WDraggableItem<T> extends ListItem<T>{
-  public family!:DOMFamily<DOMObject, WDraggableList<T>, this>
+export class WDraggableItem<T> extends WListItem<T>{
+  public readonly family!:Family<DOMObject, WDraggableList<T>, this>
   
-  public static new<T>(){
-    const di = new WDraggableItem<T>()
-
-    di.family = new DOMFamily(di, di.element)
-    di.event = new EventInvoker(di, di.element)
-    di.init();
-
-    return di;
-  }
-  public init(){
-    super.init()
-    this.event.click.register(()=> {
+  constructor(){
+    super()
+    this.input.click.register(()=> {
       this.family.parent!.draggee = this;
     })
   }

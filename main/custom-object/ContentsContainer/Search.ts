@@ -18,11 +18,11 @@ export class Search extends WContainer{
   public constructor(){
     super();
     this.class.add("search");
-    [
+    this.family.adoptAll([
       new WText("🔍").class.add("search-icon"),
-      this.$input = new InputText().event.ontyping(() => this.event.change.invoke()),
+      this.$input = new InputText().event.ontyping(() => this.change.invoke()),
       this.$mode = new FilterMode(this)
-    ].forEach(e => this.family.adopt(e));
+    ]);
   }
   test(content:Content){
     const sepTitle = hangulSeperate(content.title)

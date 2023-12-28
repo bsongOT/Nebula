@@ -1,31 +1,11 @@
 import p5 from "p5";
 import { Coord } from "../../coord-system";
 import { Form } from "../../factors/forms/Form";
-import {CanvasObject} from "."
-import { CanvasEventInvoker } from "@/factors/events/CanvasEventInvoker";
-import { CanvasFamily } from "@/factors/families/CanvasFamily";
+import { CanvasObject } from "."
 import { LineForm } from "@/factors/forms/LineForm";
 
 export class WLine extends CanvasObject{
-  public event!: CanvasEventInvoker<this>;
-  public family!: CanvasFamily<CanvasObject, CanvasObject, this>;
   public form!: LineForm;
-  public static new(start:Coord, end:Coord){
-    const l = new WLine()
-
-    l.family = new CanvasFamily(l)
-    l.event = new CanvasEventInvoker(l)
-    l.form = new LineForm()
-                 .moveStartAt(start)
-                 .moveEndAt(end)
-    l.init()
-
-    return l;
-  }
-  protected constructor(){ super(); }
-  protected init(){
-    super.init()
-  }
   public update(){
     return this;
   }

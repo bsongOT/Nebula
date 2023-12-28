@@ -1,7 +1,7 @@
 import { TreeNode } from "@/data-structure/tree";
 import { engine } from "@/engine";
-import { WebObject, DOMObject, WBody } from "@/objects";
-import { EventQueue } from "../events/Event";
+import { WebObject } from "@/objects";
+import { EventQueue } from "./Event";
 
 export type Event<T extends Record<string, (...args:any)=>void>> = {
     [key in keyof T]:EventQueue<T[key]>
@@ -71,6 +71,24 @@ export class Family<C extends WebObject, P extends WebObject, T extends WebObjec
     }
     public demote(){
         this.rightFriend?.family?.bringDown?.(this.me)
+        return this.me
+    }
+
+    //event
+    public onremove(onremove:()=>void){
+        this.event.remove.modify(onremove)
+        return this.me
+    }
+    public onadopt(onadopt:<T extends C>(member:T)=>void){
+        this.event.adopt.modify(onadopt)
+        return this.me
+    }
+    public onbringDown(onbringDown:(obj:WebObject)=>void){
+        this.event.bringDown.modify(onbringDown)
+        return this.me
+    }
+    public onbringUp(onbringUp:(obj:WebObject)=>void){
+        this.event.bringUp.modify(onbringUp)
         return this.me
     }
 }

@@ -1,15 +1,15 @@
-import { InputEventInvoker } from "@/factors/events/InputEventInvoker";
-import {DOMObject} from "../WebObject"
-import { DOMFamily } from "@/factors/families/DOMFamily";
+import { Family } from "@/factors/Family";
+import { DOMObject } from "../DOMObject";
+import { EventQueue } from "@/factors/Event";
 
 export abstract class WInput extends DOMObject{
   protected readonly element!: HTMLInputElement;
-  public readonly event:InputEventInvoker<WInput>;
-  public family:DOMFamily<never, DOMObject, WInput>
+  public readonly family!:Family<never, DOMObject, this>
+  public readonly change:EventQueue<()=>void>
   public constructor(){
     super("input");
-    this.event = new InputEventInvoker(this, this.element)
-    this.family = new DOMFamily(this, this.element)
+    this.change = new EventQueue()
+    this.element.onchange = () => this.change.invoke();
   }
   public setValue(v:string){
     this.value = v;
