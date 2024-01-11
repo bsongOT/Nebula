@@ -3,8 +3,8 @@ import { engine } from "@/engine";
 import { WebObject } from "@/objects";
 import { EventQueue } from "./Event";
 
-export type Event<T extends Record<string, (...args:any)=>void>> = {
-    [key in keyof T]:EventQueue<T[key]>
+export type Event<T> = {
+    [key in keyof T]:T[key] extends (...args:any[])=>void ? EventQueue<T[key]> : never
 }
 export class Family<C extends WebObject, P extends WebObject, T extends WebObject>{
     private node:TreeNode<WebObject>
@@ -76,19 +76,19 @@ export class Family<C extends WebObject, P extends WebObject, T extends WebObjec
 
     //event
     public onremove(onremove:()=>void){
-        this.event.remove.modify(onremove)
+        this.event.remove.setListener(onremove)
         return this.me
     }
     public onadopt(onadopt:<T extends C>(member:T)=>void){
-        this.event.adopt.modify(onadopt)
+        this.event.adopt.setListener(onadopt)
         return this.me
     }
     public onbringDown(onbringDown:(obj:WebObject)=>void){
-        this.event.bringDown.modify(onbringDown)
+        this.event.bringDown.setListener(onbringDown)
         return this.me
     }
     public onbringUp(onbringUp:(obj:WebObject)=>void){
-        this.event.bringUp.modify(onbringUp)
+        this.event.bringUp.setListener(onbringUp)
         return this.me
     }
 }

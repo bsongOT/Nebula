@@ -2,9 +2,10 @@ import { DOMObject } from "./DOMObject";
 import "../styles/StateBox.css"
 import { Family } from "@/factors/Family";
 import { EventQueue } from "@/factors/Event";
+import { HTMLObject } from "./WebObject";
 
-export class WStateBox extends DOMObject {
-  public readonly family!: Family<never, DOMObject, this>;
+export class WStateBox extends DOMObject<"span"> {
+  public readonly family!: Family<never, HTMLObject, this>;
   public readonly change:EventQueue<()=>void>;
   public get value(): string {
     return this.element.innerText;
@@ -14,16 +15,16 @@ export class WStateBox extends DOMObject {
   }
   private states:string[];
   private $index:number = 0;
-  get index():number{
+  public get index(){
     return this.$index;
   }
-  set index(v){
+  public set index(v){
     if (isNaN(v)) return;
     this.$index = v % this.states.length;
     this.value = this.state;
     this.change.invoke()
   }
-  get state(){
+  public get state(){
     return this.states[this.index]
   }
   constructor(states:string[]){

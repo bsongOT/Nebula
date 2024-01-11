@@ -4,7 +4,7 @@ import { WListItem } from "./WListItem";
 import { DOMObject } from "../DOMObject";
 
 export class WDraggableItem<T> extends WListItem<T>{
-  public readonly family!:Family<DOMObject, WDraggableList<T>, this>
+  public readonly family!:Family<DOMObject<any>, WDraggableList<T>, this>
   
   constructor(){
     super()

@@ -6,15 +6,14 @@ import { Class } from "@/factors/Class";
 import { Style } from "@/factors/Style";
 
 export class WBody extends HTMLObject{
-  public class: Class<this>;
-  public style: Style;
+  public readonly class: Class<this>;
+  public readonly style: Style;
   protected readonly element:HTMLElement;
-  public readonly family!: Family<DOMObject, never, this>;
-  constructor(children:DOMObject[]){
+  public readonly family!: Family<DOMObject<any>, never, this>;
+  constructor(){
     super();
     this.element = document.body;
     this.class = Class.new(this, this.element);
     this.style = Style.new(this.element)
-    this.family.adoptAll(children)
   }
 }

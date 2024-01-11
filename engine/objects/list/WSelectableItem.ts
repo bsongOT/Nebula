@@ -4,7 +4,7 @@ import { DOMObject } from "../DOMObject";
 import { Family } from "@/factors/Family";
 
 export class WSelectableItem<T> extends WListItem<T> implements ISelectable{
-  public readonly family!:Family<DOMObject, WSelectableList<T>, this>
+  public readonly family!:Family<DOMObject<any>, WSelectableList<T>, this>
   public get selected(){
     return this.class.contains("selected");
   }

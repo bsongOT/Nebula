@@ -1,4 +1,4 @@
-import {ContentsList, Search, Filter, SortTool, Checker, ContentItem}
+import {ContentsList, Search, SortTool, Checker, ContentItem}
 from "."
 import { WContainer, WDetail } from "@/objects/"
 import { Content } from "../../data/Data";
@@ -7,18 +7,17 @@ import "../../styles/ContentsContainer.css"
 import "../../styles/Tool-box.css"
 
 function filter(){
-  const filter = new WDetail()  
-  filter
-    .family.adoptAll([
-      new WButton("Filter"),
-      new WContainer().family.adoptAll([
-        new WButton("add filter")
-            .class.add("add-filter-button")
-            .input.onclick(()=>this.add()),
-  box=  new WContainer().class.add("filter-box")
-      ])
-    ])
-    .class.add("filter");
+  return (
+    new WDetail(
+    new WSimpleButton("Filter"),
+    new WContainer().family.adoptAll(
+      new WSimpleButton("add filter")
+        .class.add("add-filter-button")
+        .input.onclick(()=>this.add()),
+      new WContainer().class.add("filter-box")
+    )
+    ).class.add("filter")
+  )
 }
 function test(content:Content):boolean|string{
   const filters = this.box.family.children as FilterItem[];

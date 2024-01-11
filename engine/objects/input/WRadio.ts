@@ -20,31 +20,26 @@ export class SimpleRadio extends WInput{
     this.element.name = name;
   }
 }
-export class WRadio extends DOMObject{
-    private $radio:SimpleRadio;
-    private $label:WText|undefined;
-    public get value(){return this.$radio.value;}
-    public get checked(){
-        return this.$radio.checked;
-    }
-    constructor(name: string){
-        super("label")
-        this.$radio = new SimpleRadio(name);
-        this.class.add("radio")
-        this.$radio.change.register(()=>{
-          if (this.checked) this.class.add("checked")
-          else this.class.remove("checked")
-        })
-    }
-    public label(text:string){
-      if (this.$label)
-        this.$label.value = text;
-      else
-        this.$label = this.family.adopt(new WText(text))
-      return this;
-    }
-    public check(){
-      this.element.click()
-      return this;
-    }
+export class WRadio extends DOMObject<"div">{
+  private $radio:SimpleRadio;
+  private $label:WText|undefined;
+  public get checked(){
+    return this.$radio.checked;
+  }
+  constructor(name: string){
+    super("div")
+    this.$radio = new SimpleRadio(name);
+    this.class.add("radio")
+    this.$radio.change.register(()=>{
+      if (this.checked) this.class.add("checked")
+      else this.class.remove("checked")
+    })
+  }
+  public label(text:string){
+    if (this.$label)
+      this.$label.value = text;
+    else
+      this.$label = this.family.adopt(new WText(text))
+    return this;
+  }
 }

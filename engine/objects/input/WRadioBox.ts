@@ -2,10 +2,11 @@ import { DOMObject } from "../DOMObject";
 import { WRadio } from "./WRadio";
 import "../../styles/RadioBox.css"
 import { Family } from "@/factors/Family";
+import { HTMLObject } from "../WebObject";
 
-export class WRadioBox extends DOMObject{
-  public readonly family!:Family<WRadio, DOMObject, this>
-  public get value() {
+export class WRadioBox extends DOMObject<"div">{
+  public readonly family!:Family<WRadio, HTMLObject, this>
+  public get selectedRadio() {
     return this.family.children.find(r => r.checked)
   }
   constructor(children:WRadio[]){

@@ -16,14 +16,14 @@ export class Input<T> {
         this.doubleclick = new EventQueue();
     }
     public onclick(onclick: () => void) {
-        this.click.modify(onclick);
+        this.click.setListener(onclick);
         return this.obj;
     }
     public oncontextmenu(oncontextmenu: () => void) {
-        this.contextmenu.modify(oncontextmenu);
+        this.contextmenu.setListener(oncontextmenu);
         return this.obj;
     }
     public ondoubleclick(ondoubleclick: () => void) {
-        this.doubleclick.modify(ondoubleclick);
+        this.doubleclick.setListener(ondoubleclick);
     }
 }

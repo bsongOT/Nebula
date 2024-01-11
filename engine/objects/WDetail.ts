@@ -20,9 +20,7 @@ export class WDetail extends WContainer{
       content.style.maxHeight(`${content.style.scrollHeight}px`);
     }
   }
-  constructor(children:[WButton, DOMObject]){
-    const [toggle, content] = children
-    
+  constructor(toggle:WButton, content:DOMObject<any>){
     super()
     
     this.family.adoptAll([

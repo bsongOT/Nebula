@@ -5,11 +5,11 @@ import {CanvasObject} from "./CanvasObject"
 import p5 from "p5"
 import { HTMLObject } from "../WebObject";
 
-export class WCanvas extends DOMObject{
+export class WCanvas extends DOMObject<"div">{
   public readonly p:p5;
   public readonly family!:Family<CanvasObject, HTMLObject, this>
   constructor(w:number, h:number){
-    super();
+    super("div");
     const tour = (node:CanvasObject, func:(o:CanvasObject)=>void) => {
       for (let c of node.family.children){
         func(c)

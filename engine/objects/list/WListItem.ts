@@ -3,20 +3,12 @@ import { WListView } from ".";
 import "../../styles/ListItem.css"
 import { DOMObject } from "../DOMObject";
 
-export class WListItem<T> extends DOMObject{
-  public readonly family!:Family<DOMObject, WListView<T>, this>
-  public get value(): T|undefined {
-    return this.$data;
-  }
-  protected set value(v: T|undefined) {
-    this.$data = v;
-  }
-  private $data?:T;
-  constructor(){
+export class WListItem<T> extends DOMObject<"li">{
+  public readonly family!:Family<DOMObject<any>, WListView<T>, this>
+  public data:T|undefined;
+  constructor(data?:T){
     super("li")
+    this.data = data;
     this.class.add("list-item")
-  }
-  public data(value?:T){
-    this.value = value;
   }
 }

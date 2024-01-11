@@ -2,7 +2,7 @@ import { Family } from "@/factors/Family";
 import { HTMLObject, WOption } from "."
 import { DOMObject } from "./DOMObject";
 
-export class WSelectMenu<T> extends DOMObject {
+export class WSelectMenu<T> extends DOMObject<"select"> {
   public readonly family!: Family<WOption<T>, HTMLObject, this>;
   protected readonly element!:HTMLSelectElement;
   get value(){

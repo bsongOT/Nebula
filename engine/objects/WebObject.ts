@@ -42,9 +42,4 @@ export abstract class HTMLObject extends WebObject {
     event.bringDown.register(onbringDown)
     event.bringUp.register(onbringUp)
   }
-  protected initInput(){
-    this.element.onclick = () => this.input.click.invoke()
-    this.element.oncontextmenu = () => this.input.contextmenu.invoke()
-    this.element.ondblclick = () => this.input.doubleclick.invoke()
-  }
 }

@@ -3,9 +3,9 @@ import "../styles/popup.css"
 import { DOMObject } from "./DOMObject";
 
 export class WPopup extends WContainer{
-    private $content:DOMObject;
+    private $content:DOMObject<any>;
     private $background:WContainer;
-    constructor(trigger:WButton, content:DOMObject){
+    constructor(trigger:WButton, content:DOMObject<any>){
         super()
         this.family.adoptAll([
             this.$background = new WContainer()
