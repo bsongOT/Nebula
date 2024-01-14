@@ -4,10 +4,10 @@ import { Family } from "@/factors/Family";
 
 export class WOption<T> extends DOMObject<"option">{
   public readonly family!: Family<never, WSelectMenu<T>, this>;
-  public get value(): string {
+  public get text(): string {
     return this.element.innerText;
   }
-  public set value(v: string) {
+  public set text(v: string) {
     this.element.innerText = v;
   }
   public get disabled():boolean{
@@ -16,7 +16,7 @@ export class WOption<T> extends DOMObject<"option">{
   public set disabled(v:boolean){
     this.element.disabled = v;
   }
-  public data:T|string;
+  public data:T|undefined;
 
   get selected(){
     return this.element.selected
@@ -24,9 +24,9 @@ export class WOption<T> extends DOMObject<"option">{
   set selected(v){
     this.element.selected = v;
   }
-  constructor(name:string, data?:T){
+  constructor(text:string, data?:T){
     super("option");
-    this.value = name;
-    this.data = data ?? name;
+    this.text = text;
+    this.data = data;
   }
 }

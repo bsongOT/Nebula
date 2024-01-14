@@ -1,7 +1,8 @@
 import {WButton} from "@/objects/"
-import {data} from "../../data/Data"
+import {Data} from "../../data/Data"
+import { btn } from "@/funcObject"
 
-export const addContentButton = ()=>{
+export const addContentButton = (data:Data)=>{
   const addContent = () => {
     const title = prompt("컨텐츠 제목을 입력하세요", "content")
     if (title === null || title === "") return;
@@ -9,5 +10,5 @@ export const addContentButton = ()=>{
     data.addContent(title, "Story")
   }
   
-  return new WButton("+").event.onclick(addContent)
+  return btn("+").input.onclick(addContent)
 }

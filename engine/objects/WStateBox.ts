@@ -37,4 +37,8 @@ export class WStateBox extends DOMObject<"span"> {
       this.index++;
     })
   }
+  public onchange(onchange:()=>void){
+    this.change.setListener(onchange)
+    return this;
+  }
 }

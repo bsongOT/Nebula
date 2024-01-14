@@ -1,16 +1,17 @@
-import { WText, WContainer, WButton } from "@/objects"
+import { span, div, btn } from "@/funcObject";
 import { Content } from "../../../data/Content"
-import { SelectableItem } from "@/objects/list";
 
-export class ContentItem extends SelectableItem<Content> {
-  constructor(content:Content) {
-    super([
-      new WText(content.title),
-      new WContainer([
-        new WButton(content.parents.length.toString()),
-        new WButton(content.nebulas.length.toString())
-      ]).class.add("list-item-backlink")
-    ]);
-    this.value = content;
-  }
+function contentItem(content:Content){
+  const parentsCount = content.parents.length.toString();
+  const nebulasCount = content.nebulas.length.toString()
+
+  return (
+    sul(
+      span(content.title),
+      div(
+        btn(parentsCount),
+        btn(nebulasCount)
+      ).class.add("list-item-backlink")
+    )
+  )
 }

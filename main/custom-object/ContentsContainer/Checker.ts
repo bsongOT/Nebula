@@ -1,17 +1,14 @@
-import { WButton, WContainer, WDetail, SelectMenu} from "@/objects/"
+import { div, btn, select } from "@/funcObject";
 import { WCheckbox } from "@/objects/input/";
 
-export class Checker extends WDetail{
-  constructor(){
-    super([
-      new WButton("Checker"),
-      new WContainer([
-        new WCheckbox().label("Nebula"),
-        new SelectMenu([]),
-        new WCheckbox().label("Parent"),
-        new SelectMenu([]), // nebula
-        new SelectMenu([]) //stars
-      ])
-    ]);
-  }
-}
+const checker = () =>
+  div(
+    btn("Checker"),
+    div(
+      new WCheckbox().label("Nebula"),
+      select(),
+      new WCheckbox().label("Parent"),
+      select(), // nebula
+      select() //stars
+    )
+  );

@@ -1,52 +1,32 @@
-import {SelectableList} from "@/objects/list/"
-import {ContentItem, Filter, Search} from "../"
+import {WSelectableList} from "@/objects/list/"
+import {ContentItem } from "../"
 import {Content} from "../../../data/Data"
 import { DataCollection } from "../../../data/DataCollection";
 
-export class ContentsList extends SelectableList<Content>{
-  private contents:DataCollection<Content>
-  private search:Search|undefined;
-  private filter:Filter|undefined;
-  public constructor(contents:DataCollection<Content>){
-    super([])
-    this.class.add("contents-list")
-    this.contents = contents;
-  }
-  public setSearch(search:Search){
-    this.search = search;
-    return this;
-  }
-  public setFilter(filter:Filter){
-    this.filter = filter;
-    return this;
-  }
-  public update(){
-    this.family.empty();
+const contentsList = 
+  new WSelectableList<Content>()
+    .class.add("contents-list");
 
-    for (let c of this.contents.all()){
+function update(contents:DataCollection<Content>){
+    contentsList.family.empty();
+
+    for (let c of contents.all()){
       let spoiled = false;
-      
-      if (this.search){
-        const sm = this.search.mode;
+      const sm = search.mode;
 
-        if (!this.search.test(c)){
+        if (!testBySearch(c)){
           if (sm === "omit") continue;
           if (sm === "spoil") spoiled = true;
         }
-      }
       
-      if (this.filter){
-        const fr = this.filter.test(c)
+        const fr = testByFilter(c)
 
         if (fr !== true){
           if (fr === "omit") continue;
           if (fr === "spoil") spoiled = true;
         }
-      }
       
-      const item = this.adopt(new ContentItem(c))
+      const item = contentsList.family.adopt(contentItem(c))
       if (spoiled) item.class.add("filtered")
     }
-    return this;
-  }
 }

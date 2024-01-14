@@ -11,4 +11,8 @@ export abstract class WInput extends DOMObject<"input">{
     this.change = new EventQueue()
     this.element.onchange = () => this.change.invoke();
   }
+  public onchange(onchange:()=>void){
+    this.change.setListener(onchange)
+    return this;
+  }
 }

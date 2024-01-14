@@ -2,6 +2,7 @@ import {WContainer, WButton} from "@/objects"
 import {StarList} from "./StarListContainer/StarList"
 import {Nebula} from "../data/Data"
 import "../styles/StarList.css"
+import { btn, div } from "@/funcObject"
 
 export const StarListContainer = (nebula:Nebula) => {
   let starList:StarList;
@@ -12,21 +13,21 @@ export const StarListContainer = (nebula:Nebula) => {
   const indent = ()=>starList.selection.indent()
 
   return (
-  new WContainer([
+  div(
     starList = new StarList(nebula),
-    new WContainer([
-      new WButton("↑")
+    div(
+      btn("↑")
         .class.add("up-arrow")
         .event.onclick(updent),
-      new WButton("←")
+      btn("←")
         .class.add("left-arrow")
         .event.onclick(outdent),
-      new WButton("↓")
+      btn("↓")
         .class.add("down-arrow")
         .event.onclick(downdent),
-      new WButton("→")
+      btn("→")
         .class.add("right-arrow")
         .event.onclick(indent)
-    ]).class.add("arrow-button-container")
-  ]))
+    ).class.add("arrow-button-container")
+  ))
 }

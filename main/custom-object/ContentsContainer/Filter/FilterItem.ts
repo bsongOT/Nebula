@@ -1,97 +1,94 @@
-import {
-  WContainer, SelectMenu, Option,
-  MultiSelectMenu, StateBox, WButton
-} 
+import {WContainer, WOption, WSelectMenu, WStateBox}
 from "@/objects"
-import {Filter} from "../"
-import {FilterMode} from "./FilterMode"
 import {data, Content} from "../../../data/Data"
 import { WInputText } from "@/objects/input/";
+import { btn, div, multiselect, select, statebox } from "@/funcObject";
+import { DOMObject } from "@/objects/DOMObject";
 
-export class FilterItem extends WContainer {
-  private modeObject:FilterMode;
-  private typeObject:SelectMenu<string>;
-  private condBox:WContainer;
-  public get mode(){
-    return this.modeObject.value;
-  }
-  public constructor(filter:Filter){
-    super()
-    this.class.add("filter-item")
-    
-    const condUI = {
-      "nebula": [
-        new MultiSelectMenu(
-          data.nebulas.map(n => new Option(n.name, n))
-        ).event.onchange(()=>filter.event.change.invoke())
-      ],
-      "parent": [
-        new MultiSelectMenu(
-          data.contents.filter(c => c.children.length >= 1).map(c => new Option(c.title, c))
-        ).event.onchange(()=>filter.event.change.invoke())
-      ],
-      "nebula count": [
-        new WInputText("number").event.onchange(()=>filter.event.change.invoke()),
-        new StateBox(["↑", "↓"]).event.onchange(()=>filter.update())
-      ],
-      "parent count": [
-        new WInputText("number").event.onchange(()=>filter.update()),
-        new StateBox(["↑", "↓"]).onchange(()=>filter.update())
-      ]
-    };
-    
-    this.family.adoptAll([
-      this.modeObject = new FilterMode(filter),
-      this.typeObject = new SelectMenu<string>([
-        new Option("nebula"),
-        new Option("parent"),
-        new Option("nebula count"),
-        new Option("parent count")
-      ]).event.onchange(() => {
-        this.condBox.family.empty()
-        condUI[this.typeObject.value].forEach(c => this.condBox.adopt(c))
+let s:WSelectMenu<DOMObject<any>>;
+let cb:WContainer;
+let ncuStruct:{
+  counter:WInputText,
+  compare:WStateBox
+}
+
+export const filterItem = (listUpdate:()=>void) => {
+  const nebulaOptions = data.nebulas.map(n => new WOption(n.name, n))
+  const nebulaUI = multiselect(...nebulaOptions).onchange(listUpdate)
+
+  const parentUI = multiselect(
+    ...data.contents
+      .filter(c => c.children.length >= 3)
+      .map(c => new WOption(c.title, c))
+  ).onchange(listUpdate)
+
+  const nebulaCountUI = div(...Object.values(
+  ncuStruct = {
+    counter: new WInputText("number").onchange(listUpdate),
+    compare: statebox("↑", "↓").onchange(listUpdate)
+  }))
+
+  const parentsCountUI = div(
+    new WInputText("number").onchange(listUpdate),
+    statebox("↑", "↓").onchange(listUpdate)
+  )
+
+  const item = 
+  div(
+    statebox("omit", "spoil")
+      .class.add("filter-mode")
+      .onchange(listUpdate),
+s=  select<DOMObject<any>>(
+      new WOption("nebula", nebulaUI),
+      new WOption("parent", parentUI),
+      new WOption("nebula count", nebulaCountUI),
+      new WOption("parent count", parentsCountUI)
+    )
+      .onchange(()=> {
+        cb.family.empty()
+        cb.family.adopt(s.value)
         filter.update()
       }),
-      this.condBox = new WContainer(condUI["nebula"]).addClass("condition-box"),
-      new WButton("X")
-        .class.add("close-button")
-        .event.onclick(()=>{
-          this.remove()
-          filter.update()
-        })
-    ])
-  }
-  public test(content:Content){
-    switch(this.typeObject.value){
-      case "nebula": { 
-        const menu = this.condBox.family.children[0];
-        const targets = menu.value
-        return targets.some(n => n.contentIds.includes(content.id))
-      }
-      case "parent":{
-        const menu = this.condBox.family.children[0];
-        const targets = menu.value
-        return targets.some(c => c.children.includes(content.id))
-      }
-      case "nebula count":{
-        const ref = Number(this.condBox.family.children[0].value);
-        const compare = this.condBox.family.children[1].value
-        const count = content.nebulas.length
-        
-        if (compare === "↑") return count>=ref;
-        if (compare === "↓") return count<=ref;
-      }
-      case "parent count":{
-        const ref = Number(this.condBox.family.children[0].value);
-        const compare = this.condBox.family.children[1].value
-        const count = content.parents.length;
-        
-        if (compare === "↑") return count >= ref
-        if (compare === "↓") return count <= ref
-      }
+cb= div(s.selectedData!).class.add("condition-box"),
+    btn("X")
+      .class.add("close-button")
+      .input.onclick(()=>{
+        item.family.remove();
+        listUpdate()
+      })
+  ).class.add("filter-item");
+
+  const test = (content:Content) => {
+    switch(s.selectedData){
+      case nebulaUI: 
+        return nebulaUI.selectedDatas.some(n => n.contentIds.includes(content.id))
+      case parentUI: 
+        return parentUI.selectedDatas.some(c => c.children.includes(content.id))
+      case nebulaCountUI:
+        return ncuStruct.counter.value >= content.parents.length
+      case parentsCountUI:
+        return parentsCountUI.inputText.value
     }
   }
-  private testNebula(content:Content){
-    
+
+  return item;
+}
+
+function test(content:Content){
+  switch(){
+    case "nebula count":{
+      const compare = condBox.family.children[1].value
+      const count = content.nebulas.length
+        
+      if (compare === "↑") return count>=ref;
+      if (compare === "↓") return count<=ref;
+    }
+    case "parent count":{
+      const compare = condBox.family.children[1].value
+      const count = content.parents.length;
+        
+      if (compare === "↑") return count >= ref
+      if (compare === "↓") return count <= ref
+    }
   }
 }

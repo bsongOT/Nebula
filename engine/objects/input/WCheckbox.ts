@@ -20,7 +20,7 @@ export class WCheckbox extends DOMObject<"div">{
   private $label:WText|undefined;
   constructor(){
     super("div")
-    this.$checkbox = new WSimpleCheckbox();
+    this.$checkbox = this.family.adopt(new WSimpleCheckbox());
     this.class.add("checkbox")
   }
   public label(text:string){

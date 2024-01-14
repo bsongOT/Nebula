@@ -1,11 +1,11 @@
-import {ListView} from "@/objects/list/"
+import {WListView} from "@/objects/list/"
 import { Tree, TreeNode } from "@/data-structure/tree";
 import { ISelectable } from "@/interfaces/ISelectable";
 import { SelectableSpace } from "@/virtual spaces/SelectableSpace";
 import {Content, Nebula} from "../../data/Data"
 import { StarLeafItem } from "./StarLeafItem";
 
-export class StarList extends ListView<Content>{
+export class StarList extends WListView<Content>{
   private space:SelectableSpace<ISelectable>;
   private $tree:Tree<StarLeafItem>;
   public get tree(){
@@ -33,7 +33,7 @@ export class StarList extends ListView<Content>{
       }
       n.data!.family.parent!.family.children[1].family.adopt(n.data!)
       if (n.children.length > 0){
-        n.data!.family.adopt(new ListView<Content>())
+        n.data!.family.adopt(new WListView<Content>())
       }
     })
   }
