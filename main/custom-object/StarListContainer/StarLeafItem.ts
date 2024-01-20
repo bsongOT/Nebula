@@ -3,99 +3,72 @@ import { TreeNode } from "@/data-structure/tree";
 import { ISelectable } from "../../../engine/interfaces/ISelectable";
 import { Content } from "../../data/Data";
 import { StarList } from "./StarList";
-import { ListItem, ListView } from "@/objects/list";
+import { WListItem, WListView } from "@/objects/list";
 
-export class StarLeafItem extends ListItem<Content> implements ISelectable {
-  private $list:StarList;
-  public get list(){ return this.$list; }
-  private set list(v:StarList){ this.$list = v; }
-  private $isOrient:boolean;
-  public get isOrient(){ return this.$isOrient }
-  private set isOrient(v:boolean){ this.$isOrient = v; }
-  private text:WText;
-  private $matchedTreeNode:TreeNode<StarLeafItem>;
-  public get matchedTreeNode(){
-    return this.$matchedTreeNode;
+export class StarLeafItem extends WListItem<Content> implements ISelectable {
+  public readonly list:StarList;
+
+  private readonly text:WText;
+  public localList:WListView<Content> | undefined
+
+  public readonly isOrient:boolean;
+
+  public put(item:StarLeafItem){
+    this.localList?.family.adopt(item)
+    return this
   }
-  private set matchedTreeNode(v:TreeNode<StarLeafItem>){
-    this.$matchedTreeNode = v;
-  }
-  public indent():StarLeafItem{
-    if (!this.family.leftFriend) return this;
 
-    const l = this.family.leftFriend;
+  public indent(){
+    const l = this.family.leftFriend as StarLeafItem;
 
-    if (l.family.children.length < 2) 
-      l.family.adopt(new ListView<Content>())
+    if (!l) return this;
+    if (!l.localList) 
+      l.localList = l.family.adopt(new WListView<Content>())
     
-    l.family.children[1].family.adopt(this)
-    this.matchedTreeNode.tree.insert(
-      this.matchedTreeNode.leftFriend,
-      this.matchedTreeNode
-    )
+    l.localList.family.adopt(this)
 
-    return this;
+    this.list.updateData()
   }
 
-  public outdent():StarLeafItem{
-    if (this.family.parent === this.list) return this;
+  public outdent(){
+    if (this.family.parent === this.list) return;
     const prevList = this.family.parent!;
 
     this.family.parent!.family.parent!.family.bringDown(this)
-    this.matchedTreeNode.tree.insertAsRightFriend(
-      this.matchedTreeNode.parent, 
-      this.matchedTreeNode)
+    this.list.updateData()
 
     if (prevList.family.children.length <= 0)
       prevList.family.remove()
-
-    return this;
   }
 
   public updent(){
-    if (!this.family.leftFriend) return this;
+    if (!this.family.leftFriend) return;
 
     this.family.promote()
-    this.matchedTreeNode.tree.insertAsLeftFriend(
-      this.matchedTreeNode.leftFriend,
-      this.matchedTreeNode
-    )
-
-    return this;
+    this.list.updateData()
   }
 
   public downdent(){
-    if (!this.family.rightFriend) return this;
+    if (!this.family.rightFriend) return;
 
     this.family.demote()
-    this.matchedTreeNode.tree.insertAsRightFriend(
-      this.matchedTreeNode.rightFriend,
-      this.matchedTreeNode
-    )
-
-    return this;
+    this.list.updateData()
   }
 
-  public constructor(content:Content, list:StarList, treeNode:TreeNode<StarLeafItem>, isOrient:boolean) {
-    super();
-    this.$list = list;
-    this.value = content;
+  public constructor(content:Content, list:StarList, isOrient:boolean) {
+    super(content);
+    this.list = list;
     this.text = this.family.adopt(new WText(content.title));
-    this.$matchedTreeNode = treeNode;
     this.isOrient = isOrient;
-    this.$selected = false;
-    this.text.event.click.register(()=>{
+    this.text.input.onclick(()=>{
       this.list.selection = this;
     })
-    this.text.event.click.register(()=>{})
   }
-  private $selected:boolean;
   public get selected():boolean {
-    return this.$selected;
+    return this.text.class.contains("selected");
   }
   public set selected(v:boolean) {
     if (v) this.text.class.add("selected")
     else this.text.class.remove("selected")
-    this.$selected = v;
   }
 }

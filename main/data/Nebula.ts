@@ -17,18 +17,18 @@ export class Nebula implements DataComponent{
     this.id = id;
     this.kind = kind;
     this.tree = tree
-    this.orient = this.tree.at(orientIndex)
+    this.orient = this.tree.at(orientIndex)!
     this.position = position;
   }
   public pack(){
-    let treeOrder = [];
-    this.tree.map<{id,index}>((c, _, i) => ({
-      id: c.id,
-      index: i
+    let treeOrder = [] as {id: number, parent: number}[];
+    this.tree.map<{id:number,index:number}>((c, _, __, i) => ({
+      id: c!.id,
+      index: i!
     })).tourNode(n => {
       treeOrder.push({
-        id: n.data.id,
-        parent: (n.parent.data ? n.parent.data.index : -1)
+        id: n!.data!.id,
+        parent: (n.parent!.data ? n.parent!.data.index : -1)
       })
     })
     return {
@@ -46,7 +46,7 @@ export class Nebula implements DataComponent{
   public static load(obj:any, contents:DataCollection<Content>):Nebula{
     let tree = new Tree<Content>();
     
-    obj.tree.forEach((cinfo, i) => {
+    obj.tree.forEach((cinfo:{id:number, parent:number}, i:number) => {
       obj.tree[i] = new TreeNode<Content>(tree, contents.get(cinfo.id));
       tree.insert(obj.tree[cinfo.parent] ?? tree.root, obj.tree[i])
     })

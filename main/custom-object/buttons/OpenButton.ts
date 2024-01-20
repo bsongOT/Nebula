@@ -1,6 +1,6 @@
-import {WButton} from "@/objects"
 import {data, Content, Nebula} from "../../data/Data"
 import { no_open_target } from "../../messages";
+import { btn } from "@/funcObject";
 
 const openButton = 
   btn("Open")

@@ -1,10 +1,10 @@
-import {Hexagon} from "@/objects/CanvasObject"
+import {WHexagon} from "@/objects/CanvasObject"
 import {r3} from "@/utils/mathconsts";
 import { PolygonForm } from "@/factors/forms/PolygonForm";
 import { StarLeafItem } from "../StarListContainer/StarLeafItem";
 import p5 from "p5";
 
-export class StarTile extends Hexagon{
+export class StarTile extends WHexagon{
   public listItem:StarLeafItem;
   public get isSelected():boolean{
     return this.listItem?.selected;
@@ -22,8 +22,8 @@ export class StarTile extends Hexagon{
     if (this.isValid) return "#a2a9ca";
     return "#ffffff"
   }
-  public constructor(listItem:StarLeafItem, form:PolygonForm){
-    super(form)
+  public constructor(listItem:StarLeafItem){
+    super()
     this.listItem = listItem;
   }
   public render(p:p5){
@@ -33,7 +33,7 @@ export class StarTile extends Hexagon{
     const s = this.form.side;
     const [x, y] = [this.form.position.x, this.form.position.y]
     
-    const content = this.listItem?.value
+    const content = this.listItem?.data
     if (!content) return this;
     
     p.textAlign(p.CENTER, p.CENTER)

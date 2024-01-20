@@ -1,8 +1,8 @@
-import { DOMObject } from "@/objects";
+import { DOMObject } from "@/objects/DOMObject";
 import { emptyArr } from "@/utils/utils";
 
 
-export class Calender extends DOMObject{
+export class Calender extends DOMObject<"table">{
   constructor(){
     super("table")
     let today = new Date();

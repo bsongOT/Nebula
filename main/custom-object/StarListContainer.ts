@@ -13,21 +13,21 @@ export const StarListContainer = (nebula:Nebula) => {
   const indent = ()=>starList.selection.indent()
 
   return (
-  div(
+  div({})(
     starList = new StarList(nebula),
-    div(
+    div({class: "arrow-button-container"})(
       btn("↑")
         .class.add("up-arrow")
-        .event.onclick(updent),
+        .input.onclick(updent),
       btn("←")
         .class.add("left-arrow")
-        .event.onclick(outdent),
+        .input.onclick(outdent),
       btn("↓")
         .class.add("down-arrow")
-        .event.onclick(downdent),
+        .input.onclick(downdent),
       btn("→")
         .class.add("right-arrow")
-        .event.onclick(indent)
-    ).class.add("arrow-button-container")
+        .input.onclick(indent)
+    )
   ))
 }

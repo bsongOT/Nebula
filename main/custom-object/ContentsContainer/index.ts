@@ -1,7 +1,6 @@
 export * from "./Checker"
 export * from "./List/ContentItem"
 export * from "./List/ContentsList"
-export * from "./Filter/Filter"
 export * from "./Search"
 export * from "./SortTool"
 export * from "./ContentsContainer"

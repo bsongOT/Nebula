@@ -1,50 +1,78 @@
-import {ContentsList, Search, SortTool, Checker, ContentItem}
-from "."
+
 import { WContainer, WDetail } from "@/objects/"
-import { Content } from "../../data/Data";
+import { Content, data } from "../../data/Data";
 import { DataCollection } from "../../data/DataCollection";
 import "../../styles/ContentsContainer.css"
 import "../../styles/Tool-box.css"
-import { btn, div } from "@/funcObject";
+import { btn, div, sul } from "@/funcObject";
+import { FilterItem } from "./FilterItem";
+import { contentItem } from "./List/ContentItem";
 
-function filter(){
+export function contentsList(){
+  const list = sul().class.add("contrnts-list");
+
+
+  function listUpdate(){
+    list.family.empty();
+    for (let c of data.contents.all()){
+      const result = test(c);
+
+      if (result === "omit") continue;
+      if (result === "spoil"){
+        list.family.adopt(contentItem(c))
+        list.class.add("filtered")
+      }
+      if (result === "pass"){
+        list.family.adopt(contentItem(c))
+      }
+    }
+  }
+
+  return (
+    div({class: "contents-list-view"})(
+      search(),
+      div({class: "tool-box"})(
+        filter(listUpdate),
+        sortTool(),
+        checker()
+      ),
+      sul().class.add("contents-list")
+    )
+  )
+}
+
+function filter(listUpdate:()=>void){
+  const filterBox = div({class: "filter-box"})()
+  const addFilter = ()=>{
+    filterBox.family.adopt(new FilterItem(listUpdate, data))
+    listUpdate()
+  }
   return (
     new WDetail(
       btn("Filter"),
-      div(
+      div({class: "filter"})(
         btn("add filter")
           .class.add("add-filter-button")
-          .input.onclick(listUpdate),
-        div().class.add("filter-box")
+          .input.onclick(addFilter),
+        filterBox
       )
-    ).class.add("filter")
+    )
   )
 }
-function test(content:Content):boolean|string{
-  const filters = this.box.family.children as FilterItem[];
-  let spoiled = false;
-  
-  for (let f of filters){
-    const m = f.mode;
-
-    if (f.test(content)) continue;
-    if (m === "omit") return "omit"
-    if (m === "spoil") spoiled = true;
+class Search extends WContainer {
+  constructor(){
+    super();
+    this.family.adoptAll(
+      
+    )
   }
-  
-  return spoiled ? "spoil" : true;
 }
+function test(content:Content):"pass"|"omit"|"spoil"{
+  const filters = filterBox.family.children as FilterItem[];
+  const tests = filters.map(f => f.test(content))
   
-  div(
-    new Search().onchange(listUpdate),
-    div(
-      filter().event.onchange(listUpdate),
-      new SortTool(),
-      new Checker(),
-    ).class.add("contents-container-tool-box"),
-    new ContentsList(contents).setSearch(s).setFilter(f)
-  ).class.add("contents-container")
-
-function listUpdate(){
-
+  if (tests.includes("omit")) return "omit"
+  if (tests.includes("spoil")) return "spoil"
+  
+  return "pass";
 }

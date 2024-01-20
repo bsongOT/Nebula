@@ -1,17 +1,17 @@
-import { span, div, btn } from "@/funcObject";
+import { span, div, btn, sul, sli } from "@/funcObject";
 import { Content } from "../../../data/Content"
 
-function contentItem(content:Content){
+export function contentItem(content:Content){
   const parentsCount = content.parents.length.toString();
   const nebulasCount = content.nebulas.length.toString()
 
   return (
-    sul(
+    sli({data: content})(
       span(content.title),
-      div(
+      div({class: "list-item-backlink"})(
         btn(parentsCount),
         btn(nebulasCount)
-      ).class.add("list-item-backlink")
+      )
     )
   )
 }

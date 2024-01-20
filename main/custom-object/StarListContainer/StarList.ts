@@ -7,43 +7,42 @@ import { StarLeafItem } from "./StarLeafItem";
 
 export class StarList extends WListView<Content>{
   private space:SelectableSpace<ISelectable>;
-  private $tree:Tree<StarLeafItem>;
-  public get tree(){
-    return this.$tree;
-  }
-  private set tree(v:Tree<StarLeafItem>){
-    this.$tree = v;
-  }
+  public readonly tree:Tree<Content>;
   public get selection(){
     return this.space.selection as StarLeafItem;
   }
   public set selection(v:StarLeafItem){
     this.space.selection = v;
   }
-  public constructor(nebula:Nebula){
+  constructor(nebula:Nebula){
     super();
     this.class.add("star-list")
     this.space = new SelectableSpace();
-    this.$tree = nebula.tree.map((c, bn, an) => new StarLeafItem(c!, this, an!, nebula.orient === bn));
-    this.tree.tourNode(n => {
-      this.space.regist(n.data!)
-      if (n.parent === this.tree.root){
-        this.family.adopt(n.data!)
-        return;
+    this.tree = nebula.tree;
+    this.tree
+      .map((c, bn) => new StarLeafItem(c!, this, bn === nebula.orient))
+      .tourNode(n => {
+        if (n.parent === n.tree.root){
+          return this.family.adopt(n.data!)
+        }
+        n.parent!.data!.put(n.data!)
+      })
+  }
+  public updateData(){
+    this.tree.nodes.forEach(n => this.tree.remove(n))
+    const makeTree = (item:StarLeafItem, node:TreeNode<Content>) => {
+      if (!item.localList) return;
+      for (let c of item.localList.family.children as StarLeafItem[]){
+        const childNode = new TreeNode(this.tree, c.data!)
+        this.tree.insert(node, childNode)
+        makeTree(c, childNode)
       }
-      n.data!.family.parent!.family.children[1].family.adopt(n.data!)
-      if (n.children.length > 0){
-        n.data!.family.adopt(new WListView<Content>())
-      }
-    })
+    }
   }
   public add(content:Content){
-    const node = new TreeNode<StarLeafItem>(this.tree)
-    const item = new StarLeafItem(content, this, node, false)
-    node.data = item;
-
+    const item = new StarLeafItem(content, this, false)
     this.family.adopt(item);
     this.space.regist(item);
-    this.tree.insert(this.tree.root, node)
+    this.updateData()
   }
 }

@@ -6,6 +6,9 @@ import { HTMLObject } from "../WebObject";
 export abstract class WInput extends DOMObject<"input">{
   public readonly family!:Family<never, HTMLObject, this>
   public readonly change:EventQueue<()=>void>
+  public get value(){
+    return this.element.value
+  }
   constructor(){
     super("input");
     this.change = new EventQueue()

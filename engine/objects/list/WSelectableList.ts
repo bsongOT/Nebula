@@ -21,5 +21,6 @@ export class WSelectableList<T> extends WListView<T>{
     super();
     this.space = new SelectableSpace<WSelectableItem<T>>();
     this.select = new EventQueue();
+    this.family.event.adopt.register((obj)=>this.space.regist(obj))
   }
 }
