@@ -22,10 +22,11 @@ export class Nebula implements DataComponent{
   }
   public pack(){
     let treeOrder = [] as {id: number, parent: number}[];
-    this.tree.map<{id:number,index:number}>((c, _, __, i) => ({
+    const orderTree = this.tree.map<{id:number,index:number}>((c, _, __, i) => ({
       id: c!.id,
       index: i!
-    })).tourNode(n => {
+    }))
+    orderTree.tourNode(orderTree.root, n => {
       treeOrder.push({
         id: n!.data!.id,
         parent: (n.parent!.data ? n.parent!.data.index : -1)

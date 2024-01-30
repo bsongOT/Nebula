@@ -6,7 +6,6 @@ export class Calender extends DOMObject<"table">{
   constructor(){
     super("table")
     let today = new Date();
-    (today.getMonth()+1)+"월";
 
     let blank = (36+today.getDay() - today.getDate())%7;
     let days = [

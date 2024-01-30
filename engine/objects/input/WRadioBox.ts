@@ -2,7 +2,7 @@ import { DOMObject } from "../DOMObject";
 import { WRadio } from "./WRadio";
 import "../../styles/RadioBox.css"
 import { Family } from "@/factors/Family";
-import { HTMLObject } from "../WebObject";
+import { HTMLObject } from "../HTMLObject";
 
 export class WRadioBox extends DOMObject<"div">{
   public readonly family!:Family<WRadio, HTMLObject, this>

@@ -1,4 +1,5 @@
 export * from "./WebObject"
+export * from "./HTMLObject"
 export * from "./WBody"
 export * from "./WContainer"
 export * from "./WButton"

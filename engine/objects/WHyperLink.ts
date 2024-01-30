@@ -1,7 +1,7 @@
 import { DOMObject } from "./DOMObject";
 import "../styles/HyperLink.css"
 import { Family } from "@/factors/Family";
-import { HTMLObject } from "./WebObject";
+import { HTMLObject } from "./HTMLObject";
 
 export class WHyperLink extends DOMObject<"a">{
   public readonly family!: Family<never, HTMLObject, this>;

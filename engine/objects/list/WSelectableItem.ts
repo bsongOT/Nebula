@@ -12,4 +12,10 @@ export class WSelectableItem<T> extends WListItem<T> implements ISelectable{
     if (v) this.class.add("selected");
     else this.class.remove("selected");
   }
+  constructor(data?:T){
+    super(data)
+    this.input.click.register(()=>{
+      this.family.parent!.selection = this;
+    })
+  }
 }

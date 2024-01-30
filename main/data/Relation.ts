@@ -4,9 +4,14 @@ import { data } from "./Data";
 import { DataComponent } from "./DataComponent";
 
 export class RelationTable {
-    firstTree:Tree<Content>;
+    mainTree:Tree<Content>;
     secondTree:Tree<Content>;
     id:number;
+    constructor(mainTree:Tree<Content>, secondTree:Tree<Content>, id:number){
+        this.mainTree = mainTree;
+        this.secondTree = secondTree;
+        this.id = id;
+    }
 }
 export class Relation implements DataComponent {
     first:Content;
@@ -19,8 +24,8 @@ export class Relation implements DataComponent {
     }
     public static load(obj:any){
         let r = new Relation(
-            data.contents.get(obj.first),
-            data.contents.get(obj.second),
+            data.contents.get(obj.first)!,
+            data.contents.get(obj.second)!,
             obj.id
         )
         return r;

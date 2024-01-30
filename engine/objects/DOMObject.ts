@@ -1,5 +1,5 @@
 import { Class } from "@/factors/Class";
-import { HTMLObject } from "./WebObject";
+import { HTMLObject } from "./HTMLObject";
 import { Style } from "@/factors/Style";
 
 export abstract class DOMObject<T extends keyof HTMLElementTagNameMap> extends HTMLObject {

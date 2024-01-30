@@ -1,6 +1,6 @@
 import { TreeNode } from "@/data-structure/tree";
 import { engine } from "@/engine";
-import { WebObject } from "@/objects";
+import { WebObject } from "@/objects/WebObject";
 import { EventQueue } from "./Event";
 
 export type Event<T> = {
@@ -90,5 +90,10 @@ export class Family<C extends WebObject, P extends WebObject, T extends WebObjec
     public onbringUp(onbringUp:(obj:WebObject)=>void){
         this.event.bringUp.setListener(onbringUp)
         return this.me
+    }
+
+    //etc
+    public tour(func:(n:WebObject)=>void){
+        engine.hierarchy.tourNode(this.node, (n) => func(n.data!))
     }
 }

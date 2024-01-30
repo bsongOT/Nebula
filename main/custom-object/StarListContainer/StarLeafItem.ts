@@ -21,7 +21,7 @@ export class StarLeafItem extends WListItem<Content> implements ISelectable {
   public indent(){
     const l = this.family.leftFriend as StarLeafItem;
 
-    if (!l) return this;
+    if (!l) return;
     if (!l.localList) 
       l.localList = l.family.adopt(new WListView<Content>())
     
@@ -42,15 +42,11 @@ export class StarLeafItem extends WListItem<Content> implements ISelectable {
   }
 
   public updent(){
-    if (!this.family.leftFriend) return;
-
     this.family.promote()
     this.list.updateData()
   }
 
   public downdent(){
-    if (!this.family.rightFriend) return;
-
     this.family.demote()
     this.list.updateData()
   }

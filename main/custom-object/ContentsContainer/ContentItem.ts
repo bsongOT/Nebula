@@ -1,5 +1,5 @@
 import { span, div, btn, sul, sli } from "@/funcObject";
-import { Content } from "../../../data/Content"
+import { Content } from "../../data/Content"
 
 export function contentItem(content:Content){
   const parentsCount = content.parents.length.toString();

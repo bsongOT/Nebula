@@ -14,6 +14,9 @@ export class SimpleRadio extends WInput{
   public get checked():boolean{
     return this.element.checked;
   }
+  public set checked(v){
+    this.element.checked = v;
+  }
   constructor(name:string){
     super()
     this.element.type = "radio";
@@ -26,11 +29,14 @@ export class WRadio extends DOMObject<"div">{
   public get checked(){
     return this.$radio.checked;
   }
+  public set checked(v:boolean){
+    this.$radio.checked = v;
+  }
   constructor(name: string){
     super("div")
     this.$radio = new SimpleRadio(name);
     this.class.add("radio")
-    this.$radio.change.register(()=>{
+    this.$radio.events.change.register(()=>{
       if (this.checked) this.class.add("checked")
       else this.class.remove("checked")
     })
@@ -40,6 +46,10 @@ export class WRadio extends DOMObject<"div">{
       this.$label.value = text;
     else
       this.$label = this.family.adopt(new WText(text))
+    return this;
+  }
+  public check(){
+    this.checked = true;
     return this;
   }
 }

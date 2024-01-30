@@ -1,30 +1,45 @@
-import { WBody } from "@/objects/";
-import {UpperMenu,
-  ContentsContainer,
-  AddContentButton,
-  RemoveContentButton,
-  OpenButton,
-  StartNebulaButton,
-  ContentsList
-} from "../../custom-object"
+import { HTMLObject } from "@/objects/HTMLObject";
+import {UpperMenu, ContentsList} from "../../custom-object"
 import {data} from "../../data/Data"
 import "../style.css"
+import { body, btn } from "@/funcObject";
+import { no_open_target } from "../../messages";
+import { receiveNewContent } from "../../respond";
+import { Family } from "@/factors/Family";
+import { WTest } from "@/objects/WTest";
+import { WebObject } from "@/objects/WebObject";
 
-let cl:ContentsList;
-let obtn, snbtn, acbtn, rmcbtn;
+//const list = new ContentsList(data)
 
-new WBody([
+//alert(WTest)
+//alert(Family)
+alert(WebObject)
+/*
+body(
   new UpperMenu(),
-  new ContentsContainer(data.contents).useComponents(({list})=>{
-    cl = list!;
-    cl.onselect(() => {
-        rmcbtn.target = cl.selection?.value
-        obtn.target = cl.selection?.value
-        snbtn.target = cl.selection?.value
-    })
+  list,
+  btn("Open").input.onclick(() => {
+    if (!list.selection?.data) return alert(no_open_target)
+    data.selectedContent = list.selection.data;
+    window.open("../content-page/content-page.html")
   }),
-  obtn = new OpenButton(),
-  snbtn = new StartNebulaButton(),
-  acbtn = new AddContentButton().onclick(()=>cl.update()),
-  rmcbtn = new RemoveContentButton().event.onclick(()=>cl.update())
-])
+  btn("start nebula").input.onclick(() => {
+    if (!list.selection?.data) return alert("컨텐트를 선택해주세요.");
+    data.selectedNebula = data.addNebula(
+      list.selection.data.title,
+      "Story",
+      list.selection.data
+    )
+
+    window.open("./nebula.html", "_self")
+  }),
+  btn("+").input.onclick(() => {
+    receiveNewContent()
+    list.update()
+  }),
+  btn("🗑").input.onclick(() => {
+    if (!list.selection?.data) return alert("삭제할 컨텐트를 선택하세요")
+    data.contents.remove(list.selection.data.id)
+    list.update()
+  })
+)*/

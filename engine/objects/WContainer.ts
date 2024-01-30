@@ -1,6 +1,6 @@
 import { Family } from "@/factors/Family";
 import { DOMObject } from "./DOMObject";
-import { HTMLObject } from "./WebObject";
+import { HTMLObject } from "./HTMLObject";
 
 export abstract class AbstractContainer extends DOMObject<"div">{
   public abstract readonly components: Record<string, DOMObject<any>>;

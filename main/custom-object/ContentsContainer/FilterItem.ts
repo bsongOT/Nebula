@@ -32,7 +32,7 @@ class IfParentBlock extends WMultiSelectMenu<Content> {
         .map(c => option(c.title, c))
     )
   }
-  public readonly test =(content:Content) => {
+  public readonly test = (content:Content) => {
     return this.selectedDatas.some(
       c => c?.children.includes(content)
     )
@@ -84,7 +84,7 @@ class IfParentCountBlock extends WContainer {
 }
 
 export class FilterItem extends WSelectableItem<()=>boolean>{
-  private kindMenu:WSelectMenu<IfBlock>;
+  public readonly test:(content:Content)=>"pass"|"omit"|"spoil"
 
   constructor(listUpdate:()=>void, data:Data){
     super()
@@ -96,23 +96,22 @@ export class FilterItem extends WSelectableItem<()=>boolean>{
     const ifParentCountBlock = new IfParentCountBlock(listUpdate)
 
     const conditionBox = div({class: "condition-box"})(ifNebulaBlock)
-
-    this.family.adoptAll([
-      statebox("Omit", "Spoil")
-        .class.add("filter-mode")
-        .onchange(listUpdate),
-      this.kindMenu = 
+    const mode = statebox("Omit", "Spoil").class.add("filter-mode").onchange(listUpdate)
+    const kindMenu = 
       select<IfBlock>(
         option("nebula", ifNebulaBlock),
         option("parent", ifParentBlock),
         option("nebula count", ifNebulaCountBlock),
         option("parent count", ifParentCountBlock)
       )
-        .onchange(() => {
-          conditionBox.family.empty();
-          conditionBox.family.adopt(this.kindMenu.selectedData!)
-          listUpdate()
-        }),
+      .onchange(() => {
+        conditionBox.family.empty();
+        conditionBox.family.adopt(kindMenu.selectedData!)
+        listUpdate()
+      })
+    this.family.adoptAll([
+      mode,
+      kindMenu,
       conditionBox,
       btn("X")
         .class.add("close-button")
@@ -121,10 +120,11 @@ export class FilterItem extends WSelectableItem<()=>boolean>{
           listUpdate()
         })
     ])
-  }
-  public test(content:Content){
-    if (this.kindMenu.selectedData!.test(content)) return "pass"
-    if (this.mode.value === "Omit") return "omit"
-    return "spoil"
+  
+    this.test = (content:Content) => {
+      if (kindMenu.selectedData!.test(content)) return "pass"
+      if (mode.value === "Omit") return "omit"
+      return "spoil"
+    }
   }
 }

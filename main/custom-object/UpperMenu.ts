@@ -1,21 +1,24 @@
-import {Navigator, HyperLink} from "@/objects/"
+import {WNavigator, WHyperLink} from "@/objects/"
 
-export const paths = [
+const paths = [
   "./index.html",
   "./todo.html",
   "./nebula-menu.html",
   "./playground-menu.html",
-  "./relation.html"
+  "./relation.html",
+  "./test.html"
 ];
 
-export class UpperMenu extends Navigator{
+export class UpperMenu extends WNavigator{
   constructor(){
-    super([
-      new HyperLink("Home", paths[0]),
-      new HyperLink("Todo", paths[1]),
-      new HyperLink("Nebula", paths[2]),
-      new HyperLink("Playground", paths[3]),
-      new HyperLink("Relation", paths[4])
+    super();
+    this.family.adoptAll([/*
+      new WHyperLink("Home", paths[0]),
+      new WHyperLink("Todo", paths[1]),
+      new WHyperLink("Nebula", paths[2]),
+      new WHyperLink("Playground", paths[3]),
+      new WHyperLink("Relation", paths[4]),
+      new WHyperLink("Test", paths[5])*/
     ])
   }
 }

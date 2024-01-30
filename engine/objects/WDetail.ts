@@ -23,11 +23,11 @@ export class WDetail extends WContainer{
   constructor(toggle:WButton, content:DOMObject<any>){
     super()
     
+    toggle.class.add("detail-toggle")
+    toggle.input.click.register(()=> this.collapsed = !this.collapsed)
+    
     this.family.adoptAll([
-      toggle.class.add("detail-toggle")
-            .input.onclick(() => {
-              this.collapsed = !this.collapsed;
-            }),
+      toggle,
       content.class.add("detail-content")
     ])
     

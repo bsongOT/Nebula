@@ -6,17 +6,21 @@ import { DataComponent } from "./DataComponent";
 export class Playground implements DataComponent{
   nebulaInfos:NebulaShape[];
   id: number;
-  constructor(){
+  constructor(id:number){
     this.nebulaInfos = []
+    this.id = id;
   }
   public pack(){
 
   }
-  public static load(obj:any){
-    let p = new Playground();
+  public static load(obj:{
+    id: number,
+    nebulaInfos: {id: number, start:{x:number, y:number, z:number}}[]
+  }){
+    let p = new Playground(obj.id);
     p.nebulaInfos = obj.nebulaInfos.map(n => {
       return new NebulaShape(
-        data.nebulas.get(n.id),
+        data.nebulas.get(n.id)!,
         new HexCoord(n.start.x, n.start.y, n.start.z)
       )
     })

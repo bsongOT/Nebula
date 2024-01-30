@@ -1,6 +1,7 @@
 import { SelectableSpace } from "../../virtual spaces/SelectableSpace";
 import { WListView, WSelectableItem } from "."
-import { HTMLObject, WebObject } from "../WebObject";
+import { WebObject } from "../WebObject";
+import { HTMLObject } from "../HTMLObject";
 import { DOMObject } from "../DOMObject";
 import { Family } from "@/factors/Family";
 import { EventQueue } from "@/factors/Event";
@@ -22,5 +23,9 @@ export class WSelectableList<T> extends WListView<T>{
     this.space = new SelectableSpace<WSelectableItem<T>>();
     this.select = new EventQueue();
     this.family.event.adopt.register((obj)=>this.space.regist(obj))
+  }
+  public onselect(onselect:()=>void){
+    this.select.setListener(onselect)
+    return this;
   }
 }

@@ -1,7 +1,3 @@
 export * from "./UpperMenu"
 export * from "./ContentsContainer"
-export * from "./StarListContainer"
-export * from "./buttons"
-export * from "./AddInTreeButton"
 export * from "./Nebula/StarTile"
-export * from "./TitleInput"

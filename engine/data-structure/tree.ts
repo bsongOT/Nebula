@@ -94,17 +94,17 @@ export class Tree<T>{
     }
     return indexOf(this.root) ? i : -1
   }
-  tourNode(func:(n:TreeNode<T>, depth?:number)=>void){
+  tourNode(start:TreeNode<T>, func:(n:TreeNode<T>, depth?:number)=>void){
     const tour = (n:TreeNode<T>, depth?:number) => {
       for(let c of n.children){
         func(c, depth)
         tour(c, depth??0 + 1)
       }
     }
-    return tour(this.root, 0)
+    return tour(start, 0)
   }
   tour(func:(n:T|undefined, depth?:number)=>void){
-    return this.tourNode((node, depth)=>func(node.data, depth))
+    return this.tourNode(this.root, (node, depth)=>func(node.data, depth))
   }
   every(condition:(n:T|undefined)=>boolean){
     return this.nodes.map(n => n.data).every(condition)

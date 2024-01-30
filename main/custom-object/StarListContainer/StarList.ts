@@ -7,7 +7,7 @@ import { StarLeafItem } from "./StarLeafItem";
 
 export class StarList extends WListView<Content>{
   private space:SelectableSpace<ISelectable>;
-  public readonly tree:Tree<Content>;
+  public readonly tree:Tree<StarLeafItem>;
   public get selection(){
     return this.space.selection as StarLeafItem;
   }
@@ -18,10 +18,9 @@ export class StarList extends WListView<Content>{
     super();
     this.class.add("star-list")
     this.space = new SelectableSpace();
-    this.tree = nebula.tree;
+    this.tree = nebula.tree.map((c, bn) => new StarLeafItem(c!, this, bn === nebula.orient))
     this.tree
-      .map((c, bn) => new StarLeafItem(c!, this, bn === nebula.orient))
-      .tourNode(n => {
+      .tourNode(this.tree.root, n => {
         if (n.parent === n.tree.root){
           return this.family.adopt(n.data!)
         }
@@ -30,10 +29,10 @@ export class StarList extends WListView<Content>{
   }
   public updateData(){
     this.tree.nodes.forEach(n => this.tree.remove(n))
-    const makeTree = (item:StarLeafItem, node:TreeNode<Content>) => {
+    const makeTree = (item:StarLeafItem, node:TreeNode<StarLeafItem>) => {
       if (!item.localList) return;
       for (let c of item.localList.family.children as StarLeafItem[]){
-        const childNode = new TreeNode(this.tree, c.data!)
+        const childNode = new TreeNode(this.tree, c)
         this.tree.insert(node, childNode)
         makeTree(c, childNode)
       }

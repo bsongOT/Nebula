@@ -2,7 +2,7 @@ import { DOMObject } from "./DOMObject";
 import "../styles/StateBox.css"
 import { Family } from "@/factors/Family";
 import { EventQueue } from "@/factors/Event";
-import { HTMLObject } from "./WebObject";
+import { HTMLObject } from "./HTMLObject";
 
 export class WStateBox extends DOMObject<"span"> {
   public readonly family!: Family<never, HTMLObject, this>;

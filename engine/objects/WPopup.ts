@@ -7,13 +7,14 @@ export class WPopup extends WContainer{
     private $background:WContainer;
     constructor(trigger:WButton, content:DOMObject<any>){
         super()
+        trigger
+          .class.add("popup-trigger")
+          .input.click.register(()=>this.show())
+          
         this.family.adoptAll([
             this.$background = new WContainer()
                 .class.add("popup-background")
                 .input.onclick(()=>this.hide()),
-            trigger
-                .class.add("popup-trigger")
-                .input.onclick(()=>this.show()),
             this.$content = content.class.add("popup-content")
         ]);
         this.class.add("popup")

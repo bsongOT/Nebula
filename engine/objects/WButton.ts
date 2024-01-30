@@ -1,6 +1,6 @@
 import { Family } from "@/factors/Family";
 import { DOMObject } from "./DOMObject";
-import { HTMLObject } from "./WebObject";
+import { HTMLObject } from "./HTMLObject";
 
 export class WSimpleButton extends DOMObject<"button">{
   public readonly family!: Family<never, HTMLObject, this>

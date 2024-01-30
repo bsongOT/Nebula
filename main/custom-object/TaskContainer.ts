@@ -1,8 +1,3 @@
-import { Data } from "../data/Data"
+import { div } from "@/funcObject"
 
-
-const taskList = (data:Data)=>{
-  return ul(
-    
-  )
-}
+const taskList = div({})()
