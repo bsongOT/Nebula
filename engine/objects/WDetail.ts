@@ -24,7 +24,7 @@ export class WDetail extends WContainer{
     super()
     
     toggle.class.add("detail-toggle")
-    toggle.input.click.register(()=> this.collapsed = !this.collapsed)
+    toggle.input.click.register(() => this.collapsed = !this.collapsed)
     
     this.family.adoptAll([
       toggle,

@@ -1,8 +1,9 @@
 import { HTMLObject } from "./HTMLObject";
-import "../styles/all.css"/*
-import { Family } from "@/factors/Family";*/
+import "../styles/all.css"
+import { Family } from "@/factors/Family";
 import { Class } from "@/factors/Class";
 import { Style } from "@/factors/Style";
+import { DOMObject } from "./DOMObject";
 
 export class WBody extends HTMLObject{
   private static $instance:WBody;
@@ -15,9 +16,8 @@ export class WBody extends HTMLObject{
   public readonly class: Class<this>;
   public readonly style: Style;
   protected readonly element:HTMLElement;
-  //public readonly family!: Family<DOMObject<any>, never, this>;
+  public readonly family!: Family<DOMObject<any>, never, this>;
   private constructor(){
-    alert(456)
     super();
     this.element = document.body;
     this.class = Class.new(this, this.element);

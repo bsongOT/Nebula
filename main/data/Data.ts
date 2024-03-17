@@ -4,74 +4,84 @@ export * from "./Nebula"
 import { Tree, TreeNode } from "@/data-structure/tree"
 import { Coord } from "../../engine/coord-system"
 import { nebulaSpaceSize } from "../consts"
-import {Content, ContentKind} from "./Content"
+import {Content} from "./Content"
 import { DataCollection } from "./DataCollection"
 import { Dust } from "./Dust"
-import {Nebula, NebulaKind} from "./Nebula"
-import {Playground} from "./Playground"
+import {Nebula} from "./Nebula"
+import {Universe} from "./Universe"
 import {Relation} from "./Relation"
+import { DataComponent } from "./DataComponent"
+import { Packer, Unpacker } from "./DataParser"
+
+type DataKey = "all-dusts" | "all-contents" | "all-nebulas" | "all-universes" | "all-relations"
+type DataMap = {
+  "all-dusts": Dust,
+  "all-contents": Content,
+  "all-nebulas": Nebula,
+  "all-universes": Universe,
+  "all-relations": Relation
+}
 
 export const $ = (name:string) => localStorage.getItem(name)
 export const $$ = (name:string, value:string) => localStorage.setItem(name, value)
 export class Data {
-  private $contents:DataCollection<Content>;
-  private $nebulas:DataCollection<Nebula>;
-  private $playgrounds:DataCollection<Playground>;
-  private $relations:DataCollection<Relation>;
-  private $dusts:DataCollection<Dust>;
-  public readonly test=new DataCollection<Dust>();
-
-  public get contents(){return this.$contents}
-  public get nebulas(){return this.$nebulas}
-  public get playgrounds(){return this.$playgrounds}
-  public get relations(){return this.$relations}
-  public get dusts(){return this.$dusts}
-  
-  get selectedContent():Content|undefined{   
-    const id = Number($("selected-content"))
-    return this.contents.get(id)
-  }
-  set selectedContent(value:Content){
-    $$("selected-content", value.id.toString())
-  }
-  get selectedNebula():Nebula|undefined{
-    const id = Number($("selected-nebula"))
-    return this.nebulas.get(id)
-  }
-  set selectedNebula(value:Nebula){
-    $$("selected-nebula", value.id.toString())
-  }
+  public readonly contents:DataCollection<Content>;
+  public readonly nebulas:DataCollection<Nebula>;
+  public readonly universes:DataCollection<Universe>;
+  public readonly relations:DataCollection<Relation>;
+  public readonly dusts:DataCollection<Dust>;
   
   constructor(){
-    this.$contents = new DataCollection(
-      Array.from(
-        JSON.parse($("all-contents") ?? "[]"))
-        .map(c => Content.load(c)));
-    this.$nebulas = new DataCollection(
-      Array.from(
-        JSON.parse($("all-nebulas") ?? "[]"))
-        .map(n => Nebula.load(n, this.contents)));
-    this.$playgrounds = new DataCollection(
-      Array.from(
-        JSON.parse($("all-playgrounds") ?? "[]"))
-        /*.map(p => Playground.load(p))*/);
-    this.$relations = new DataCollection(JSON.parse($("all-relations") ?? "[]")/*.map(r => Relation.load(r))*/);
-    this.$dusts = new DataCollection(JSON.parse($("all-dusts") ?? "[]")/*.map(d => Dust.load(d))*/);
+    this.dusts = this.loadCollection("all-dusts")
+    this.contents = this.loadCollection("all-contents")
+    this.nebulas = this.loadCollection("all-nebulas")
+    this.universes = this.loadCollection("all-universes")
+    this.relations = this.loadCollection("all-relations")
   }
   
-  public addContent(title:string, kind:ContentKind):Content{
-    const content = this.contents.add(new Content(title, kind, NaN))
-    $$("all-contents", JSON.stringify(this.$contents.map(c => c.pack())))
+  public addContent(title:string){
+    const content = this.contents.add(new Content())
+
+    content.title = title;
+    $$("all-contents", JSON.stringify(this.contents.map(c => Packer.content(c))))
+    
     return content;
   }
-  public addNebula(name:string, kind:NebulaKind, first:Content){
-    const tree = new Tree<Content>();
-    tree.insert(tree.root, new TreeNode<Content>(tree, first))
-    const nebula = this.nebulas.add(
-      new Nebula(name, NaN, kind, this.findPos(), tree, 0)
+  public addNebula(name:string, first:Content){
+    //TODO: change findPos logic
+    const nebula = this.nebulas.add(new Nebula())
+
+    nebula.name = name;
+    nebula.tree = new Tree<Content>()
+    nebula.tree.insert(
+      nebula.tree.root, 
+      new TreeNode(nebula.tree, first)
     )
-    $$("all-nebulas", JSON.stringify(this.nebulas.map(n => n.pack())))
+
+    $$("all-nebulas", JSON.stringify(this.nebulas.map(n => Packer.nebula(n))))
+    
     return nebula;
+  }
+  public addUniverse(){
+    const universe = this.universes.add(new Universe());
+
+    
+
+    return universe
+  }
+
+  private loadCollection<T extends DataKey>(keyword:T):DataCollection<DataMap[T]>{
+    const json = JSON.parse($(keyword) ?? "[]");
+    const boxes = Array.from(json) as any[];
+    const loader = {
+      "all-dusts": Unpacker.dust,
+      "all-contents": Unpacker.content,
+      "all-nebulas": Unpacker.nebula,
+      "all-universes": Unpacker.universe,
+      "all-relations": Unpacker.relation
+    }[keyword] as ((box:any) => DataMap[T])
+
+    return new DataCollection(boxes.map(loader))
   }
 
   private findPos():Coord{
@@ -91,6 +101,4 @@ export class Data {
   }
 }
 
-export let data = new Data()
-export const selectedContent = data.selectedContent;
-export const selectedNebula = data.selectedNebula
+export const data = new Data()

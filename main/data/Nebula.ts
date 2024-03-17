@@ -4,58 +4,15 @@ import { Content } from "./Data";
 import { DataCollection } from "./DataCollection";
 import { DataComponent } from "./DataComponent";
 
-export type NebulaKind = "Type"|"Story"
 export class Nebula implements DataComponent{
-  name:string;
   id:number;
-  kind:NebulaKind;
-  orient:TreeNode<Content>;
+  name:string;
   tree:Tree<Content>
   position:Coord;
-  constructor(name:string, id:number, kind:NebulaKind, position:Coord, tree:Tree<Content>, orientIndex:number){
-    this.name = name;
-    this.id = id;
-    this.kind = kind;
-    this.tree = tree
-    this.orient = this.tree.at(orientIndex)!
-    this.position = position;
-  }
-  public pack(){
-    let treeOrder = [] as {id: number, parent: number}[];
-    const orderTree = this.tree.map<{id:number,index:number}>((c, _, __, i) => ({
-      id: c!.id,
-      index: i!
-    }))
-    orderTree.tourNode(orderTree.root, n => {
-      treeOrder.push({
-        id: n!.data!.id,
-        parent: (n.parent!.data ? n.parent!.data.index : -1)
-      })
-    })
-    return {
-      name: this.name,
-      id: this.id,
-      kind: this.kind,
-      tree: treeOrder,
-      orient: this.tree.indexOf(this.orient),
-      position: {
-        x: this.position.x,
-        y: this.position.y
-      }
-    }
-  }
-  public static load(obj:any, contents:DataCollection<Content>):Nebula{
-    let tree = new Tree<Content>();
-    
-    obj.tree.forEach((cinfo:{id:number, parent:number}, i:number) => {
-      obj.tree[i] = new TreeNode<Content>(tree, contents.get(cinfo.id));
-      tree.insert(obj.tree[cinfo.parent] ?? tree.root, obj.tree[i])
-    })
-
-    return new Nebula(
-      obj.name, obj.id, obj.kind,
-      new Coord(obj.position.x, obj.position.y),
-      tree, obj.orient
-    )
+  constructor(){
+    this.name = "";
+    this.id = -1;
+    this.tree = new Tree()
+    this.position = new Coord(-1, -1)
   }
 }

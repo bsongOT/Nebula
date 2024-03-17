@@ -3,18 +3,19 @@ export type TreeLike<T> = {
   root: TreeNodeLike<T>
 }
 export type TreeNodeLike<T> = {
-  data?:T,
+  data:T,
   children:TreeNodeLike<T>[]
 }
 
 export class Tree<T>{
-  nodes:TreeNode<T>[];
-  root:TreeNode<T>;
+  public nodes:TreeNode<T>[];
+  public root:TreeNode<T>;
+
   get length(){
     return this.nodes.length;
   }
   constructor(){
-    this.nodes = [this.root = new TreeNode(this)];
+    this.nodes = [this.root = new TreeNode(this, undefined as any)];
   }
   static fromNode<T>(treeNodeLike:TreeNodeLike<T>){
     let tree = new Tree<T>()
@@ -94,8 +95,8 @@ export class Tree<T>{
     }
     return indexOf(this.root) ? i : -1
   }
-  tourNode(start:TreeNode<T>, func:(n:TreeNode<T>, depth?:number)=>void){
-    const tour = (n:TreeNode<T>, depth?:number) => {
+  tourNode(start:TreeNode<T>, func:(n:TreeNode<T>, depth:number)=>void){
+    const tour = (n:TreeNode<T>, depth:number) => {
       for(let c of n.children){
         func(c, depth)
         tour(c, depth??0 + 1)
@@ -103,19 +104,18 @@ export class Tree<T>{
     }
     return tour(start, 0)
   }
-  tour(func:(n:T|undefined, depth?:number)=>void){
+  tour(func:(n:T|undefined, depth:number)=>void){
     return this.tourNode(this.root, (node, depth)=>func(node.data, depth))
   }
   every(condition:(n:T|undefined)=>boolean){
     return this.nodes.map(n => n.data).every(condition)
   }
-  map<U>(func:(data:T|undefined, beforNode?:TreeNode<T>, node?:TreeNode<U>, index?:number)=>U){
+  map<U>(func:(data:T, index:number)=>U){
     const tree = new Tree<U>()
     let index = 0;
     const mapping = (node:TreeNode<T>, target:TreeNode<U>) => {
       for (let c of node.children){
-        const n = new TreeNode<U>(tree)
-        n.data = func(c.data, c, n, index)
+        const n = new TreeNode<U>(tree, func(c.data, index))
         tree.insert(target, n)
         index++;
         mapping(c, n)
@@ -125,9 +125,32 @@ export class Tree<T>{
     mapping(this.root, tree.root);
     return tree;
   }
+  arrayize(){
+    const array = [] as {parent:number, data:T}[];
+    const orderTree = this.map((data, index) => ({index:index, data:data}))
+    
+    orderTree.tourNode(orderTree.root, node => {
+      array.push({
+        parent: node.parent?.data?.index ?? -1,
+        data: node.data.data
+      })
+    })
+
+    return array
+  }
+  static treeize<U>(array:{parent:number, data:U}[]){
+    const tree = new Tree<U>()
+    const treeOrder = array.map(v => new TreeNode(tree, v.data))
+    
+    for (let i = 0; i < array.length; i++){
+      tree.insert(treeOrder[array[i].parent] ?? tree.root, treeOrder[i])
+    }
+
+    return tree;
+  }
 }
 export class TreeNode<T>{
-  data?:T;
+  data:T;
   tree:Tree<T>;
   parent?:TreeNode<T>;
   children:TreeNode<T>[];
@@ -141,7 +164,7 @@ export class TreeNode<T>{
     const cren = this.parent.children;
     return cren[cren.indexOf(this) + 1]
   }
-  constructor(tree:Tree<T>, data?:T){
+  constructor(tree:Tree<T>, data:T){
     this.tree = tree;
     this.data = data;
     this.children = [];

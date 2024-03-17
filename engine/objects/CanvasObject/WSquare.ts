@@ -5,7 +5,11 @@ import { CanvasObject } from "./CanvasObject";
 import p5 from "p5";
 
 export class WSquare extends CanvasObject{
-  public form!: PolygonForm;
+  public readonly form: PolygonForm;
+  constructor(){
+    super()
+    this.form = new PolygonForm()
+  }
   public update() {
     return this
   }

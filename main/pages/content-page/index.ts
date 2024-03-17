@@ -6,7 +6,7 @@ import { body, div } from "@/funcObject";
 if (!data.selectedContent) throw "error"
 
 body(
-    new UpperMenu(),
+    /*new UpperMenu(),
     div({class: "figure"})(),
     new TreeList(data.selectedContent.body.claimTree).class.add("claims")
-)
+*/)

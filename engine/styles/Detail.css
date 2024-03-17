@@ -4,7 +4,7 @@
 .detail-toggle::before{
     transform: rotate(90deg);
 }
-.detail-collapsed{
+.detail-collapsed > .detail-content{
     max-height: 0;
     padding-top: 0;
     margin: 0;

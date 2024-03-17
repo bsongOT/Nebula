@@ -54,14 +54,17 @@ export class Family<C extends WebObject, P extends WebObject, T extends WebObjec
 
     // as friend
     public remove(){
+        this.event.remove.invoke()
         this.node.tree.remove(this.node)
         return this.me
     }
     public bringDown(obj:WebObject){
+        this.event.bringDown.invoke(obj)
         this.node.tree.insertAsRightFriend(this.node, obj.family.node)
         return this.me
     }
     public bringUp(obj:WebObject){
+        this.event.bringUp.invoke(obj)
         this.node.tree.insertAsLeftFriend(this.node, obj.family.node)
         return this.me
     }

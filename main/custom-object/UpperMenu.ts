@@ -1,24 +1,38 @@
+import { nav, a } from "@/funcObject";
 import {WNavigator, WHyperLink} from "@/objects/"
 
-const paths = [
-  "./index.html",
-  "./todo.html",
-  "./nebula-menu.html",
-  "./playground-menu.html",
-  "./relation.html",
-  "./test.html"
-];
+const menus = [{
+    name: "Home",
+    path: "./index.html"
+  },{
+    name: "Todo",
+    path: "./todo.html"
+  },{
+    name: "Nebula",
+    path: "./nebula-menu.html"
+  },{
+    name: "Relation",
+    path: "./relation.html"
+  },{
+    name: "Tree",
+    path: "./tree.html"
+  },{
+    name: "Data",
+    path: "./data.html"
+  },{
+    name: "Test",
+    path: "./test.html"
+  }
+]
 
 export class UpperMenu extends WNavigator{
   constructor(){
     super();
-    this.family.adoptAll([/*
-      new WHyperLink("Home", paths[0]),
-      new WHyperLink("Todo", paths[1]),
-      new WHyperLink("Nebula", paths[2]),
-      new WHyperLink("Playground", paths[3]),
-      new WHyperLink("Relation", paths[4]),
-      new WHyperLink("Test", paths[5])*/
-    ])
+    this.family.adoptAll(
+      menus.map(m => new WHyperLink(m.name, m.path))
+    )
   }
 }
+export const upperMenu = () => nav()(
+  ...menus.map(m => a({href: m.path})(m.name))
+)
