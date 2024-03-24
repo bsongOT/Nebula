@@ -1,4 +1,4 @@
-import { Tree } from "../../engine/data-structure/tree";
+import { Tree } from "../../../engine/data-structure/tree";
 import {Content} from "./Content"
 import { Dust } from "./Dust";
 import { Nebula } from "./Nebula";

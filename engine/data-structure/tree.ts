@@ -34,7 +34,7 @@ export class Tree<T>{
   static from<T>(treeLike:TreeLike<T>){
     return Tree.fromNode<T>(treeLike.root)
   }
-  insert(parent:TreeNode<T>, child:TreeNode<T>){
+  insert(child:TreeNode<T>, parent:TreeNode<T> = this.root){
     this.remove(child)
     parent.children.push(child);
     child.parent = parent;
@@ -42,8 +42,8 @@ export class Tree<T>{
     return child;
   }
   insertAsLeftFriend(member:TreeNode<T>, left:TreeNode<T>){
-    this.remove(left)
     if (!member.parent) return;
+    this.remove(left)
     member.parent.children.splice(
       member.parent.children.indexOf(member),
       0, left
@@ -52,8 +52,8 @@ export class Tree<T>{
     this.nodes.push(left)
   }
   insertAsRightFriend(member:TreeNode<T>, right:TreeNode<T>){
-    this.remove(right)
     if (!member.parent) return;
+    this.remove(right)
     member.parent.children.splice(
       member.parent.children.indexOf(member) + 1,
       0, right
@@ -104,10 +104,10 @@ export class Tree<T>{
     }
     return tour(start, 0)
   }
-  tour(func:(n:T|undefined, depth:number)=>void){
+  tour(func:(n:T, depth:number)=>void){
     return this.tourNode(this.root, (node, depth)=>func(node.data, depth))
   }
-  every(condition:(n:T|undefined)=>boolean){
+  every(condition:(n:T)=>boolean){
     return this.nodes.map(n => n.data).every(condition)
   }
   map<U>(func:(data:T, index:number)=>U){

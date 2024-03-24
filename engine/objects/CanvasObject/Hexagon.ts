@@ -4,11 +4,9 @@ import { r3 } from "../../utils/mathconsts"
 import { PolygonForm } from "../../factors/forms/PolygonForm"
 import p5 from "p5";
 
-export class WHexagon extends CanvasObject{
+export class Hexagon extends CanvasObject{
   public form!: PolygonForm;
-  public update(){
-    return this;
-  }
+  public update = () => this;
   public render(p:p5){
     const size = this.form.side;
     const center = this.form.position;

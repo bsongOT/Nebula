@@ -1,4 +1,4 @@
-import { DataComponent } from "./DataComponent";
+import { DataComponent } from "./components/DataComponent";
 
 export class DataCollection<T extends DataComponent> {
   private array:T[];

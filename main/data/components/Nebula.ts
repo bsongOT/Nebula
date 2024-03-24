@@ -1,7 +1,7 @@
-import { Coord } from "../../engine/coord-system";
-import { Tree, TreeNode } from "../../engine/data-structure/tree"
-import { Content } from "./Data";
-import { DataCollection } from "./DataCollection";
+import { Coord } from "../../../engine/coord-system";
+import { Tree, TreeNode } from "../../../engine/data-structure/tree"
+import { Content } from "../Data";
+import { DataCollection } from "../DataCollection";
 import { DataComponent } from "./DataComponent";
 
 export class Nebula implements DataComponent{

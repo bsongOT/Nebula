@@ -1,5 +1,4 @@
 import { nav, a } from "@/funcObject";
-import {WNavigator, WHyperLink} from "@/objects/"
 
 const menus = [{
     name: "Home",
@@ -25,14 +24,6 @@ const menus = [{
   }
 ]
 
-export class UpperMenu extends WNavigator{
-  constructor(){
-    super();
-    this.family.adoptAll(
-      menus.map(m => new WHyperLink(m.name, m.path))
-    )
-  }
-}
 export const upperMenu = () => nav()(
   ...menus.map(m => a({href: m.path})(m.name))
 )

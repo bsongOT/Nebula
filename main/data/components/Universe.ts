@@ -1,6 +1,6 @@
 import {Nebula} from "./Nebula"
-import {Coord, HexCoord} from "../../engine/coord-system"
-import { Content, data } from "./Data";
+import {Coord, HexCoord} from "../../../engine/coord-system"
+import { Content, data } from "../Data";
 import { DataComponent } from "./DataComponent";
 import { Relation } from "./Relation";
 
@@ -31,13 +31,8 @@ export class Universe implements DataComponent{
     )
   }
 }
-export class NebulaInfo{
+export type NebulaInfo = {
   nebula:Nebula;
   start:HexCoord;
   worldPos:Coord;
-  constructor(nebula:Nebula, start:HexCoord, worldPos:Coord){
-    this.nebula = nebula;
-    this.start = start;
-    this.worldPos = worldPos;
-  }
 }

@@ -4,7 +4,7 @@ import { PolygonForm } from "../../factors/forms/PolygonForm";
 import { CanvasObject } from "./CanvasObject";
 import p5 from "p5";
 
-export class WSquare extends CanvasObject{
+export class Square extends CanvasObject{
   public readonly form: PolygonForm;
   constructor(){
     super()

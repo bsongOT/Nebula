@@ -4,7 +4,7 @@ import { Form } from "../../factors/forms/Form";
 import { CanvasObject } from "."
 import { LineForm } from "@/factors/forms/LineForm";
 
-export class WLine extends CanvasObject{
+export class Line extends CanvasObject{
   public form!: LineForm;
   public update(){
     return this;

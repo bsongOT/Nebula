@@ -1,16 +1,16 @@
-export * from "./Content"
-export * from "./Nebula"
+export * from "./components/Content"
+export * from "./components/Nebula"
 
 import { Tree, TreeNode } from "@/data-structure/tree"
-import { Coord } from "../../engine/coord-system"
+import { Coord, HexCoord } from "../../engine/coord-system"
 import { nebulaSpaceSize } from "../consts"
-import {Content} from "./Content"
+import {Content} from "./components/Content"
 import { DataCollection } from "./DataCollection"
-import { Dust } from "./Dust"
-import {Nebula} from "./Nebula"
-import {Universe} from "./Universe"
-import {Relation} from "./Relation"
-import { DataComponent } from "./DataComponent"
+import { Dust } from "./components/Dust"
+import {Nebula} from "./components/Nebula"
+import {NebulaInfo, Universe} from "./components/Universe"
+import {Relation} from "./components/Relation"
+import { DataComponent } from "./components/DataComponent"
 import { Packer, Unpacker } from "./DataParser"
 
 type DataKey = "all-dusts" | "all-contents" | "all-nebulas" | "all-universes" | "all-relations"
@@ -47,25 +47,27 @@ export class Data {
     
     return content;
   }
-  public addNebula(name:string, first:Content){
-    //TODO: change findPos logic
+  public addNebula(name:string, at:Universe){
     const nebula = this.nebulas.add(new Nebula())
 
     nebula.name = name;
     nebula.tree = new Tree<Content>()
-    nebula.tree.insert(
-      nebula.tree.root, 
-      new TreeNode(nebula.tree, first)
-    )
+    
+    at.nebulaInfos.push({
+      nebula: nebula,
+      start: new HexCoord(-1, 0, 0),
+      worldPos: this.findPos(at)
+    })
 
     $$("all-nebulas", JSON.stringify(this.nebulas.map(n => Packer.nebula(n))))
+    $$("all-universes", JSON.stringify(this.universes.map(u => Packer.universe(u))))
     
     return nebula;
   }
   public addUniverse(){
     const universe = this.universes.add(new Universe());
 
-    
+    $$("all-universes", JSON.stringify(this.universes.map(u => Packer.universe(u))))
 
     return universe
   }
@@ -84,10 +86,10 @@ export class Data {
     return new DataCollection(boxes.map(loader))
   }
 
-  private findPos():Coord{
-    let maxx = Math.max(...this.nebulas.map(n => n.position.x));
+  private findPos(univ:Universe):Coord{
+    let maxx = Math.max(...univ.nebulaInfos.map(n => n.worldPos.x));
     if (maxx < 0) maxx = 0;
-    let maxy = Math.max(...this.nebulas.filter(n => n.position.x === maxx).map(n => n.position.y));
+    let maxy = Math.max(...univ.nebulaInfos.filter(n => n.worldPos.x === maxx).map(n => n.worldPos.y));
     if (maxy < 0) maxy = 0;
     if (maxy < nebulaSpaceSize - 2)
       return new Coord(maxx, maxy + 2)

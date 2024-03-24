@@ -1,47 +1,42 @@
-import {WListView} from "@/objects/list/"
-import { Tree, TreeNode } from "@/data-structure/tree";
-import { ISelectable } from "@/interfaces/ISelectable";
-import { SelectableSpace } from "@/virtual spaces/SelectableSpace";
-import {Content, Nebula} from "../../data/Data"
-import { StarLeafItem } from "./StarLeafItem";
+import { Tree } from "@/data-structure/tree";
+import { li, ul } from "@/funcObject";
 
-export class StarList extends WListView<Content>{
-  private space:SelectableSpace<ISelectable>;
-  public readonly tree:Tree<StarLeafItem>;
-  public get selection(){
-    return this.space.selection as StarLeafItem;
+const treeEqual = (tree1:Tree<any>, tree2:Tree<any>) => {
+  const array1 = tree1.arrayize()
+  const array2 = tree2.arrayize()
+
+  if (array1.length !== array2.length) return false;
+  for (let i = 0; i < array1.length; i++){
+    if (array1[i].data !== array2[i].data) return false;
+    if (array1[i].parent !== array2[i].parent) return false;
   }
-  public set selection(v:StarLeafItem){
-    this.space.selection = v;
-  }
-  constructor(nebula:Nebula){
-    super();
-    this.class.add("star-list")
-    this.space = new SelectableSpace();
-    this.tree = nebula.tree.map((c, bn) => new StarLeafItem(c!, this, bn === nebula.orient))
-    this.tree
-      .tourNode(this.tree.root, n => {
-        if (n.parent === n.tree.root){
-          return this.family.adopt(n.data!)
-        }
-        n.parent!.data!.put(n.data!)
-      })
-  }
-  public updateData(){
-    this.tree.nodes.forEach(n => this.tree.remove(n))
-    const makeTree = (item:StarLeafItem, node:TreeNode<StarLeafItem>) => {
-      if (!item.localList) return;
-      for (let c of item.localList.family.children as StarLeafItem[]){
-        const childNode = new TreeNode(this.tree, c)
-        this.tree.insert(node, childNode)
-        makeTree(c, childNode)
+
+  return true;
+}
+
+export const treeList = <T>(tree: Tree<T>, nodeCreator: (data:T, index:number) => HTMLElement) => {
+  const obj = ul({class: "tree-list"})();
+
+  let oldTree = tree.map(v => v)
+  
+  setInterval(()=>{
+    if (treeEqual(tree, oldTree)) return;
+
+    obj.innerHTML = "";
+    
+    const childTree = tree.map(nodeCreator);
+
+    childTree.tourNode(childTree.root, n => {
+      if (!n.parent || n.parent === n.tree.root){
+        return obj.append(li()(n.data))
       }
-    }
-  }
-  public add(content:Content){
-    const item = new StarLeafItem(content, this, false)
-    this.family.adopt(item);
-    this.space.regist(item);
-    this.updateData()
-  }
+      if (!n.parent.data.children[1])
+        n.parent.data.append(ul()())
+      n.parent.data.children[1].append(n.data)
+    })
+
+    oldTree = tree.map(v => v);
+  }, 100)
+
+  return obj;
 }

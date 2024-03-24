@@ -1,9 +1,18 @@
 import { Tree } from "./data-structure/tree"
-import { WebObject } from "./objects/WebObject"
-import { WCanvasContainer } from "./objects/CanvasObject"
+
+class Analyzer {
+
+}
+
+class Updater {
+    register(){
+        
+    }
+}
 
 export const engine = {
-    hierarchy: new Tree<WebObject>(),/*
+    analyzer: new Analyzer(),
+    updater: new Updater(),/*
     debugTool: () => {
         return new WCanvasContainer()
     }*/

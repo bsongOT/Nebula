@@ -1,9 +1,9 @@
 import { Coord, HexCoord } from "@/coord-system";
-import { Content } from "./Content";
-import { Dust } from "./Dust";
-import { Nebula } from "./Nebula";
-import { Relation } from "./Relation";
-import { NebulaInfo, Universe } from "./Universe";
+import { Content } from "./components/Content";
+import { Dust } from "./components/Dust";
+import { Nebula } from "./components/Nebula";
+import { Relation } from "./components/Relation";
+import { NebulaInfo, Universe } from "./components/Universe";
 import { data } from "./Data";
 import { Tree } from "@/data-structure/tree";
 
@@ -132,11 +132,11 @@ export class Unpacker {
 
     u.id = universeBox.id;
     u.nebulaInfos = universeBox.nebulaInfos.map(
-        ni => new NebulaInfo(
-            data.nebulas.get(ni.nebula)!,
-            new HexCoord(ni.start.x, ni.start.y, ni.start.z),
-            new Coord(ni.worldPos.x, ni.worldPos.y)
-        )
+        ni => ({
+          nebula: data.nebulas.get(ni.nebula)!,
+          start: new HexCoord(ni.start.x, ni.start.y, ni.start.z),
+          worldPos: new Coord(ni.worldPos.x, ni.worldPos.y)
+        })
     )
     u.palette = universeBox.palette.map(id => data.contents.get(id)!);
     u.relations = universeBox.relations.map(id => data.relations.get(id)!)

@@ -1,13 +1,9 @@
-import { WCanvasContainer, WCanvas, WSquare } from "@/objects/CanvasObject/";
-import { WRadio, WRadioBox } from "@/objects/input/";
 import { nebulaSpaceSize } from "../../consts";
-import {UpperMenu, upperMenu} from "../../custom-object/"
-import {NebulaTile} from "../../custom-object/NebulaTile"
-import {Nebula, data} from "../../data/Data"
+import { upperMenu} from "../../custom-object/"
+import {data} from "../../data/Data"
 import "../../styles/NebulaSpace.css"
-import { emptyArr } from "@/utils/utils";
-import { body, btn, canvas, div, inputText, span, table, td, tr } from "@/funcObject";
-import { Universe } from "../../data/Universe";
+import { body, btn, div, span, table, td, tr } from "@/funcObject";
+import { Universe } from "../../data/components/Universe";
 
 const size = nebulaSpaceSize;
 const map = universeMap()
@@ -58,7 +54,7 @@ function updateMap(){
 
       const cell = getCell(x, y)
 
-      cell.onclick = () => showUniverse(univ)
+      cell.onclick = () => selectedUniverse = univ
       
       cell.style.background = "purple"
 

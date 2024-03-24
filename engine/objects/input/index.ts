@@ -1,5 +1,0 @@
-export * from "./WCheckbox"
-export * from "./WInput"
-export * from "./WInputText"
-export * from "./WRadio"
-export * from "./WRadioBox"
