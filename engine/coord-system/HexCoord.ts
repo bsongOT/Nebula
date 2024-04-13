@@ -1,6 +1,9 @@
 import { r3 } from "../utils/mathconsts";
 import { Coord } from "./Coord";
 
+export function H(x:number, y:number, z:number){
+  return new HexCoord(x, y, z)
+}
 export class HexCoord {
   x: number;
   y: number;

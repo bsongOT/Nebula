@@ -5,7 +5,9 @@ module.exports = {
   entry: {
     index: './main/pages/main/index.ts',
     nebulaMenu: "./main/pages/nebula-menu/index.ts",
-    nebula: './main/pages/nebula/index.ts'
+    nebula: './main/pages/nebula/index.ts',
+    content: './main/pages/content-page/index.ts',
+    data: "./main/pages/_develop/data.ts"
   },
   mode: "development",
   module: {
@@ -50,9 +52,13 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './main/pages/content-page/content-page.html',
       filename: 'content-page.html',
-      chunks: []
+      chunks: ["content"]
     }),
-                                                                                                                                                                                                                                   
+    new HtmlWebpackPlugin({
+      template: './main/pages/_develop/data.html',
+      filename: 'data.html',
+      chunks: ["data"]
+    })                                                                                                                                                                                            
   ],
   devServer: {
     port: 9000

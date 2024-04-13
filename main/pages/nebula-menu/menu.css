@@ -1,0 +1,42 @@
+.universe-map {
+  border-spacing: 0;
+  width: 400px;
+  height: 400px;
+}
+.universe-map > tr > td {
+  position: relative;
+  background: #eee;
+  transition: 0.2s;
+  box-shadow: 
+    1px 0 #ddd inset, 
+    1px 0 #ddd inset,
+    0 1px #ddd inset,
+    0 -1px #ddd inset;
+}
+.universe-map > tr > td.valid {
+  box-shadow: none;
+}
+.universe-map > tr > td.selected-cell {
+  box-shadow:
+    0 0 3px #f00 inset;
+}
+.clear {
+  opacity: 0.6;
+}
+.nebula-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 50%;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  transform: translate(-50%, -50%) scale(0.5);
+  width: 180%;
+}
+.universe-window-box > *:not(.current-window){
+  display: none;
+}
+* {
+  font-family: sans-serif;
+}

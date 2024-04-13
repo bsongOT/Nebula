@@ -1,94 +1,70 @@
-import { nebulaSpaceSize } from "../../consts";
 import { upperMenu} from "../../custom-object/"
 import {data} from "../../data/Data"
-import "../../styles/NebulaSpace.css"
-import { body, btn, div, span, table, td, tr } from "@/funcObject";
-import { Universe } from "../../data/components/Universe";
+import "./menu.css"
+import { body, btn, div, span, ul, canvas } from "@/funcObject";
+import { selli } from "@/objects/list/selli";
+import { UniverseMap } from "./universeMap";
+import { Coord } from "@/coord-system";
+import { UniverseList } from "./universeList";
 
-const size = nebulaSpaceSize;
-const map = universeMap()
-const getCell = (x:number, y:number) => <HTMLElement>map.children[y].children[x]
-
-class ElementUpdater {
-  private list:(()=>void)[] = [];
-  private updater?: NodeJS.Timeout
-  public register(func:()=>void){
-    this.list.push(func)
-    if (this.updater) return;
-    this.updater = setInterval(
-      () => this.list.forEach(f => f()),
-      100
-    )
+const memento = {
+  universeMap: {
+    size: 16,
+    universes: data.universes,
+    viewPoint: new Coord(0, 0),
+    selection: undefined,
+    selectedNebula: undefined
+  },
+  universeList: {
+    universes: data.universes
   }
 }
 
-const updater = new ElementUpdater();
-
-let selectedUniverse:Universe|undefined;
-
-function universeMap(){
-  const map = table()()
-
-  map.append(...Array(size).fill(0).map(_ => (
-    tr()(
-      ...Array(size).fill(0).map(_ => td()())
-    )
-  )))
-
-  updater.register(updateMap)
-
-  return map;
+const layout = {
+  map: new UniverseMap(memento.universeMap),
+  minimap: canvas({width: 400})(),
+  list: new UniverseList(memento.universeList),
+  nebulaEditor: {
+    
+  }
 }
 
-function updateMap(){
-  for (const r of map.children){
-    for(const cell of r.children){
-      cell.className = ""
-    }
+const switchGroups = [
+  {
+    switch: selli(span()("World")),
+    element: layout.map.element
+  },{
+    switch: selli(span()("Minimap")),
+    element: layout.minimap
   }
-  for (const univ of data.universes.all()){
-    for (const neb of univ.nebulaInfos){
-      const [x, y] = [neb.worldPos.x, neb.worldPos.y]
-      if (x < 0 || x >= size) continue;
-      if (y < 0 || y >= size) continue;
+]
 
-      const cell = getCell(x, y)
+for (const sg of switchGroups){
+  sg.switch.onclick = () => {
+    for (const s of switchGroups)
+      s.element.classList.remove("current-window")
 
-      cell.onclick = () => selectedUniverse = univ
-      
-      cell.style.background = "purple"
-
-      if (univ.isIn(x - 1, y)) cell.style.borderLeft = "2px solid blue"
-      if (univ.isIn(x + 1, y)) cell.style.borderRight = "2px solid blue"
-      if (univ.isIn(x, y - 1)) cell.style.borderTop = "2px solid blue"
-      if (univ.isIn(x, y + 1)) cell.style.borderBottom = "2px solid blue"
-    }
+    sg.element.classList.add("current-window")
   }
-  if (selectedUniverse) showUniverse(selectedUniverse)
-}
-
-function showUniverse(universe:Universe){
-  for (const r of map.children){
-    for (const cell of r.children as HTMLCollectionOf<HTMLElement>){
-      cell.classList.add("clear");
-      cell.innerText = ""
-    }
-  }
-  for (const neb of universe.nebulaInfos){
-    const cell = getCell(neb.worldPos.x, neb.worldPos.y)
-    cell.classList.remove("clear")
-    cell.innerText = neb.nebula.name
-  }
-  map.classList.add("floating")
 }
 
 body(
   upperMenu(),
-  btn({onclick: () => data.addUniverse()})("New Universe"),
-  div({class: "nebula-space"})(
-    btn()("<"),
-    map,
-    btn()(">")
+  div({class: "universe"})(
+    btn({onclick: () => data.addUniverse()})("New Universe"),
+    btn({onclick: () => data.addNebula("Untitled", data.universes.get(Number(layout.list.element.querySelector<HTMLElement>(".selected")!.innerText))!)})("New Nebula"),
+    div()(span()(`x: 0, y: 0`)),
+    div()(
+      ul({class: "switch-box"})(
+        ...switchGroups.map(sg => sg.switch)
+      ),
+      div({class: "universe-window-box"})(
+        ...switchGroups.map(sg => sg.element)
+      )
+    ),
+    layout.list.element
   ),
-  span()(`1 / ${data.getNebulaSpaceTotalPage()}`),
+
 );
+
+switchGroups[0].switch.click()

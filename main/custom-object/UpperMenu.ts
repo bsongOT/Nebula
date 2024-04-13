@@ -4,17 +4,8 @@ const menus = [{
     name: "Home",
     path: "./index.html"
   },{
-    name: "Todo",
-    path: "./todo.html"
-  },{
     name: "Nebula",
     path: "./nebula-menu.html"
-  },{
-    name: "Relation",
-    path: "./relation.html"
-  },{
-    name: "Tree",
-    path: "./tree.html"
   },{
     name: "Data",
     path: "./data.html"

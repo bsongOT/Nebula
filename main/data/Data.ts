@@ -1,16 +1,14 @@
 export * from "./components/Content"
 export * from "./components/Nebula"
 
-import { Tree, TreeNode } from "@/data-structure/tree"
+import { Tree } from "@/data-structure/tree"
 import { Coord, HexCoord } from "../../engine/coord-system"
-import { nebulaSpaceSize } from "../consts"
 import {Content} from "./components/Content"
 import { DataCollection } from "./DataCollection"
 import { Dust } from "./components/Dust"
 import {Nebula} from "./components/Nebula"
-import {NebulaInfo, Universe} from "./components/Universe"
+import {Universe} from "./components/Universe"
 import {Relation} from "./components/Relation"
-import { DataComponent } from "./components/DataComponent"
 import { Packer, Unpacker } from "./DataParser"
 
 type DataKey = "all-dusts" | "all-contents" | "all-nebulas" | "all-universes" | "all-relations"
@@ -23,15 +21,15 @@ type DataMap = {
 }
 
 export const $ = (name:string) => localStorage.getItem(name)
-export const $$ = (name:string, value:string) => localStorage.setItem(name, value)
+export const $$ = (name:DataKey, value:string) => localStorage.setItem(name, value)
 export class Data {
-  public readonly contents:DataCollection<Content>;
-  public readonly nebulas:DataCollection<Nebula>;
-  public readonly universes:DataCollection<Universe>;
-  public readonly relations:DataCollection<Relation>;
-  public readonly dusts:DataCollection<Dust>;
-  
-  constructor(){
+  public contents!:DataCollection<Content>;
+  public nebulas!:DataCollection<Nebula>;
+  public universes!:DataCollection<Universe>;
+  public relations!:DataCollection<Relation>;
+  public dusts!:DataCollection<Dust>;
+
+  public load(){
     this.dusts = this.loadCollection("all-dusts")
     this.contents = this.loadCollection("all-contents")
     this.nebulas = this.loadCollection("all-nebulas")
@@ -87,20 +85,39 @@ export class Data {
   }
 
   private findPos(univ:Universe):Coord{
-    let maxx = Math.max(...univ.nebulaInfos.map(n => n.worldPos.x));
-    if (maxx < 0) maxx = 0;
-    let maxy = Math.max(...univ.nebulaInfos.filter(n => n.worldPos.x === maxx).map(n => n.worldPos.y));
-    if (maxy < 0) maxy = 0;
-    if (maxy < nebulaSpaceSize - 2)
-      return new Coord(maxx, maxy + 2)
-    else
-      return new Coord(maxx + 2, 0)
-  }
-  public getNebulaSpaceTotalPage(){
-    const total = Math.ceil(Math.max(...this.nebulas.map(n => n.position.x)) / nebulaSpaceSize);
-    if (total < 0) return 1;
-    return total + 1;
+    if (univ.nebulaInfos.length === 0)
+      return new Coord(0, 0)
+
+    const worldPoses = univ.nebulaInfos.map(ni => ni.worldPos)
+    const xs = worldPoses.map(p => p.x)
+    const ys = worldPoses.map(p => p.y)
+
+    const [minx, maxx] = [Math.min(...xs), Math.max(...xs)]
+    const [miny, maxy] = [Math.min(...ys), Math.max(...ys)]
+
+    const width = maxx - minx + 1;
+    const height = maxy - miny + 1;
+
+    const isFull = worldPoses.length + 1 > width * height
+
+    if (isFull){
+      if (width <= height) 
+        return new Coord(maxx + 1, miny)
+      else
+        return new Coord(minx, maxy + 1)
+    }
+
+    if (width > height){
+      const wallYs = worldPoses.filter(p => p.x === maxx).map(p => p.y)
+      const wallHighestY = Math.min(...[...Array(height).keys()].map(k => k + miny).filter(y => !wallYs.includes(y)))
+      return new Coord(maxx, wallHighestY)
+    }
+
+    const bottomXs = worldPoses.filter(p => p.y === maxy).map(p => p.x)
+    const bottomLeftmostX = Math.min(...[...Array(width).keys()].map(k => k + minx).filter(x => !bottomXs.includes(x)))
+    return new Coord(bottomLeftmostX, maxy)
   }
 }
 
 export const data = new Data()
+data.load();

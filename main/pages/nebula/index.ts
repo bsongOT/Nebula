@@ -1,103 +1,153 @@
-import { CanvasObject, Container, Hexagon} from "@/objects/CanvasObject"
+import { Container, Hexagon} from "@/objects/CanvasObject"
 import { StarTile } from "../../custom-object"
-import {Coord, HexCoord} from "@/coord-system"
-import {HexWorld} from "@/data-structure/hexworld"
-import { body, btn, canvas, div, inputText, li, span } from "@/funcObject"
-import { treeList } from "../../custom-object/StarListContainer/StarList"
-import { Content } from "../../data/components/Content"
-import { Tree, TreeNode } from "@/data-structure/tree"
-import { data } from "../../data/Data"
+import {H, P} from "@/coord-system"
+import { btn, canvas, div, li, span, ul } from "@/funcObject"
+import { Content, Nebula } from "../../data/Data"
+import { DTE } from "@/objects/DTE"
+import { gridify } from "@/data-structure/utils"
+import { selli } from "@/objects/list/selli"
 
-const id = Number(new URL(location.search).searchParams.get("id"))
-if (!id || isNaN(id)) throw "error"
-
-const nebula = data.nebulas.get(id);
-if (!nebula) throw "error"
-
-const tree = nebula.tree;
-let selection:TreeNode<Content>|undefined;
-
-const starList = treeList(tree, (content, i) => div({onclick:()=>selection = tree.at(i)})(span()(content.title)))
-const effectBox = new Container();
-const tileBox = new Container();
-
-const cv = canvas()(
-  effectBox,
-  tileBox
-)
-
-body(
-  div()(
-    starList,
-    div({class: "arrow-button-container"})(
-      btn({class: "up-arrow", onclick: updent})("↑"),
-      btn({class: "left-arrow", onclick: outdent})("←"),
-      btn({class: "down-arrow", onclick: downdent})("↓"),
-      btn({class: "right-arrow", onclick: indent})("→")
-    )
-  ),
-  cv
-)
-
-function updent(){
-  const left = selection?.leftFriend;
-  if (!left) return;
-  tree.insertAsLeftFriend(left, selection!)
-}
-
-function outdent(){
-  const parent = selection?.parent;
-  if (!parent) return;
-  tree.insertAsRightFriend(parent, selection!)
-}
-
-function downdent(){
-  const right = selection?.rightFriend;
-  if (!right) return;
-  tree.insertAsRightFriend(right, selection!)
-}
-
-function indent(){
-  const left = selection?.leftFriend;
-  if (!left) return;
-  tree.insert(selection!, left)
-}
-
-const dropGrid = (grid:HexWorld<Content>) => {
-  tileBox.empty()
-  const size = grid.size.x;
-  const pivot = new HexCoord(size-1,0,size-1)
-  let pos = new HexCoord(0,0,0)
-
-  for (let i = 0; i < grid.area; i++) {
-    const content = grid.at(pos);
-    const tile = content ? new StarTile("none", content) : new Hexagon()
-    const coord = pos.sub(pivot).toCoord(20).add(new Coord(1,1).scale(cv.scrollWidth/2))
-
-    tile.form
-      .moveAt(coord.x, coord.y)
-      .setColor("#ffffff")
-      .setSide(20)
-
-    tileBox.adopt(tile)
-    pos = grid.next(pos);
+class StarTreeNode {
+  public readonly element:HTMLLIElement;
+  public readonly layout:{
+    main: HTMLDivElement,
+    list: HTMLUListElement
+  }
+  constructor(content:Content){
+    this.layout = {
+      main: div()(span()(content.title)),
+      list: ul()()
+    }
+    this.element = li()(
+      this.layout.main,
+      this.layout.list
+    );
   }
 }
-const update = () => {
-  let pos = new HexCoord(0,-1,0)
-  let prevD = 0;
+export class StarTree extends DTE {
+  public readonly layout;
+  public readonly info;
+  public readonly element;
 
-  const grid = new HexWorld<Content>()
+  public paletteGroups:{
+    content:Content,
+    element:HTMLLIElement
+  }[]
+
+  public selection:{
+    element:HTMLElement
+  }|undefined;
+
+  constructor(attributes:{nebula: Nebula}){
+    super()
+    this.info = attributes;
+    this.paletteGroups = [];
+    this.layout = {
+      tree: ul()(),
+      palette: {
+        list: ul()(),
+      },
+      contentSelector: div()(),
+      nebulaGrid: {
+        tileBox: new Container(),
+        effectBox: new Container()
+      }
+    }
+    this.element = div()(
+      div()(
+        this.layout.palette.list,
+        btn({class: "adder", onclick: ()=>this.addIntoPalette()})("+"),
+        btn({class: "remover", onclick: ()=>this.removeFromPalette()})("-")
+      ),
+      this.layout.contentSelector,
+      btn({class: "bringer"})("->"),
+      this.layout.tree,
+      div({class: "arrow-keys"})(
+        btn({class: "up-arrow", onclick: ()=>this.updent()})("위"),
+        btn({class: "left-arrow", onclick: ()=>this.outdent()})("왼"),
+        btn({class: "down-arrow", onclick: ()=>this.downdent()})("밑"),
+        btn({class: "right-arrow", onclick: ()=>this.indent()})("오")
+      ),
+      canvas()(
+        this.layout.nebulaGrid.tileBox,
+        this.layout.nebulaGrid.effectBox
+      )
+    )
+    this.init()
+  }
+  public init(){
+    const tree = this.info.nebula.tree.map(c => new StarTreeNode(c));
+    tree.tourNode(tree.root, node => {
+      if (node.parent === tree.root){
+        this.layout.tree.append(node.data.element)
+      }
+      node.data.layout.list.append(
+        ...node.children.map(n => n.data.element)
+      )
+    })
+    this.layout.palette.list.append(...this.info.nebula.palette.map(c => selli(span()(c.title))))
+    super.init()
+  }
+  public detect(){ return true; }
+  public update(){
+    this.layout.nebulaGrid.tileBox.empty()
+
+    const tileBox = this.layout.nebulaGrid.tileBox;
+    const canvasSize = 500;//this.layout.nebulaGrid.canvas.scrollWidth;
+    const canvasCenter = P(1,1).scale(canvasSize / 2)
+    const grid = gridify(this.info.nebula.tree)
+    const size = grid.size.x;
+    const pivot = H(size - 1, 0, size - 1)
+
+    for (const pos of grid.range){
+      const content = grid.at(pos);
+      const tile = content ? new StarTile("none", content) : new Hexagon()
+      const coord = pos.sub(pivot).toCoord(20).add(canvasCenter)
+
+      tile.form.moveAt(coord.x, coord.y)
+      tile.form.setSide(20)
+
+      tileBox.adopt(tile)
+    }
+  }
+  public updent(){
+    const left = this.selection?.element?.previousElementSibling;
+    if (!left) return;
+
+    left.insertAdjacentElement('beforebegin', this.selection!.element)
+  }
+  public downdent(){
+    const right = this.selection?.element?.nextElementSibling;
+    if (!right) return;
+
+    right.insertAdjacentElement('afterend', this.selection!.element)
+  }
+  public outdent(){
+    const parent = this.selection?.element?.parentElement;
+    if (!parent) return;
+
+    parent.insertAdjacentElement('afterend', this.selection!.element)
+  }
+  public indent(){
+    const left = this.selection?.element?.previousElementSibling;
+    if (!left) return;
+
+    left.append(this.selection!.element)
+  }
+
+  public addIntoPalette(){
+    //this.layout.
+  }
+
+  public removeFromPalette(){
+    this.layout.palette.list.querySelector(".selected")?.remove()
+  }
   
-  tree.tourNode(tree.root, (n, d)=>{
-    if (!d) return;
-    if (prevD < d) pos.z += d - prevD
-    else if (prevD === d) pos.y++;
-    else pos.x += prevD - d
-    
-    grid.setVal(pos, n.data)
-    prevD = d;
-  })
-
-  dropGrid(grid)
+  public PutIntoNebula(){
+    const item = this.layout.palette.list.querySelector(".selected")
+    const content = this.paletteGroups.find(g => g.element === item)?.content
+    if (!content) return;
+    this.layout.tree.append(new StarTreeNode(content).element)
+    item?.remove()
+  }
 }

@@ -7,7 +7,11 @@ export class Relation {
     id:number
     mainTree:Nebula;
     secondTree:Nebula;
-    table:(Dust|"none")[][];
+    table:{
+        main: Content,
+        second: Content,
+        state: "none" | Dust
+    }[];
     constructor(){
         this.mainTree = new Nebula();
         this.secondTree = new Nebula()

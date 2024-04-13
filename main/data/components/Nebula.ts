@@ -7,12 +7,19 @@ import { DataComponent } from "./DataComponent";
 export class Nebula implements DataComponent{
   id:number;
   name:string;
-  tree:Tree<Content>
-  position:Coord;
+  tree:Tree<Content>;
+  palette:Content[];
   constructor(){
     this.name = "";
     this.id = -1;
     this.tree = new Tree()
-    this.position = new Coord(-1, -1)
+    this.palette = [];
+  }
+  toString(){
+    return `
+      id: ${this.id}
+      name: ${this.name}
+      treeLength: ${this.tree.length}
+    `.split("\n").map(l => l.trim()).join("\n");
   }
 }

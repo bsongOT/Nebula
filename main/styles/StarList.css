@@ -7,7 +7,7 @@
     overflow-x: hidden;
     overflow-y: scroll;
 }
-.arrow-button-container{
+.arrow-keys{
     display: inline-grid;
     width: 90px;
     height: 60px;

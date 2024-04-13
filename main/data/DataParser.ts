@@ -20,8 +20,8 @@ type ContentBox = {
 type NebulaBox = {
     id:number,
     name:string,
-    position: {x:number, y:number},
     treeOrder: {id:number, parent:number}[],
+    palette: number[]
 }
 type UniverseBox = {
     id: number,
@@ -30,14 +30,17 @@ type UniverseBox = {
         worldPos: {x:number, y:number},
         nebula: number
     }[],
-    relations: number[],
-    palette: number[]
+    relations: number[]
 }
 type RelationBox = {
     id: number,
     mainTree: number,
     secondTree: number,
-    table: number[][]
+    table: {
+      main: number,
+      second: number,
+      state: Dust|"none"
+    }[]
 }
 
 export class Packer {
@@ -61,16 +64,12 @@ export class Packer {
         id: nebula.id,
         name: nebula.name,
         treeOrder: nebula.tree.map(n => n.id).arrayize(),
-        position: {
-            x: nebula.position.x,
-            y: nebula.position.y
-        }
+        palette: nebula.palette.map(n => n.id)
     }
   }
   static universe(universe:Universe){
     return {
         id: universe.id,
-        palette: universe.palette.map(c => c.id),
         relations: universe.relations.map(r => r.id),
         nebulaInfos: universe.nebulaInfos.map(ni => ({
             start: {
@@ -91,9 +90,11 @@ export class Packer {
         id: relation.id,
         mainTree: relation.mainTree.id,
         secondTree: relation.secondTree.id,
-        table: relation.table.map(r => (
-            r.map(d => d instanceof Dust ? d.id : d)
-        ))
+        table: relation.table.map(c => ({
+          main: c.main.id,
+          second: c.second.id,
+          state: c.state instanceof Dust ? c.state.id : c.state
+        }))
     }
   }
 }
@@ -119,11 +120,11 @@ export class Unpacker {
     
     n.name = nebulaBox.name
     n.id = nebulaBox.id
-    n.position = new Coord(nebulaBox.position.x, nebulaBox.position.y)
     n.tree = Tree.treeize(nebulaBox.treeOrder.map(i => ({
       data: data.contents.get(i.id)!,
       parent: i.parent
     })))
+    n.palette = nebulaBox.palette.map(id => data.contents.get(id)!).filter(c => c)
 
     return n;
   }
@@ -138,7 +139,6 @@ export class Unpacker {
           worldPos: new Coord(ni.worldPos.x, ni.worldPos.y)
         })
     )
-    u.palette = universeBox.palette.map(id => data.contents.get(id)!);
     u.relations = universeBox.relations.map(id => data.relations.get(id)!)
 
     return u;
@@ -149,11 +149,11 @@ export class Unpacker {
     r.mainTree = data.nebulas.get(relationBox.mainTree)!
     r.secondTree = data.nebulas.get(relationBox.secondTree)!
     r.id = relationBox.id
-    r.table = relationBox.table.map(
-        row => row.map(
-            id => data.dusts.get(id) ?? "none"
-        )
-    )
+    r.table = relationBox.table.map(c => ({
+      main: data.contents.get(c.main)!,
+      second: data.contents.get(c.second)!,
+      state: typeof c.state === "number" ? data.dusts.get(c.state)! : c.state
+    }))
     
     return r;
   }

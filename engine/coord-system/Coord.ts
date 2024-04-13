@@ -1,4 +1,6 @@
-
+export function P(x:number, y:number){
+  return new Coord(x, y)
+}
 export class Coord{
   public x:number;
   public y:number;

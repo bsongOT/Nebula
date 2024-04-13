@@ -1,4 +1,5 @@
 import { li } from "@/funcObject";
+import "./selli.css"
 
 export const selli = (...children:HTMLElement[]) => {
   const obj = li()(...children);

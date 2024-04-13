@@ -5,6 +5,3 @@ import { body } from "@/funcObject";
 body(
   upperMenu()
 )
-/**
- * favorites tree
- */
