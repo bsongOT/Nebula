@@ -1,4 +1,4 @@
-import { Coord } from "../../../engine/coord-system";
+import { Coord } from "../../../engine/utils/math/coord-system";
 import { Tree, TreeNode } from "../../../engine/data-structure/tree"
 import { Content } from "../Data";
 import { DataCollection } from "../DataCollection";

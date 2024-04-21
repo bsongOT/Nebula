@@ -1,5 +1,5 @@
 import { Form } from "@/factors/forms/Form";
-import { Coord } from "../../coord-system";
+import { Coord } from "../../utils/math/coord-system";
 import { PolygonForm } from "../../factors/forms/PolygonForm";
 import { CanvasObject } from "./CanvasObject";
 import p5 from "p5";

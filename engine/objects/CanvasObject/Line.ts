@@ -1,19 +1,21 @@
 import p5 from "p5";
-import { Coord } from "../../coord-system";
-import { Form } from "../../factors/forms/Form";
+import { Coord, P } from "../../utils/math/coord-system";
 import { CanvasObject } from "."
-import { LineForm } from "@/factors/forms/LineForm";
 
 export class Line extends CanvasObject{
-  public form!: LineForm;
+  public end:Coord;
+  constructor(){
+    super();
+    this.end = P(0, 0)
+  }
   public update(){
     return this;
   }
   public render(p:p5){
-    const x1 = this.form.start.x;
-    const y1 = this.form.start.y;
-    const x2 = this.form.end.x;
-    const y2 = this.form.end.y
+    const x1 = this.position.x;
+    const y1 = this.position.y;
+    const x2 = this.end.x;
+    const y2 = this.end.y
 
     p.push();
     p.strokeWeight(5)

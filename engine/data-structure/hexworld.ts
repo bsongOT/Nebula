@@ -1,4 +1,4 @@
-import { HexCoord } from "../coord-system/HexCoord";
+import { HexCoord } from "../utils/math/coord-system/HexCoord";
 import { emptyArr } from "../utils/utils";
 import { HexGrid } from "./hexgrid";
 

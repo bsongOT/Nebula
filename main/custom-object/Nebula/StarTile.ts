@@ -1,13 +1,13 @@
 import {Hexagon} from "@/objects/CanvasObject"
-import {r3} from "@/utils/mathconsts";
 import p5 from "p5";
 import { Content } from "../../data/components/Content";
+import { r3 } from "@/utils/math/consts";
 
 export class StarTile extends Hexagon{
   private readonly content:Content;
   constructor(state:"none"|"selected", content:Content){
     super()
-    this.form.color = {
+    this.color = {
       none: "#cccccc",
       selected: "#2a99cc"
     }[state]
@@ -17,8 +17,8 @@ export class StarTile extends Hexagon{
   public render(p:p5){
     super.render(p);
 
-    const s = this.form.side;
-    const [x, y] = [this.form.position.x, this.form.position.y]
+    const s = this.side;
+    const [x, y] = [this.position.x, this.position.y]
     
     p.textAlign(p.CENTER, p.CENTER)
     p.textSize(8)

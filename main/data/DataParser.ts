@@ -1,4 +1,4 @@
-import { Coord, HexCoord } from "@/coord-system";
+import { Coord, HexCoord } from "@/utils/math/coord-system";
 import { Content } from "./components/Content";
 import { Dust } from "./components/Dust";
 import { Nebula } from "./components/Nebula";

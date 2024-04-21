@@ -2,10 +2,12 @@ import { upperMenu} from "../../custom-object/"
 import {data} from "../../data/Data"
 import "./menu.css"
 import { body, btn, div, span, ul, canvas } from "@/funcObject";
-import { selli } from "@/objects/list/selli";
+import { selli } from "@/objects/UI/list/selli";
 import { UniverseMap } from "./universeMap";
-import { Coord } from "@/coord-system";
+import { Coord } from "@/utils/math/coord-system";
 import { UniverseList } from "./universeList";
+import { NebulaViewer } from "./nebulaViewer";
+import { SimpleNebulaSelector } from "../../custom-object/NebulaSelectors/SimpleNebulaSelector";
 
 const memento = {
   universeMap: {
@@ -31,10 +33,10 @@ const layout = {
 
 const switchGroups = [
   {
-    switch: selli(span()("World")),
+    switch: selli()(span()("World")),
     element: layout.map.element
   },{
-    switch: selli(span()("Minimap")),
+    switch: selli()(span()("Minimap")),
     element: layout.minimap
   }
 ]
@@ -50,6 +52,8 @@ for (const sg of switchGroups){
 
 body(
   upperMenu(),
+  new SimpleNebulaSelector({nebulas: data.nebulas}).element,
+  new NebulaViewer().element,
   div({class: "universe"})(
     btn({onclick: () => data.addUniverse()})("New Universe"),
     btn({onclick: () => data.addNebula("Untitled", data.universes.get(Number(layout.list.element.querySelector<HTMLElement>(".selected")!.innerText))!)})("New Nebula"),
@@ -63,8 +67,7 @@ body(
       )
     ),
     layout.list.element
-  ),
-
+  )
 );
 
 switchGroups[0].switch.click()

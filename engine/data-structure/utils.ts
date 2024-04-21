@@ -1,4 +1,4 @@
-import { H } from "@/coord-system";
+import { H } from "@/utils/math/coord-system";
 import { HexWorld } from "./hexworld";
 import { Tree } from "./tree";
 

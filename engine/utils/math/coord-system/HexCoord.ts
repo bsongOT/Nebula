@@ -1,4 +1,4 @@
-import { r3 } from "../utils/mathconsts";
+import { r3 } from "../consts";
 import { Coord } from "./Coord";
 
 export function H(x:number, y:number, z:number){

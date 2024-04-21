@@ -1,7 +1,7 @@
 import p5 from "p5";
 import { CanvasObject } from "./objects/CanvasObject";
 import { Tree, TreeNode } from "./data-structure/tree";
-import { Coord } from "./coord-system";
+import { Coord } from "./utils/math/coord-system";
 import { isTypeReferenceNode } from "typescript";
 
 type Tag = keyof HTMLElementTagNameMap;
@@ -18,12 +18,12 @@ const create = <T extends Tag>(tag:T, attrs?:Record<string,any>) => {
     }
     return obj as HTMLElementTagNameMap[T];
 }
-const independentElement = (tag:Tag) => (
+const independentElement = <T extends Tag>(tag:T) => (
     (attrs?:Record<string, any>) => (
         () => create(tag, attrs)
     )
 )
-const simpleElement = (tag:Tag) => (
+const simpleElement = <T extends Tag>(tag:T) => (
     (attrs?:Record<string,any>) => (
         (text:string) => {
             const obj = create(tag, attrs)
@@ -42,11 +42,16 @@ const element = <T extends Tag, C extends HTMLElement = HTMLElement>(tag:T) => (
     )
 )
 export const inputText = independentElement("input")
+export const slider = (attrs?:Record<string,any>) => {
+  const obj = independentElement("input")(attrs)();
+  obj.type = "range"
+  return obj;
+}
 export const btn = simpleElement("button")
 export const span = simpleElement("span")
 export const a = simpleElement("a")
-export const checkbox = () => {
-    const obj = create("input")
+export const checkbox = (attrs?:Record<string,any>) => {
+    const obj = independentElement("input")(attrs)()
     obj.type = "checkbox"
     return obj;
 }

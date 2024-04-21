@@ -1,14 +1,22 @@
-import {Form} from "../../factors/forms/Form"
-import { Coord } from "../../coord-system";
+import { Coord, P } from "../../utils/math/coord-system";
 import p5 from "p5";
 import { Tree, TreeNode } from "@/data-structure/tree";
 
 export abstract class CanvasObject {
-  public abstract readonly form:Form;
+  public position:Coord;
+
   public abstract update():this;
   public abstract render(p:p5):this;
   public abstract isIn(point:Coord):boolean;
   private node:TreeNode<CanvasObject>|undefined;
+
+  constructor(){
+    this.position = P(0, 0);
+  }
+
+  public move(vector:Coord){
+    this.position = this.position.add(vector);
+  }
 
   public get children(){
     return this.node!.children.map(c => c.data)

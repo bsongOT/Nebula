@@ -2,7 +2,7 @@ export * from "./components/Content"
 export * from "./components/Nebula"
 
 import { Tree } from "@/data-structure/tree"
-import { Coord, HexCoord } from "../../engine/coord-system"
+import { Coord, HexCoord } from "../../engine/utils/math/coord-system"
 import {Content} from "./components/Content"
 import { DataCollection } from "./DataCollection"
 import { Dust } from "./components/Dust"

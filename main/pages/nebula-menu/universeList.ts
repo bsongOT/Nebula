@@ -1,10 +1,10 @@
 import { span, ul } from "@/funcObject";
-import { selli } from "@/objects/list/selli";
+import { selli } from "@/objects/UI/list/selli";
 import { Universe } from "../../data/components/Universe";
 import { DataCollection } from "../../data/DataCollection";
-import { DTE } from "@/objects/DTE";
+import { UIManager } from "@/objects/UIManager";
 
-export class UniverseList extends DTE{
+export class UniverseList extends UIManager{
   public readonly element:HTMLUListElement;
   public readonly info
   public readonly layout;
@@ -15,13 +15,10 @@ export class UniverseList extends DTE{
     this.layout = {};
     this.init()
   }
-  public init(){
-    super.init()
-  }
   public update(){
     this.element.innerHTML = "";
 
-    const dataToElement = (univ:Universe) => selli(span()(univ.id.toString()))
+    const dataToElement = (univ:Universe) => selli()(span()(univ.id.toString()))
     this.element.append(...this.info.universes.map(dataToElement))
   }
   public detect(){

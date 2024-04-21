@@ -21,7 +21,7 @@ export class Coord{
       this.y - c2.y
     )
   }
-  public eq(c2:Coord):boolean{
+  public eq(c2:Coord){
     return this.x === c2.x && this.y === c2.y;
   }
   public scale(s:number){

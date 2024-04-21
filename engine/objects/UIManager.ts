@@ -2,10 +2,10 @@ import { engine } from "@/engine";
 import { CanvasObject } from "./CanvasObject";
 
 type Layout = {
-    [key:string]: Layout | HTMLElement | CanvasObject | undefined
+    [key:string|number]: Layout | HTMLElement | CanvasObject | undefined | (Layout | HTMLElement | CanvasObject | undefined)[]
 }
 
-export abstract class DTE {
+export abstract class UIManager {
   public abstract element:HTMLElement;
   public abstract info:Record<string, any>;
   public abstract layout:Layout;
@@ -20,4 +20,8 @@ export abstract class DTE {
   }
   public abstract update():void;
   public abstract detect():boolean;
+}
+
+export abstract class Mirror extends UIManager {
+  public abstract info:Readonly<Record<string, any>>;
 }

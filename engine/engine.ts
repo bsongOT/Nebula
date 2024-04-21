@@ -1,8 +1,4 @@
-import { Tree } from "./data-structure/tree"
-
-class Analyzer {
-
-}
+import { btn, div, li, span, ul } from "./funcObject";
 
 class Updater {
     private list:(()=>void)[] = []
@@ -18,10 +14,26 @@ class Updater {
     }
 }
 
+class Debug {
+    public element:HTMLElement;
+    private message:HTMLElement;
+    constructor(){
+        this.message = ul()()
+        this.element = div()(
+            btn({onclick: () => this.element.style.display = "none"})("X"),
+            this.message
+        )
+    }
+    public log(message?:any){
+        this.element.style.display = "block";
+        this.message.append(li()(span()(message)))
+    }
+    public erase(){
+        this.message.innerHTML = "";
+    }
+}
+
 export const engine = {
-    analyzer: new Analyzer(),
-    updater: new Updater(),/*
-    debugTool: () => {
-        return new WCanvasContainer()
-    }*/
+    updater: new Updater(),
+    debug: new Debug()
 }

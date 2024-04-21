@@ -1,13 +1,13 @@
-import { Container, Hexagon} from "@/objects/CanvasObject"
+import { CanvasObject, Container, Hexagon} from "@/objects/CanvasObject"
 import { StarTile } from "../../custom-object"
-import {H, P} from "@/coord-system"
+import {H, P} from "@/utils/math/coord-system"
 import { btn, canvas, div, li, span, ul } from "@/funcObject"
 import { Content, Nebula } from "../../data/Data"
-import { DTE } from "@/objects/DTE"
+import { UIManager } from "@/objects/UIManager"
 import { gridify } from "@/data-structure/utils"
-import { selli } from "@/objects/list/selli"
+import { selli } from "@/objects/UI/list/selli"
 
-class StarTreeNode {
+export class StarTreeNode {
   public readonly element:HTMLLIElement;
   public readonly layout:{
     main: HTMLDivElement,
@@ -24,7 +24,27 @@ class StarTreeNode {
     );
   }
 }
-export class StarTree extends DTE {
+export class StarTreeList extends UIManager {
+  public readonly element;
+  public readonly info;
+  public readonly layout;
+  constructor(attrs:{}){
+    super();
+    this.info = attrs;
+    this.layout = {
+
+    }
+    this.element = ul()(
+
+    )
+  }
+  public update(){
+  }
+  public detect(){
+    return false;
+  }
+}
+export class StarTree extends UIManager {
   public readonly layout;
   public readonly info;
   public readonly element;
@@ -78,14 +98,12 @@ export class StarTree extends DTE {
   public init(){
     const tree = this.info.nebula.tree.map(c => new StarTreeNode(c));
     tree.tourNode(tree.root, node => {
-      if (node.parent === tree.root){
-        this.layout.tree.append(node.data.element)
-      }
       node.data.layout.list.append(
         ...node.children.map(n => n.data.element)
       )
     })
-    this.layout.palette.list.append(...this.info.nebula.palette.map(c => selli(span()(c.title))))
+    this.layout.tree.append(...tree.root.children.map(n => n.data.element))
+    this.layout.palette.list.append(...this.info.nebula.palette.map(c => selli()(span()(c.title))))
     super.init()
   }
   public detect(){ return true; }
@@ -104,8 +122,8 @@ export class StarTree extends DTE {
       const tile = content ? new StarTile("none", content) : new Hexagon()
       const coord = pos.sub(pivot).toCoord(20).add(canvasCenter)
 
-      tile.form.moveAt(coord.x, coord.y)
-      tile.form.setSide(20)
+      tile.position = coord;
+      tile.side = 20;
 
       tileBox.adopt(tile)
     }
@@ -136,14 +154,14 @@ export class StarTree extends DTE {
   }
 
   public addIntoPalette(){
-    //this.layout.
+    this.layout.contentSelector.style.display = "block";
   }
 
   public removeFromPalette(){
     this.layout.palette.list.querySelector(".selected")?.remove()
   }
   
-  public PutIntoNebula(){
+  public putIntoNebula(){
     const item = this.layout.palette.list.querySelector(".selected")
     const content = this.paletteGroups.find(g => g.element === item)?.content
     if (!content) return;

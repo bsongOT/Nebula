@@ -2,7 +2,7 @@ import { body, div, span, ul } from "@/funcObject";
 import { data } from "../../data/Data";
 import { DataCollection } from "../../data/DataCollection";
 import { Tree } from "@/data-structure/tree";
-import { selli } from "@/objects/list/selli";
+import { selli } from "@/objects/UI/list/selli";
 
 const wildData = elementify(data);
 wildData.style.marginLeft= "0"
@@ -34,10 +34,10 @@ function elementify(data:any){
 body(
     wildData,
     ul()(
-      selli(span()("Dust")),
-      selli(span()("Content")),
-      selli(span()("Nebula")),
-      selli(span()("Universe")),
-      selli(span()("Relation"))
+      selli()(span()("Dust")),
+      selli()(span()("Content")),
+      selli()(span()("Nebula")),
+      selli()(span()("Universe")),
+      selli()(span()("Relation"))
     )
 )

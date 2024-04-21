@@ -1,5 +1,5 @@
 import {Nebula} from "./Nebula"
-import {Coord, HexCoord} from "../../../engine/coord-system"
+import {Coord, HexCoord, P} from "../../../engine/utils/math/coord-system"
 import { Content, data } from "../Data";
 import { DataComponent } from "./DataComponent";
 import { Relation } from "./Relation";
@@ -34,7 +34,7 @@ export class Universe implements DataComponent{
     ]
   }
   public isIn(x:number, y:number){
-    return this.nebulaInfos.some(n => n.worldPos.eq(new Coord(x, y)))
+    return this.nebulaInfos.some(n => n.worldPos.eq(P(x, y)))
   }
   public isInBoxRange(x:number, y:number){
     const xs = this.nebulaInfos.map(n => n.worldPos.x)

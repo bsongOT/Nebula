@@ -40,3 +40,24 @@
 * {
   font-family: sans-serif;
 }
+.switch-box{
+  padding: 0;
+}
+.switch-box > li {
+  display: inline-block;
+  list-style: none;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-right: none;
+  transition: 0.2s;
+}
+.switch-box > .selected {
+  background: #ddd;
+}
+.switch-box>:first-child{
+  border-radius: 10px 0 0 10px;
+}
+.switch-box>:last-child{
+  border-radius: 0 10px 10px 0;
+  border-right: 1px solid #ccc
+}

@@ -1,5 +1,5 @@
 import {emptyArr} from "../utils/utils"
-import {H, HexCoord} from "../coord-system"
+import {H, HexCoord} from "../utils/math/coord-system"
 
 export class HexGrid<T>{
   private $size:HexCoord

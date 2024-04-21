@@ -1,9 +1,8 @@
 import { engine } from "@/engine";
 import { span, table, td, tr } from "@/funcObject";
-import { emptyArr } from "@/utils/utils";
 import { DataCollection } from "../../data/DataCollection";
 import { Universe } from "../../data/components/Universe";
-import { Coord } from "@/coord-system";
+import { Coord } from "@/utils/math/coord-system";
 import { Nebula } from "../../data/Data";
 
 type UniverseMapInfo = {

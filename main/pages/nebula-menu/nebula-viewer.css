@@ -1,0 +1,129 @@
+.nebula-category {
+  position: relative;
+  width: 300px;
+  height: 285px;
+  margin: 0;
+  padding: 0;
+}
+.nebula-category > li {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.2s;
+  background: none;
+}
+
+.nebula-category>:nth-child(1){
+  position: absolute;
+  top: 30%;
+  left: 25%;
+  width: 50%;
+  height: 50%;
+}
+.nebula-category > :nth-child(n + 2){
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 62%;
+  height: 22.5%;
+  transform-origin: top left;
+}
+
+.nebula-category>:nth-child(2) {
+  top: 0;
+  left: 50%;
+  transform: rotate(36deg);
+}
+.nebula-category>:nth-child(3) {
+  top: 38%;
+  left: 100%;
+  transform: rotate(108deg);
+}
+.nebula-category>:nth-child(4) {
+  top: 100%;
+  left: 81%;
+  transform: rotate(180deg);
+}
+.nebula-category>:nth-child(5) {
+  top: 100%;
+  left: 19%;
+  transform: rotate(252deg);
+}
+.nebula-category>:nth-child(6) {
+  top: 38%;
+  left: 0;
+  transform: rotate(324deg);
+}
+
+.nebula-category > :nth-child(2) > *{
+  transform: rotate(-36deg);
+}
+.nebula-category > :nth-child(3) > *{
+  transform: rotate(-108deg);
+}
+.nebula-category > :nth-child(4) > *{
+  transform: rotate(-180deg);
+}
+.nebula-category > :nth-child(5) > *{
+  transform: rotate(-252deg);
+}
+.nebula-category > :nth-child(6) > *{
+  transform: rotate(-324deg);
+}
+
+.nebula-category > :nth-child(1)::before{
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  clip-path: polygon(50% 0, 100% 38%, 81% 100%, 19% 100%, 0% 38%);
+  background: white;
+}
+.nebula-category > :nth-child(n + 2)::before{
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  clip-path: polygon(0 0, 100% 0, 75% 100%, 25% 100%);
+}
+.nebula-category > :nth-child(2)::before{
+  background: orange;
+}
+.nebula-category > :nth-child(3)::before{
+  background: yellow;
+}
+.nebula-category > :nth-child(4)::before{
+  background: red;
+}
+.nebula-category > :nth-child(5)::before{
+  background: skyblue;
+}
+.nebula-category > :nth-child(6)::before{
+  background: grey;
+}
+
+.nebula-category > .selected {
+  z-index: 1;
+  scale: 1.2;
+  filter: drop-shadow(0 0 10px grey);
+}
+.nebula-category > :nth-child(1).selected {
+  translate: 0% -5%;
+}
+.nebula-category > :nth-child(2).selected {
+  transform: rotate(36deg) translate(-8.66%, -8.66%);
+}
+.nebula-category > :nth-child(3).selected {
+  transform: rotate(108deg) translate(-8.66%, -8.66%);
+}
+.nebula-category > :nth-child(4).selected {
+  transform: rotate(180deg) translate(-8.66%, -8.66%);
+}
+.nebula-category > :nth-child(5).selected {
+  transform: rotate(252deg) translate(-8.66%, -8.66%);
+}
+.nebula-category > :nth-child(6).selected {
+  transform: rotate(324deg) translate(-8.66%, -8.66%);
+}

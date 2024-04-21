@@ -1,0 +1,15 @@
+.nebula-list {
+    min-height: 200px;
+    border: 1px solid #ccc;
+}
+.nebula-list > li {
+    height: 25px;
+    border-bottom: 1px solid #ccc;
+}
+.nebula-list > li:last-child {
+    border-bottom: none;
+}
+.page-changer {
+    border: none;
+    background: none;
+}
