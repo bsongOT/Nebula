@@ -62,10 +62,6 @@ export class StarTree extends UIManager {
     element: HTMLLIElement;
   }[];
 
-  public selection: {
-    element: HTMLElement;
-  } | undefined;
-
   constructor(attributes: { nebula: Nebula; }) {
     super();
     this.info = attributes;
@@ -73,7 +69,7 @@ export class StarTree extends UIManager {
     this.layout = {
       tree: new StarTreeList(this.info),
       palette: {
-        list: ul({ onclick: () => this.layout.palette.inputArea.classList.add("hidden") })(),
+        list: ul({ onclick: () => this.layout.palette.inputArea.classList.remove("hidden") })(),
         inputArea: new NebulaPalette(this.info).element
       },
       nebulaModel: new NebulaModel(this.info)
@@ -100,30 +96,6 @@ export class StarTree extends UIManager {
   }
   public detect() { return false; }
   public update() {}
-  public updent() {
-    const left = this.selection?.element?.previousElementSibling;
-    if (!left) return;
-
-    left.insertAdjacentElement('beforebegin', this.selection!.element);
-  }
-  public downdent() {
-    const right = this.selection?.element?.nextElementSibling;
-    if (!right) return;
-
-    right.insertAdjacentElement('afterend', this.selection!.element);
-  }
-  public outdent() {
-    const parent = this.selection?.element?.parentElement;
-    if (!parent) return;
-
-    parent.insertAdjacentElement('afterend', this.selection!.element);
-  }
-  public indent() {
-    const left = this.selection?.element?.previousElementSibling;
-    if (!left) return;
-
-    left.append(this.selection!.element);
-  }
 
   public putIntoNebula() {
     const item = this.layout.palette.list.querySelector(".selected");

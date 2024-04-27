@@ -41,6 +41,7 @@ const element = <T extends Tag, C extends HTMLElement = HTMLElement>(tag:T) => (
         }
     )
 )
+export const textarea = simpleElement("textarea");
 export const inputText = independentElement("input")
 export const slider = (attrs?:Record<string,any>) => {
   const obj = independentElement("input")(attrs)();
