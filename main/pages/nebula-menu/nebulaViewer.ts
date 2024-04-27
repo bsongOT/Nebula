@@ -42,6 +42,15 @@ class LifetimeNebulaViewer {
   }
 }
 
+class DayNebulaViewer {
+  public readonly element:HTMLElement;
+  constructor(){
+    this.element = div()(
+      
+    )
+  }
+}
+
 export class NebulaViewer {
   public readonly element:HTMLElement;
   public readonly managers;

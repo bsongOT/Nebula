@@ -4,16 +4,22 @@ import "./menu.css"
 import { body, btn, div, span, ul, canvas } from "@/funcObject";
 import { selli } from "@/objects/UI/list/selli";
 import { UniverseMap } from "./universeMap";
-import { Coord } from "@/utils/math/coord-system";
+import { P } from "@/utils/math/coord-system";
 import { UniverseList } from "./universeList";
 import { NebulaViewer } from "./nebulaViewer";
 import { SimpleNebulaSelector } from "../../custom-object/NebulaSelectors/SimpleNebulaSelector";
 
 const memento = {
+  nebulaSelector: {
+    nebulas: data.nebulas,
+    page: 1,
+    capacity: 15,
+    keyword: ""
+  },
   universeMap: {
     size: 16,
     universes: data.universes,
-    viewPoint: new Coord(0, 0),
+    viewPoint: P(0, 0),
     selection: undefined,
     selectedNebula: undefined
   },
@@ -52,7 +58,7 @@ for (const sg of switchGroups){
 
 body(
   upperMenu(),
-  new SimpleNebulaSelector({nebulas: data.nebulas}).element,
+  new SimpleNebulaSelector(memento.nebulaSelector).element,
   new NebulaViewer().element,
   div({class: "universe"})(
     btn({onclick: () => data.addUniverse()})("New Universe"),

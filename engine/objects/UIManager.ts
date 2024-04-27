@@ -2,7 +2,7 @@ import { engine } from "@/engine";
 import { CanvasObject } from "./CanvasObject";
 
 type Layout = {
-    [key:string|number]: Layout | HTMLElement | CanvasObject | undefined | (Layout | HTMLElement | CanvasObject | undefined)[]
+    [key:string|number]: Layout | UIManager | HTMLElement | CanvasObject | undefined | (Layout | UIManager | HTMLElement | CanvasObject | undefined)[]
 }
 
 export abstract class UIManager {
