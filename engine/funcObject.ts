@@ -9,7 +9,7 @@ const create = <T extends Tag>(tag:T, attrs?:Record<string,any>) => {
     const obj = document.createElement(tag)
     for(let a in attrs){
         if (a === "class"){
-            obj.classList.add(attrs.class)
+            obj.classList.add(...attrs.class.split(" "))
         }
         else if (a.startsWith("on")){
             (obj as any)[a] = attrs[a]

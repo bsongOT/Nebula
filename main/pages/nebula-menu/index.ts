@@ -6,35 +6,34 @@ import { selli } from "@/objects/UI/list/selli";
 import { UniverseMap } from "./universeMap";
 import { P } from "@/utils/math/coord-system";
 import { UniverseList } from "./universeList";
-import { NebulaViewer } from "./nebulaViewer";
-import { SimpleNebulaSelector } from "../../custom-object/NebulaSelectors/SimpleNebulaSelector";
+import { Universe } from "../../data/components/Universe";
+import { StarTree } from "../nebula/StarTree";
+import { NebulaViewer } from "./nebula-viewer/nebulaViewer";
 
 const memento = {
-  nebulaSelector: {
-    nebulas: data.nebulas,
-    page: 1,
-    capacity: 15,
-    keyword: ""
-  },
   universeMap: {
     size: 16,
-    universes: data.universes,
-    viewPoint: P(0, 0),
-    selection: undefined,
-    selectedNebula: undefined
+    viewPoint: P(0, 0)
   },
-  universeList: {
-    universes: data.universes
+  data: {
+    universes: data.universes,
+    relations: data.relations,
+    nebulas: data.nebulas,
+    contents: data.contents,
+    dusts: data.dusts
+  },
+  selection: {
+    universe: undefined as Universe | undefined,
+    nebula: undefined,
+    content: undefined
   }
 }
 
 const layout = {
-  map: new UniverseMap(memento.universeMap),
+  map: new UniverseMap(memento.universeMap, memento.selection, memento.data),
   minimap: canvas({width: 400})(),
-  list: new UniverseList(memento.universeList),
-  nebulaEditor: {
-    
-  }
+  nebulaViewer: new NebulaViewer(),
+  list: new UniverseList(memento.data, memento.selection),
 }
 
 const switchGroups = [
@@ -44,6 +43,9 @@ const switchGroups = [
   },{
     switch: selli()(span()("Minimap")),
     element: layout.minimap
+  },{
+    switch: selli()(span()("Nebula")),
+    element: layout.nebulaViewer.element
   }
 ]
 
@@ -58,11 +60,13 @@ for (const sg of switchGroups){
 
 body(
   upperMenu(),
-  new SimpleNebulaSelector(memento.nebulaSelector).element,
-  new NebulaViewer().element,
   div({class: "universe"})(
     btn({onclick: () => data.addUniverse()})("New Universe"),
-    btn({onclick: () => data.addNebula("Untitled", data.universes.get(Number(layout.list.element.querySelector<HTMLElement>(".selected")!.innerText))!)})("New Nebula"),
+    btn({onclick: () => {
+      const univ = memento.selection.universe;
+      if(!univ) return;
+      data.addNebula("Untitled", univ)
+    }})("New Nebula"),
     div()(span()(`x: 0, y: 0`)),
     div()(
       ul({class: "switch-box"})(
@@ -73,6 +77,9 @@ body(
       )
     ),
     layout.list.element
+  ),
+  div()(
+    new StarTree(memento.data, memento.selection).element
   )
 );
 

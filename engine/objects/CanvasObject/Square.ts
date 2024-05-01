@@ -1,24 +1,25 @@
-import { Form } from "@/factors/forms/Form";
-import { Coord } from "../../utils/math/coord-system";
-import { PolygonForm } from "../../factors/forms/PolygonForm";
+import { Coord, P } from "../../utils/math/coord-system";
 import { CanvasObject } from "./CanvasObject";
 import p5 from "p5";
 
 export class Square extends CanvasObject{
-  public readonly form: PolygonForm;
+  public position;
+  public side;
+  public color:string|undefined
   constructor(){
     super()
-    this.form = new PolygonForm()
+    this.position = P(0, 0)
+    this.side = 10;
   }
   public update() {
     return this
   }
   public render(p:p5) {
-    const [x,y] = [this.form.position.x, this.form.position.y]
-    const s = this.form.side;
+    const [x,y] = [this.position.x, this.position.y]
+    const s = this.side;
     p.push()
-    if (this.form.color)
-      p.fill(this.form.color)
+    if (this.color)
+      p.fill(this.color)
     p.rect(x,y,s,s)
     p.pop()
 
@@ -26,12 +27,12 @@ export class Square extends CanvasObject{
   }
   public isIn(point: Coord): boolean {
     const [px, py] = [point.x, point.y];
-    const [x, y] = [this.form.position.x, this.form.position.y]
+    const [x, y] = [this.position.x, this.position.y]
     
     if (px < x) return false;
-    if (px > x + this.form.side) return false;
+    if (px > x + this.side) return false;
     if (py < y) return false;
-    if (py > y + this.form.side) return false;
+    if (py > y + this.side) return false;
     
     return true;
   }

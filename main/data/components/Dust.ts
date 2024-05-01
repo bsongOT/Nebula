@@ -5,9 +5,12 @@ export class Dust implements DataComponent{
   public kernelPath:string;
   public id:number;
 
-  constructor(){
-    this.claim = "";
-    this.kernelPath = "";
+  constructor(info?:{
+    claim?:string,
+    kernelPath?:string
+  }){
+    this.claim = info?.claim ?? "";
+    this.kernelPath = info?.kernelPath ?? "";
     this.id = -1;
   }
 }

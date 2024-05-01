@@ -1,60 +1,18 @@
-import { Container, Hexagon } from "@/objects/CanvasObject";
-import { StarTile } from "../../custom-object";
-import { H, P } from "@/utils/math/coord-system";
-import { btn, canvas, div, span, ul } from "@/funcObject";
+import { btn, div, li, span, ul } from "@/funcObject";
 import { Content, Nebula } from "../../data/Data";
 import { UIManager } from "@/objects/UIManager";
-import { gridify } from "@/data-structure/utils";
 import { selli } from "@/objects/UI/list/selli";
 import { NebulaPalette } from "./NebulaPalette";
 import { StarTreeList, StarTreeNode } from ".";
+import { DataCollection } from "../../data/DataCollection";
+import { NebulaModel } from "./NebulaModel";
+import { UIUpdater } from "@/objects/UIUpdater";
 
-export class NebulaModel extends UIManager {
-  public readonly layout;
-  public readonly info;
-  public readonly element;
-
-  constructor(attrs: {nebula: Nebula}){
-    super();
-    this.info = attrs;
-    this.layout = {
-      tileBox: new Container(),
-      effectBox: new Container()
-    }
-    this.element = canvas()(
-      this.layout.tileBox,
-      this.layout.effectBox
-    )
-    this.init()
-  }
-  public update(){
-    this.layout.tileBox.empty();
-
-    const tileBox = this.layout.tileBox;
-    const canvasSize = this.element.clientWidth;
-    const canvasCenter = P(1, 1).scale(canvasSize / 2)
-    const grid = gridify(this.info.nebula.tree)
-    const size = grid.size.x;
-    const pivot = H(1, 0, 1).scale(size - 1);
-
-    for (const pos of grid.range){
-      const content = grid.at(pos);
-      const tile = content ? new StarTile("none", content) : new Hexagon()
-      const coord = pos.sub(pivot).toCoord(20).add(canvasCenter)
-
-      tile.position = coord;
-      tile.side = 20;
-
-      tileBox.adopt(tile)
-    }
-  }
-  public detect(){
-    return true;
-  }
-}
 export class StarTree extends UIManager {
   public readonly layout;
   public readonly info;
+  public readonly data;
+  public readonly selection;
   public readonly element;
 
   public paletteGroups: {
@@ -62,51 +20,57 @@ export class StarTree extends UIManager {
     element: HTMLLIElement;
   }[];
 
-  constructor(attributes: { nebula: Nebula; }) {
+  constructor(data:{contents: DataCollection<Content> }, selection: {nebula?: Nebula}) {
     super();
-    this.info = attributes;
+    this.info = {};
+    this.data = data;
+    this.selection = selection;
     this.paletteGroups = [];
     this.layout = {
-      tree: new StarTreeList(this.info),
-      palette: {
-        list: ul({ onclick: () => this.layout.palette.inputArea.classList.remove("hidden") })(),
-        inputArea: new NebulaPalette(this.info).element
-      },
-      nebulaModel: new NebulaModel(this.info)
+      tree: new StarTreeList(this.selection),
+      palette: new NebulaPalette(data, selection),
+      nebulaModel: new NebulaModel(selection),
+      view: div()()
     };
     this.element = div()(
       div()(
-        this.layout.palette.list,
-        this.layout.palette.inputArea
+        btn({onclick: () => this.switchView(this.layout.palette)})("Palette"),
+        div()(
+          btn({class: "bringer"})("->"),
+          new UIUpdater(span()(""), {innerText: () => `${this.layout.palette.info.selectedContents.length}개 선택됨`}).element
+        ),
+        btn({onclick: () => this.switchView(this.layout.tree)})("Tree")
       ),
-      btn({ class: "bringer", onclick: () => this.putIntoNebula() })("->"),
-      this.layout.tree.element,
+      this.layout.view,
       div({ class: "arrow-keys" })(
-        btn({ class: "up-arrow", onclick: () => this.updent() })("위"),
-        btn({ class: "left-arrow", onclick: () => this.outdent() })("왼"),
-        btn({ class: "down-arrow", onclick: () => this.downdent() })("밑"),
-        btn({ class: "right-arrow", onclick: () => this.indent() })("오")
+        btn({ class: "up-arrow", onclick: () => this.layout.tree.updent() })("위"),
+        btn({ class: "left-arrow", onclick: () => this.layout.tree.outdent() })("왼"),
+        btn({ class: "down-arrow", onclick: () => this.layout.tree.downdent() })("밑"),
+        btn({ class: "right-arrow", onclick: () => this.layout.tree.indent() })("오")
       ),
-      this.layout.nebulaModel.element
+      this.layout.nebulaModel.element,
+      this.layout.palette.layout.text.element
     );
     this.init();
   }
   public init() {
-    this.layout.palette.list.append(...this.info.nebula.palette.map(c => selli()(span()(c.title))));
+    this.layout.view.append(this.layout.palette.element)
+    super.init();
   }
   public detect() { return false; }
   public update() {}
 
+  public switchView(view:UIManager){
+    this.layout.view.innerHTML = "";
+    this.layout.view.append(view.element)
+  }
+
   public putIntoNebula() {
-    const item = this.layout.palette.list.querySelector(".selected");
-    const content = this.paletteGroups.find(g => g.element === item)?.content;
-    if (!item || !content) return;
-    this.layout.tree.append(new StarTreeNode(content).element);
-    item.classList.add("inserted");
+    const select = this.layout.palette.info.selectedContent;
 
-    const lastInserteds = [...this.layout.palette.list.children].find(c => c.classList.contains("inserted"))
+    if (!select) return;
 
-    if (lastInserteds) lastInserteds.before(item)
-    else this.layout.palette.list.insertAdjacentElement('beforeend', item)
+    this.layout.palette.kill();
+    this.layout.tree.insert(select)
   }
 }

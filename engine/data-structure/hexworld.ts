@@ -1,5 +1,5 @@
 import { HexCoord } from "../utils/math/coord-system/HexCoord";
-import { emptyArr } from "../utils/utils";
+import { range } from "../utils/utils";
 import { HexGrid } from "./hexgrid";
 
 export class HexWorld<T> extends HexGrid<T> {
@@ -16,7 +16,7 @@ export class HexWorld<T> extends HexGrid<T> {
             )) + 1;
 
             for (let i=0;i<newSize-x;i++){
-                this.datas.push(emptyArr(y+z-1), emptyArr(y+z-1))
+                this.datas.push(range(y+z-1).map(n => undefined), range(y+z-1).map(n => undefined))
                 this.datas.forEach(l => l.push(undefined, undefined))
             }
             if (newSize > x)

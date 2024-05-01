@@ -16,12 +16,14 @@
 .universe-map > tr > td.valid {
   box-shadow: none;
 }
-.universe-map > tr > td.selected-cell {
-  box-shadow:
-    0 0 3px #f00 inset;
+.universe-map > tr > td.grown.special {
+  box-shadow:0 0 3px #f00 inset;
+}
+.universe-map > tr > td.grown {
+  z-index: 1;
 }
 .clear {
-  opacity: 0.6;
+  opacity: 0.3;
 }
 .nebula-title {
   position: absolute;

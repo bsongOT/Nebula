@@ -8,8 +8,10 @@ export class Content implements DataComponent{
   dusts:Tree<Dust>;
   actor:string;
   
-  constructor(){
-    this.title = "";
+  constructor(info?:{
+    title?: string
+  }){
+    this.title = info?.title ?? "";
     this.id = -1;
     this.dusts = new Tree()
     this.actor = "./default-actor.js"

@@ -8,6 +8,7 @@ export class Universe implements DataComponent{
   nebulaInfos:NebulaInfo[];
   relations:Relation[];
   id: number;
+  
   constructor(){
     this.nebulaInfos = []
     this.relations = []

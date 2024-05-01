@@ -9,8 +9,11 @@ export class Nebula implements DataComponent{
   name:string;
   tree:Tree<Content>;
   palette:Content[];
-  constructor(){
-    this.name = "";
+
+  constructor(info?:{
+    name?: string,
+  }){
+    this.name = info?.name ?? "";
     this.id = -1;
     this.tree = new Tree()
     this.palette = [];

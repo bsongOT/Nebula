@@ -5,15 +5,16 @@ import { UIManager } from "@/objects/UIManager"
 import { DataCollection } from "../../data/DataCollection"
 import { Tree } from "@/data-structure/tree"
 
-export class StarTreeNode {
+export class StarTreeNode extends UIManager{
   public readonly element:HTMLLIElement;
   public readonly content:Content;
-  public readonly layout:{
-    main: HTMLDivElement,
-    list: HTMLUListElement
-  }
+  public readonly info;
+  public readonly layout
+
   constructor(content:Content){
+    super();
     this.content = content;
+    this.info = {}
     this.layout = {
       main: div()(span()(content.title)),
       list: ul()()
@@ -22,50 +23,69 @@ export class StarTreeNode {
       this.layout.main,
       this.layout.list
     );
+    this.init()
   }
+  public update(){}
+  public detect = () => false;
 }
 export class StarTreeList extends UIManager {
   public readonly element;
   public readonly info;
   public readonly layout;
+  public readonly selection;
 
-  public selection:StarTreeNode | undefined;
+  private nodePairs:StarTreeNode[]
+  public selectedNode: StarTreeNode | undefined;
 
-  constructor(attrs:{nebula: Nebula}){
+  constructor(selection:{nebula?: Nebula}){
     super();
-    this.info = attrs;
+    this.info = {};
+    this.selection = selection;
     this.layout = {}
     this.element = ul()()
+    this.nodePairs = [];
     this.init();
   }
 
+  public insert(content:Content){
+    const node = new StarTreeNode(content);
+    
+    this.nodePairs.push(node);
+    this.element.append(node.element);
+  }
+
   public updent() {
-    const left = this.selection?.element?.previousElementSibling;
+    const left = this.selectedNode?.element?.previousElementSibling;
     if (!left) return;
 
-    left.insertAdjacentElement('beforebegin', this.selection!.element);
+    left.insertAdjacentElement('beforebegin', this.selectedNode!.element);
   }
   public downdent() {
-    const right = this.selection?.element?.nextElementSibling;
+    const right = this.selectedNode?.element?.nextElementSibling;
     if (!right) return;
 
-    right.insertAdjacentElement('afterend', this.selection!.element);
+    right.insertAdjacentElement('afterend', this.selectedNode!.element);
   }
   public outdent() {
-    const parent = this.selection?.element?.parentElement;
+    const parent = this.selectedNode?.element?.parentElement?.parentElement;
+
     if (!parent) return;
 
-    parent.insertAdjacentElement('afterend', this.selection!.element);
+    parent.insertAdjacentElement('afterend', this.selectedNode!.element);
   }
   public indent() {
-    const left = this.selection?.element?.previousElementSibling;
-    if (!left) return;
+    const left = this.selectedNode?.element?.previousElementSibling;
+    const leftList = this.nodePairs.find(n => n.element === left)?.layout?.list
 
-    left.append(this.selection!.element);
+    if (!leftList) return;
+
+    leftList.append(this.selectedNode!.element);
   }
 
   public init(){
-    const tree = this.info.nebula.tree.map(c => new StarTreeNode(c))
+    if (!this.selection.nebula) return;
+    const tree = this.selection.nebula.tree.map(c => new StarTreeNode(c))
+    this.nodePairs = tree.nodes.map(n => n.data)
     tree.tourNode(tree.root, n => {
       n.data.layout.list.append(
         ...n.children.map(c => c.data.element)

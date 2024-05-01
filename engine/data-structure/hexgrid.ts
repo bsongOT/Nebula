@@ -1,4 +1,4 @@
-import {emptyArr} from "../utils/utils"
+import {range} from "../utils/utils"
 import {H, HexCoord} from "../utils/math/coord-system"
 
 export class HexGrid<T>{
@@ -14,8 +14,8 @@ export class HexGrid<T>{
   constructor(size:HexCoord){
     const [x, y, z] = [size.x, size.y, size.z]
     this.$size = size
-    this.datas = emptyArr(x+y-1)
-                .map(v => emptyArr(y+z-1))
+    this.datas = range(x+y-1)
+                .map(v => range(y+z-1).map(_ => undefined))
   }
   at(h:HexCoord):T|undefined{
     return this.datas[h.y+h.z]?.[h.x+h.y]
