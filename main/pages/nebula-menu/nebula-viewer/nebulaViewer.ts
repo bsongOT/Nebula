@@ -46,7 +46,34 @@ class DayNebulaViewer {
   public readonly element:HTMLElement;
   constructor(){
     this.element = div()(
-      
+      span()("Period"),
+      slider({value: 1, min: 1, max: 100}),
+      div()(
+        btn()("1 day"),
+        btn()("3 days"),
+        btn()("1 week"),
+        btn()("2 weeks"),
+        btn()("1 month")
+      ),
+      ul()()
+    )
+  }
+}
+
+class ImportanceNebulaViewer {
+  public readonly element:HTMLElement;
+  constructor(){
+    this.element = div()(
+      span()("gap"),
+      slider({ value: 0 }),
+      btn()("-5"), btn()("-3"), btn()("-1"),
+      btn()("+1"), btn()("+3"), btn()("+5"),
+      ul()(
+        li()(span()("Nebula Count")),
+        li()(span()("Parent Count")),
+        li()(span()("Child Count")),
+        li()(span()("Dust Count"))
+      )
     )
   }
 }
@@ -58,7 +85,9 @@ export class NebulaViewer {
   constructor(){
     this.managers = {
       common: new CommonNebulaViewer(data.nebulas),
-      lifetime: new LifetimeNebulaViewer()
+      lifetime: new LifetimeNebulaViewer(),
+      day: new DayNebulaViewer(),
+      importance: new ImportanceNebulaViewer()
     }
     this.layout = {
       bodyGroup: [{
@@ -69,52 +98,32 @@ export class NebulaViewer {
         element: this.managers.lifetime.element
       },{
         switch: selli()(span()("Day")),
+        element: this.managers.day.element
+      },{
+        switch: selli()(span()("Importance")),
+        element: this.managers.importance.element
+        },{
+        switch: selli()(span()("Query")),
         element: div()(
-            span()("Period"),
-            slider({value: 1, min: 1, max: 100}),
-            btn()("1 day"),
-            btn()("3 days"),
-            btn()("1 week"),
-            btn()("2 weeks"),
-            btn()("1 month"),
-            ul()() //tree
-          )
-      },{
-          switch: selli()(span()("Importance")),
-          element: div()(
-            span()("gap"),
-            slider({value: 0}),
-            btn()("-5"), btn()("-3"), btn()("-1"),
-            btn()("+1"), btn()("+3"), btn()("+5"),
-            ul()(
-              li()(span()("Nebula Count")),
-              li()(span()("Parent Count")),
-              li()(span()("Child Count")),
-              li()(span()("Dust Count"))
+          ul()(), // Query Nebula List
+          div()(
+          span()("Main"),
+            btn()("search"),
+          ),
+          div()(
+            span()("Query"),
+            div()(
+              span()("Main") //main
+              /**
+               * nebula
+               * and
+               * or
+               * not
+               */
             )
           )
-      },{
-          switch: selli()(span()("Query")),
-          element: div()(
-            ul()(), // Query Nebula List
-            div()(
-              span()("Main"),
-              btn()("search"),
-            ),
-            div()(
-              span()("Query"),
-              div()(
-                span()("Main") //main
-                /**
-                 * nebula
-                 * and
-                 * or
-                 * not
-                 */
-              )
-            )
-          )
-      },{
+        )
+        },{
           switch: selli()(span()("Transform")),
           element: div()(
             ul()(

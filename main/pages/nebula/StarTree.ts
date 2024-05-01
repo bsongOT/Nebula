@@ -1,7 +1,6 @@
 import { btn, div, li, span, ul } from "@/funcObject";
 import { Content, Nebula } from "../../data/Data";
 import { UIManager } from "@/objects/UIManager";
-import { selli } from "@/objects/UI/list/selli";
 import { NebulaPalette } from "./NebulaPalette/NebulaPalette";
 import { StarTreeList } from "./TreeList/StarTreeList";
 import { StarTreeNode } from "./TreeList/StarTreeNode";

@@ -1,8 +1,7 @@
-import { btn, div, inputText, span, ul } from "@/funcObject";
+import { btn, div, inputText, li, span, ul } from "@/funcObject";
 import { UIManager } from "@/objects/UIManager";
 import { DataCollection } from "../../data/DataCollection";
 import { Nebula } from "../../data/Data";
-import { selli } from "@/objects/UI/list/selli";
 import "./simpleNebulaSelector.css"
 
 type SimpleNebulaSelectorInfo = {
@@ -53,7 +52,7 @@ export class SimpleNebulaSelector extends UIManager {
     public update() {
         this.layout.list.innerHTML = "";
         this.layout.items = this.info.nebulas.map(n => (
-            selli()(
+            li({onclick: e => (e.target as HTMLElement).classList.add("selected")})(
                 span()(n.id.toString()),
                 span()(n.name)
             )

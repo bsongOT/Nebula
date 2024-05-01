@@ -1,1 +1,3 @@
-export const no_open_target = "오픈할 대상을 선택해주세요."
+export const messages = {
+  no_content: "컨텐트가 없습니다."
+}
