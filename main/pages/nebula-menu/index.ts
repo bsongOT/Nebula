@@ -1,4 +1,4 @@
-import { upperMenu} from "../../custom-object/"
+import { upperMenu} from "../../global objects"
 import {data} from "../../data/Data"
 import "./menu.css"
 import { body, btn, div, span, ul, canvas } from "@/funcObject";

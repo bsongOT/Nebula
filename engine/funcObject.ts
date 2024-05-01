@@ -2,29 +2,30 @@ import p5 from "p5";
 import { CanvasObject } from "./objects/CanvasObject";
 import { Tree, TreeNode } from "./data-structure/tree";
 import { Coord } from "./utils/math/coord-system";
-import { isTypeReferenceNode } from "typescript";
 
 type Tag = keyof HTMLElementTagNameMap;
-const create = <T extends Tag>(tag:T, attrs?:Record<string,any>) => {
-    const obj = document.createElement(tag)
-    for(let a in attrs){
-        if (a === "class"){
-            obj.classList.add(...attrs.class.split(" "))
+type Attribute<T extends Tag> = Partial<HTMLElementTagNameMap[T]> & {class?:string};
+const create = <T extends Tag>(tag:T, attrs?:Attribute<T>) => {
+    const obj = document.createElement(tag);
+    for(const key in attrs){
+        const k = key as keyof Attribute<T>
+
+        if (k === "class"){
+            obj.classList.add(...attrs.class!.split(" "))
         }
-        else if (a.startsWith("on")){
-            (obj as any)[a] = attrs[a]
+        else {
+            obj[key as keyof HTMLElementTagNameMap[T]] = (attrs as any)[key as keyof HTMLElementTagNameMap[T]]!;
         }
-        else obj.setAttribute(a, attrs[a])
     }
-    return obj as HTMLElementTagNameMap[T];
+    return obj;
 }
 const independentElement = <T extends Tag>(tag:T) => (
-    (attrs?:Record<string, any>) => (
+    (attrs?:Attribute<T>) => (
         () => create(tag, attrs)
     )
 )
 const simpleElement = <T extends Tag>(tag:T) => (
-    (attrs?:Record<string,any>) => (
+    (attrs?:Attribute<T>) => (
         (text:string) => {
             const obj = create(tag, attrs)
             obj.innerText = text;
@@ -33,7 +34,7 @@ const simpleElement = <T extends Tag>(tag:T) => (
     )
 )
 const element = <T extends Tag, C extends HTMLElement = HTMLElement>(tag:T) => (
-    (attrs?:Record<string,any>) => (
+    (attrs?:Attribute<T>) => (
         (...children:C[]) => {
             const obj = create(tag, attrs);
             obj.append(...children)

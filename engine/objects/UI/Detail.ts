@@ -1,6 +1,11 @@
 import { div } from "@/funcObject";
 import "../styles/Detail.css"
 
+export class Detail {
+  constructor(){
+    
+  }
+}
 export const detail = (toggle:HTMLButtonElement, content:HTMLElement) => {
   const obj = div({class: "detail detail-collapsed"})(
     toggle,

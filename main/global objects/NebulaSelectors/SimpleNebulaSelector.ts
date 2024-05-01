@@ -19,9 +19,19 @@ export class SimpleNebulaSelector extends UIManager {
     constructor(attributes:SimpleNebulaSelectorInfo){
         super();
         this.info = attributes;
+        const memento = {
+            capacity: {
+                type: "number", 
+                value: this.info.capacity.toString(), 
+                onchange: () => this.info.capacity = Number(this.layout.capacity.value)
+            },
+            search: {
+                oninput: ()=>this.info.keyword = this.layout.search.value
+            }
+        }
         this.layout = {
-            capacity: inputText({type: "number", value: this.info.capacity, onchange: () => this.info.capacity = Number(this.layout.capacity.value)})(),
-            search: inputText({oninput: ()=>this.info.keyword = this.layout.search.value})(),
+            capacity: inputText(memento.capacity)(),
+            search: inputText(memento.search)(),
             list: ul({class: "nebula-list"})(),
             items: new Array<HTMLLIElement>(),
             pageDecreaser: btn({class: "page-changer", onclick: () => this.info.page!--})("<"),

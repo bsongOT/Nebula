@@ -1,4 +1,4 @@
-import { upperMenu } from "../../custom-object";
+import { upperMenu } from "../../global objects";
 import { body, div } from "@/funcObject";
 
 

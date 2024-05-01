@@ -1,8 +1,15 @@
 import { div } from "@/funcObject";
 import "../../styles/RadioBox.css"
 
-export const radioBox = (...children:HTMLInputElement[]) => {
-  if (children.some(c => c.type !== "radio")) throw "Only radio can be child";
+export class RadioBox {
+  public readonly element;
+  public readonly info;
 
-  return div({class: "radio-box"})(...children)
+  constructor(attrs:{
+    direction?:"row"|"column",
+    children: HTMLElement[]
+  }){
+    this.info = attrs;
+    this.element = div()(...attrs.children);
+  }
 }

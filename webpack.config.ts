@@ -5,7 +5,6 @@ module.exports = {
   entry: {
     index: './main/pages/main/index.ts',
     nebulaMenu: "./main/pages/nebula-menu/index.ts",
-    nebula: './main/pages/nebula/index.ts',
     content: './main/pages/content-page/index.ts',
     data: "./main/pages/_develop/data.ts"
   },
@@ -43,11 +42,6 @@ module.exports = {
       template: './main/pages/nebula-menu/nebula-menu.html',
       filename: "nebula-menu.html",
       chunks: ["nebulaMenu"]
-    }),
-    new HtmlWebpackPlugin({
-      template: './main/pages/nebula/nebula.html',
-      filename: "nebula.html",
-      chunks: ["nebula"]
     }),
     new HtmlWebpackPlugin({
       template: './main/pages/content-page/content-page.html',

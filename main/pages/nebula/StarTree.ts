@@ -2,11 +2,11 @@ import { btn, div, li, span, ul } from "@/funcObject";
 import { Content, Nebula } from "../../data/Data";
 import { UIManager } from "@/objects/UIManager";
 import { selli } from "@/objects/UI/list/selli";
-import { NebulaPalette } from "./NebulaPalette";
-import { StarTreeList, StarTreeNode } from ".";
+import { NebulaPalette } from "./NebulaPalette/NebulaPalette";
+import { StarTreeList } from "./TreeList/StarTreeList";
+import { StarTreeNode } from "./TreeList/StarTreeNode";
 import { DataCollection } from "../../data/DataCollection";
-import { NebulaModel } from "./NebulaModel";
-import { UIUpdater } from "@/objects/UIUpdater";
+import { NebulaModel } from "./NebulaModel/NebulaModel";
 
 export class StarTree extends UIManager {
   public readonly layout;
@@ -22,7 +22,9 @@ export class StarTree extends UIManager {
 
   constructor(data:{contents: DataCollection<Content> }, selection: {nebula?: Nebula}) {
     super();
-    this.info = {};
+    this.info = {
+
+    };
     this.data = data;
     this.selection = selection;
     this.paletteGroups = [];
@@ -37,7 +39,7 @@ export class StarTree extends UIManager {
         btn({onclick: () => this.switchView(this.layout.palette)})("Palette"),
         div()(
           btn({class: "bringer"})("->"),
-          new UIUpdater(span()(""), {innerText: () => `${this.layout.palette.info.selectedContents.length}개 선택됨`}).element
+          span()("")
         ),
         btn({onclick: () => this.switchView(this.layout.tree)})("Tree")
       ),
@@ -49,7 +51,7 @@ export class StarTree extends UIManager {
         btn({ class: "right-arrow", onclick: () => this.layout.tree.indent() })("오")
       ),
       this.layout.nebulaModel.element,
-      this.layout.palette.layout.text.element
+      this.layout.palette.layout.input.text
     );
     this.init();
   }
@@ -66,11 +68,9 @@ export class StarTree extends UIManager {
   }
 
   public putIntoNebula() {
-    const select = this.layout.palette.info.selectedContent;
-
-    if (!select) return;
+    const select = this.layout.palette.info.selectedContents;
 
     this.layout.palette.kill();
-    this.layout.tree.insert(select)
+    this.layout.tree.insert(...select)
   }
 }

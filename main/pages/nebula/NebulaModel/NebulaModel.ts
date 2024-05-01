@@ -1,11 +1,10 @@
 import { Container, Hexagon } from "@/objects/CanvasObject";
-import { StarTile } from "../../custom-object";
+import { StarTile } from "../../../global objects";
 import { H, P } from "@/utils/math/coord-system";
 import { canvas } from "@/funcObject";
-import { Nebula } from "../../data/Data";
+import { Nebula } from "../../../data/Data";
 import { UIManager } from "@/objects/UIManager";
 import { gridify } from "@/data-structure/utils";
-
 
 export class NebulaModel extends UIManager {
   public readonly layout;
