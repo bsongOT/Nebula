@@ -41,10 +41,22 @@ body {
   }
 }
 .cell-picker {
+  display: flex;
+  flex-direction: column;
   width: 200px;
   height: 100px;
   background-color: white;
   border: 1px solid black;
+}
+.cell-picker > .ok-button {
+  margin: 5px 10px 0 10px;
+}
+.picker-top {
+  position: relative;
+}
+.picker-top > .close-button{
+  position: absolute;
+  right: 5px;
 }
 .universe-map > tr > td.valid {
   box-shadow: none;

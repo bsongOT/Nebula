@@ -84,10 +84,15 @@ export class UniverseMap extends UIManager {
       picker: div({}, {
         className: () => `cell-picker ${this.info.pickedPosition ? "" : "hidden"}`
       })(
-        span()("New Universe"),        
-        btn()("X"),
+        div({class: "picker-top"})(
+          span()("New Universe"),        
+          btn({
+            class: "close-button",
+            onclick: () => this.info.pickedPosition = undefined
+          })("X"),
+        ),
         inputText()(),
-        btn()("확인")
+        btn({class: "ok-button"})("확인")
       )
     }
     this.element = div({class: "universe-map-box"})(
