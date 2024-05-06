@@ -37,11 +37,8 @@ export class UniverseList extends UIManager{
       this.prevSelection = this.selection.universe;
     }
     if (result === "selection"){
-      this.pairs.find(p => p.universe === this.selection.universe)?.element?.click()
+      this.pairs.find(p => p.universe === this.selection.universe)?.element.click()
     }
-  }
-  public detect(){
-    return true;
   }
   public detectState(){
     const uvs = this.info.universes.all();

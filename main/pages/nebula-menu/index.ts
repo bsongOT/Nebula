@@ -61,12 +61,6 @@ for (const sg of switchGroups){
 body(
   upperMenu(),
   div({class: "universe"})(
-    btn({onclick: () => data.universes.add(new Universe())})("New Universe"),
-    btn({onclick: () => {
-      const univ = memento.selection.universe;
-      if(!univ) return;
-      data.nebulas.add(new Nebula({name: "Untitled"}))
-    }})("New Nebula"),
     div()(
       ul({class: "switch-box"})(
         ...switchGroups.map(sg => sg.switch)

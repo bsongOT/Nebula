@@ -15,21 +15,20 @@ class Updater {
 }
 
 class Debug {
-    public element:HTMLElement;
-    private message:HTMLElement;
-    constructor(){
-        this.message = ul()()
-        this.element = div()(
-            btn({onclick: () => this.element.style.display = "none"})("X"),
-            this.message
+    private message = "";
+    private isShown = false;
+    public logger(){
+        return div()(
+            btn({onclick: () => this.isShown = false})("X"),
+            div({}, {innerText: () => this.message})()
         )
     }
     public log(message?:any){
-        this.element.style.display = "block";
-        this.message.append(li()(span()(message)))
+        this.message += message + "\n";
+        this.isShown = true;
     }
     public erase(){
-        this.message.innerHTML = "";
+        this.message = "";
     }
 }
 

@@ -4,12 +4,17 @@ import { Content, data } from "../Data";
 import { DataComponent } from "./DataComponent";
 import { Relation } from "./Relation";
 
+type UniverseInfo = {
+  name?: string
+}
 export class Universe implements DataComponent{
+  name: string;
   nebulaInfos:NebulaInfo[];
   relations:Relation[];
   id: number;
   
-  constructor(){
+  constructor(info?: UniverseInfo){
+    this.name = info?.name ?? "Unnamed";
     this.nebulaInfos = []
     this.relations = []
     this.id = -1;
@@ -48,6 +53,9 @@ export class Universe implements DataComponent{
       minx <= x && x <= maxx &&
       miny <= y && y <= maxy
     )
+  }
+  public get(pos:Coord){
+    return this.nebulaInfos.find(ni => ni.worldPos.eq(pos));
   }
 }
 export type NebulaInfo = {

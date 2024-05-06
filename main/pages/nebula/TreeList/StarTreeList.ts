@@ -65,5 +65,4 @@ export class StarTreeList extends UIManager {
     super.init();
   }
   public update() { }
-  public detect() { return false; }
 }

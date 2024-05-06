@@ -13,15 +13,9 @@ export abstract class UIManager {
   public init(){
     engine.updater.register(() => {
       if (!document.contains(this.element)) return;
-      if (!this.detect()) return;
 
       this.update()
     })
   }
-  public abstract update():void;
-  public abstract detect():boolean;
-}
-
-export abstract class Mirror extends UIManager {
-  public abstract info:Readonly<Record<string, any>>;
+  public update(){};
 }

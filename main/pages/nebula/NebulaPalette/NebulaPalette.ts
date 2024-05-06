@@ -5,7 +5,6 @@ import { DataCollection } from "../../../data/DataCollection";
 import "./NebulaPalette.css"
 import { NebulaPaletteInput } from "./NebulaPaletteInput";
 import { AutoComplete } from "./AutoComplete";
-import { u } from "@/objects/UIUpdater";
 
 type PalettePair = {
   element: HTMLLIElement,
@@ -47,10 +46,15 @@ export class NebulaPalette extends UIManager {
     this.layout = {
       list: ul({class: "palette-list"})(),
       input: {
-        text: u(textarea({class: "palette-text", onchange: e=>this.input = (<HTMLTextAreaElement>e.target).value})(""))({value: (element) => {
-          if (!this.info.isInputMode) return element.value;
-          return this.pairs.map(p => p.content.title).join("\n")
-        }})
+        text: textarea({
+          class: "palette-text", 
+          onchange: e=>this.input = (<HTMLTextAreaElement>e.target).value
+        },{
+          value: (element) => {
+            if (!this.info.isInputMode) return element.value;
+            return this.pairs.map(p => p.content.title).join("\n")
+          }
+        })("")
       },
       autoComplete: ul(this.memento.autoComplete)()
     };
@@ -59,12 +63,12 @@ export class NebulaPalette extends UIManager {
         btn({onclick: () => this.startInput()})("setting")
       ),
       this.layout.list,
-      u(div()(
+      div({}, {
+        className: () => this.info.isInputMode ? "palette-text-box" : "palette-text-box hidden"
+        })(
         this.layout.input.text,
         btn({onclick: ()=>this.completeInput()})("submit")
-        ))({
-        className: () => this.info.isInputMode ? "palette-text-box" : "palette-text-box hidden"
-      }),
+      ),
     );
     this.features = {
       input: new NebulaPaletteInput(this),

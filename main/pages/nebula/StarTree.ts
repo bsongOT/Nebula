@@ -23,9 +23,7 @@ export class StarTree extends UIManager {
 
   constructor(data:{contents: DataCollection<Content> }, selection: {nebula?: Nebula}) {
     super();
-    this.info = {
-
-    };
+    this.info = {};
     this.data = data;
     this.selection = selection;
     this.paletteGroups = [];
@@ -46,7 +44,10 @@ export class StarTree extends UIManager {
       ),
       this.layout.view,
       div({ class: "arrow-keys" })(
-        btn({ class: "up-arrow", onclick: () => this.layout.tree.updent() })("위"),
+        btn({ 
+          class: "up-arrow", 
+          onclick: () => this.layout.tree.updent() 
+        })("위"),
         btn({ class: "left-arrow", onclick: () => this.layout.tree.outdent() })("왼"),
         btn({ class: "down-arrow", onclick: () => this.layout.tree.downdent() })("밑"),
         btn({ class: "right-arrow", onclick: () => this.layout.tree.indent() })("오")
@@ -56,12 +57,8 @@ export class StarTree extends UIManager {
     this.init();
   }
   public init() {
-    this.layout.view.append(this.layout.palette.element)
     super.init();
   }
-  public detect() { return false; }
-  public update() {}
-
   public switchView(view:UIManager){
     this.layout.view.innerHTML = "";
     this.layout.view.append(view.element)

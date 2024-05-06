@@ -2,11 +2,16 @@ body {
   max-width: 100%;
   margin: 0;
   overflow-x: hidden;
+  padding: 5px;
+}
+.universe-map-box {
+  position: relative;
 }
 .universe-map {
-  border-spacing: 0;
   width: 400px;
   height: 400px;
+  border-spacing: 0;
+  border: 1px solid #ddd;
 }
 .universe-map > tr > td {
   position: relative;
@@ -14,9 +19,32 @@ body {
   transition: 0.2s;
   box-shadow: 
     1px 0 #ddd inset, 
-    1px 0 #ddd inset,
+    -1px 0 #ddd inset,
     0 1px #ddd inset,
     0 -1px #ddd inset;
+}
+.universe-map > tr > td.picked {
+  animation-duration: 1s;
+  animation-name: twinkle;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease;
+}
+@keyframes twinkle {
+  from {
+    background-color: #ff000000;
+  }
+  50% {
+    background-color: #ff000066;
+  }
+  to {
+    background-color: #ff000000;
+  }
+}
+.cell-picker {
+  width: 200px;
+  height: 100px;
+  background-color: white;
+  border: 1px solid black;
 }
 .universe-map > tr > td.valid {
   box-shadow: none;
@@ -29,6 +57,12 @@ body {
 }
 .clear {
   opacity: 0.3;
+}
+.cell-picker {
+  position: absolute;
+}
+.cell-picker.hidden { 
+  display: none;
 }
 .nebula-title {
   position: absolute;

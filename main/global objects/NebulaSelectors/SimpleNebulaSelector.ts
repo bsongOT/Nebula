@@ -14,6 +14,8 @@ export class SimpleNebulaSelector extends UIManager {
     public readonly element;
     public readonly info;
     public readonly layout;
+    
+    private items;
 
     constructor(attributes:SimpleNebulaSelectorInfo){
         super();
@@ -32,11 +34,24 @@ export class SimpleNebulaSelector extends UIManager {
             capacity: inputText(memento.capacity)(),
             search: inputText(memento.search)(),
             list: ul({class: "nebula-list"})(),
-            items: new Array<HTMLLIElement>(),
-            pageDecreaser: btn({class: "page-changer", onclick: () => this.info.page!--})("<"),
-            pageCounter: span()(""),
-            pageIncreaser: btn({class: "page-changer", onclick: () => this.info.page!++})(">")
+            pageDecreaser: btn({
+                class: "page-changer", 
+                onclick: () => this.info.page-- 
+            },{
+                disabled: () => this.info.page <= 1,
+
+            })("<"),
+            pageCounter: span({},{
+                innerText: () => `${this.info.page} / ${this.getMaxPage()}`
+            })(""),
+            pageIncreaser: btn({
+                class: "page-changer", 
+                onclick: () => this.info.page++
+            },{
+                disabled: () => this.info.page >= this.getMaxPage()
+            })(">")
         }
+        this.items = new Array<HTMLLIElement>(),
         this.element = div()(
             this.layout.search,
             this.layout.capacity,
@@ -50,8 +65,10 @@ export class SimpleNebulaSelector extends UIManager {
         this.init();
     }
     public update() {
+        if (this.items.length === this.info.nebulas.all().length) return;
+
         this.layout.list.innerHTML = "";
-        this.layout.items = this.info.nebulas.map(n => (
+        this.items = this.info.nebulas.map(n => (
             li({onclick: e => (e.target as HTMLElement).classList.add("selected")})(
                 span()(n.id.toString()),
                 span()(n.name)
@@ -60,21 +77,10 @@ export class SimpleNebulaSelector extends UIManager {
         
         const from = (this.info.page - 1) * this.info.capacity;
         const to = from + this.info.capacity;
-        const maxPage = Math.max(1, Math.ceil(this.layout.items.length / this.info.capacity))
 
-        this.layout.list.append(...this.layout.items.slice(from, to))
-        this.layout.pageCounter.innerText = `${this.info.page} / ${maxPage}`;
-
-        this.layout.pageDecreaser.disabled = this.info.page <= 1;
-        this.layout.pageIncreaser.disabled = this.info.page >= maxPage;
+        this.layout.list.append(...this.items.slice(from, to))
     }
-    public detect() {
-        if (this.layout.items.length !== this.info.nebulas.all().length){
-            return true;
-        }
-        if (!this.layout.pageCounter.innerText.startsWith(this.info.page.toString())) return true;
-        if (this.layout.capacity.value !== this.info.capacity?.toString()) return true;
-        if (this.info.keyword !== this.layout.search.value) return true;
-        return false;
+    private getMaxPage(){
+        return Math.max(1, Math.ceil(this.items.length / this.info.capacity))
     }
 }

@@ -48,7 +48,4 @@ export class NebulaModel extends UIManager {
       tileBox.adopt(tile);
     }
   }
-  public detect() {
-    return true;
-  }
 }

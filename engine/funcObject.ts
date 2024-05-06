@@ -2,10 +2,25 @@ import p5 from "p5";
 import { CanvasObject } from "./objects/CanvasObject";
 import { Tree, TreeNode } from "./data-structure/tree";
 import { Coord } from "./utils/math/coord-system";
+import { engine } from "./engine";
 
+export type Functionize<T> = {
+    [key in keyof T]: (element: T) => T[key]
+}
 type Tag = keyof HTMLElementTagNameMap;
 type Attribute<T extends Tag> = Partial<HTMLElementTagNameMap[T]> & {class?:string};
-const create = <T extends Tag>(tag:T, attrs?:Attribute<T>) => {
+function update<T extends HTMLElement>(element:T, attrs?:Partial<Functionize<T>>){
+    if (!document.contains(element)) return;
+  
+    for (const k in attrs){
+      const key = k as keyof Partial<Functionize<T>>;
+      const data = attrs[key]?.(element);
+  
+      if (element[key] === data) continue;
+      element[key] = data!;
+    }
+  }
+const create = <T extends Tag>(tag:T, attrs?:Attribute<T>, updatedAttrs?:Partial<Functionize<HTMLElementTagNameMap[T]>>) => {
     const obj = document.createElement(tag);
     for(const key in attrs){
         const k = key as keyof Attribute<T>
@@ -14,29 +29,30 @@ const create = <T extends Tag>(tag:T, attrs?:Attribute<T>) => {
             obj.classList.add(...attrs.class!.split(" "))
         }
         else {
-            obj[key as keyof HTMLElementTagNameMap[T]] = (attrs as any)[key as keyof HTMLElementTagNameMap[T]]!;
+            obj[key as keyof HTMLElementTagNameMap[T]] = (attrs as any)[key]!;
         }
     }
+    engine.updater.register(() => update(obj, updatedAttrs))
     return obj;
 }
 const independentElement = <T extends Tag>(tag:T) => (
-    (attrs?:Attribute<T>) => (
-        () => create(tag, attrs)
+    (attrs?:Attribute<T>, updatedAttrs?:Partial<Functionize<HTMLElementTagNameMap[T]>>) => (
+        () => create(tag, attrs, updatedAttrs)
     )
 )
 const simpleElement = <T extends Tag>(tag:T) => (
-    (attrs?:Attribute<T>) => (
+    (attrs?:Attribute<T>, updatedAttrs?:Partial<Functionize<HTMLElementTagNameMap[T]>>) => (
         (text:string) => {
-            const obj = create(tag, attrs)
+            const obj = create(tag, attrs, updatedAttrs)
             obj.innerText = text;
             return obj;
         }
     )
 )
 const element = <T extends Tag, C extends HTMLElement = HTMLElement>(tag:T) => (
-    (attrs?:Attribute<T>) => (
+    (attrs?:Attribute<T>, updatedAttrs?:Partial<Functionize<HTMLElementTagNameMap[T]>>) => (
         (...children:C[]) => {
-            const obj = create(tag, attrs);
+            const obj = create(tag, attrs, updatedAttrs);
             obj.append(...children)
             return obj;
         }
