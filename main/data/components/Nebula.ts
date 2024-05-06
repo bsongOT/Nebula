@@ -12,9 +12,10 @@ export class Nebula implements DataComponent{
 
   constructor(info?:{
     name?: string,
+    id?:number
   }){
     this.name = info?.name ?? "";
-    this.id = -1;
+    this.id = info?.id ?? -1;
     this.tree = new Tree()
     this.palette = [];
   }

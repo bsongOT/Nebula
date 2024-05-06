@@ -7,10 +7,11 @@ export class Dust implements DataComponent{
 
   constructor(info?:{
     claim?:string,
-    kernelPath?:string
+    kernelPath?:string,
+    id?:number
   }){
     this.claim = info?.claim ?? "";
     this.kernelPath = info?.kernelPath ?? "";
-    this.id = -1;
+    this.id = info?.id ?? -1;
   }
 }

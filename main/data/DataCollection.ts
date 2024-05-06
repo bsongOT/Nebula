@@ -31,6 +31,9 @@ export class DataCollection<T extends DataComponent> {
   public filter(func:(value:T, index?:number, array?:T[])=>boolean){
     return this.array.filter(func)
   }
+  public find(func:(value:T, index:number, array:T[])=>boolean){
+    return this.array.find(func)
+  }
   private binarySearch(start:number, end:number, value:number):number {
     const arr = this.array;
     if (arr[start].id > value) return -1;

@@ -6,6 +6,8 @@ import { StarTreeList } from "./TreeList/StarTreeList";
 import { StarTreeNode } from "./TreeList/StarTreeNode";
 import { DataCollection } from "../../data/DataCollection";
 import { NebulaModel } from "./NebulaModel/NebulaModel";
+import "./StarTree.css"
+import { selli } from "@/objects/UI/list/selli";
 
 export class StarTree extends UIManager {
   public readonly layout;
@@ -34,13 +36,13 @@ export class StarTree extends UIManager {
       view: div()()
     };
     this.element = div()(
-      div()(
-        btn({onclick: () => this.switchView(this.layout.palette)})("Palette"),
-        div()(
-          btn({class: "bringer"})("->"),
+      div({class: "tree-switch-box"})(
+        selli({onclick: () => this.switchView(this.layout.palette)})(span()("Palette")),
+        div({class: "bringer"})(
+          btn()("->"),
           span()("")
         ),
-        btn({onclick: () => this.switchView(this.layout.tree)})("Tree")
+        selli({onclick: () => this.switchView(this.layout.tree)})(span()("Tree"))
       ),
       this.layout.view,
       div({ class: "arrow-keys" })(
@@ -50,7 +52,6 @@ export class StarTree extends UIManager {
         btn({ class: "right-arrow", onclick: () => this.layout.tree.indent() })("오")
       ),
       this.layout.nebulaModel.element,
-      this.layout.palette.layout.input.text
     );
     this.init();
   }

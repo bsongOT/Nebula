@@ -1,0 +1,17 @@
+.tree-switch-box {
+  display: flex;
+  align-items: center;
+}
+.tree-switch-box > .bringer{
+  margin-right: 5px;
+}
+.tree-switch-box > li {
+  list-style: none;
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-right: 5px;
+}
+.tree-switch-box > li.selected {
+  background: #ddd;
+}

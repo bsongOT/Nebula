@@ -3,6 +3,10 @@ import {Content} from "./Content"
 import { Dust } from "./Dust";
 import { Nebula } from "./Nebula";
 
+export const enum RelationState {
+  none = -1
+}
+
 export class Relation {
     id:number
     mainTree:Nebula;
@@ -10,7 +14,7 @@ export class Relation {
     table:{
         main: Content,
         second: Content,
-        state: "none" | Dust
+        state: number | Dust
     }[];
     constructor(){
         this.mainTree = new Nebula();

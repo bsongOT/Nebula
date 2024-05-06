@@ -5,6 +5,7 @@ import { DataCollection } from "../../../data/DataCollection";
 import "./NebulaPalette.css"
 import { NebulaPaletteInput } from "./NebulaPaletteInput";
 import { AutoComplete } from "./AutoComplete";
+import { u } from "@/objects/UIUpdater";
 
 type PalettePair = {
   element: HTMLLIElement,
@@ -21,21 +22,21 @@ export class NebulaPalette extends UIManager {
   public readonly data;
   public readonly selection;
 
-  public palettePairs;
+  public pairs;
+  private input:string;
 
   constructor(data: { contents: DataCollection<Content> }, selection: { nebula?:Nebula }) {
     super();
-    this.palettePairs = new Array<PalettePair>()
+    this.pairs = new Array<PalettePair>()
     this.data = data;
     this.selection = selection;
+    this.input = "";
 
     this.info = {
+      isInputMode: false,
       selectedContents: new Array<Content>()
     }
     this.memento = {
-      list: {
-        class: "palette-list"
-      },
       autoComplete: {
         class: "auto-complete",
         onkeydown: (e:KeyboardEvent) => {
@@ -44,11 +45,12 @@ export class NebulaPalette extends UIManager {
       }
     }
     this.layout = {
-      list: ul(this.memento.list)(),
+      list: ul({class: "palette-list"})(),
       input: {
-        container: div()(),
-        text: textarea()(""),
-        submitButton: btn()("")
+        text: u(textarea({class: "palette-text", onchange: e=>this.input = (<HTMLTextAreaElement>e.target).value})(""))({value: (element) => {
+          if (!this.info.isInputMode) return element.value;
+          return this.pairs.map(p => p.content.title).join("\n")
+        }})
       },
       autoComplete: ul(this.memento.autoComplete)()
     };
@@ -57,6 +59,12 @@ export class NebulaPalette extends UIManager {
         btn({onclick: () => this.startInput()})("setting")
       ),
       this.layout.list,
+      u(div()(
+        this.layout.input.text,
+        btn({onclick: ()=>this.completeInput()})("submit")
+        ))({
+        className: () => this.info.isInputMode ? "palette-text-box" : "palette-text-box hidden"
+      }),
     );
     this.features = {
       input: new NebulaPaletteInput(this),
@@ -66,8 +74,8 @@ export class NebulaPalette extends UIManager {
   }
 
   public kill(){
-    const selectedElements = this.info.selectedContents.map(c => this.palettePairs.find(p => p.content === c)!.element).filter(e => e);
-    const deathThreshold = this.palettePairs.find(p => p.element.classList.contains("dead"))?.element;
+    const selectedElements = this.info.selectedContents.map(c => this.pairs.find(p => p.content === c)!.element).filter(e => e);
+    const deathThreshold = this.pairs.find(p => p.element.classList.contains("dead"))?.element;
 
     if (deathThreshold){
       deathThreshold.before(...selectedElements)
@@ -79,17 +87,10 @@ export class NebulaPalette extends UIManager {
   }
 
   public readonly startInput = () => this.features.input.startInput();
-  public readonly completeInput = () => this.features.input.completeInput();
+  public readonly completeInput = () => this.features.input.completeInput(this.input);
 
   public readonly showAutoComplete = () => this.features.autoComplete.show(this.layout.autoComplete, this.data.contents.all());
 
-  public init(){
-    this.layout.input.container.append(
-      this.layout.input.text,
-      this.layout.input.submitButton
-    )
-    super.init()
-  }
   public update() {}
   public detect() { return false; }
 }

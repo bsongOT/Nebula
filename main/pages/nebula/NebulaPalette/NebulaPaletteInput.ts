@@ -3,50 +3,58 @@ import { Content, Nebula } from "../../../data/Data";
 import { NebulaPalette } from "./NebulaPalette";
 
 export class NebulaPaletteInput {
-    constructor(public palette:NebulaPalette){}
+  constructor(public palette:NebulaPalette){}
 
-    public startInput(){
-        const pl = this.palette;
-        if (!pl.selection.nebula) return;
-        pl.layout.input.container.classList.remove("hidden")
-        pl.layout.input.text.value = pl.palettePairs.map(p => p.content.title).join("\n")
+  public startInput(){
+    const {selection, info} = this.palette;
+    if (!selection.nebula) return;
+    info.isInputMode = true;
+  }
+  public completeInput(input:string){
+    const {selection, data, info} = this.palette;
+    if (!selection.nebula) return;
+    info.isInputMode = false;
+    
+    const titles = this.toTitles(input)
+    const contents = titles.map(title => Content.request(data.contents, {title}))
+    const attrs:Partial<HTMLElement> = {
+      onclick: e => (<HTMLElement>e.target).classList.add("selected")
     }
-    public completeInput(){
-        const {selection, layout, data} = this.palette;
-        if (!selection.nebula) return;
 
-        layout.input.container.classList.add("hidden")
+    this.palette.pairs = contents.map(c =>({
+      element: li(attrs)(span()(c.title)),
+      content: c,
+      killed: selection.nebula?.tree.nodes.map(n => n.data).includes(c) ?? false
+    }))
+    .sort((a, b) => (a.killed ? 0 : 1) - (b.killed ? 0 : 1))
     
-        const titles = [...new Set(layout.input.text.value.split("\n").map(v => v.trim()).filter(v => v !== ""))];
-      
-        this.palette.palettePairs = [];
-    
-        const getContentByTitle = (title:string) => {
-          const content = data.contents.all().find(c => c.title === title);
-          if (content) return content;
-          
-          const newContent = new Content({title});
-          
-          return data.contents.add(newContent);
-        }
-    
-        for (const title of titles){
-          const content = getContentByTitle(title)
-          const element = li({onclick: () => {
-            element.classList.add("selected")
-            this.palette.info.selectedContents = this.palette.palettePairs.filter(p => p.element.classList.contains("selected")).map(p => p.content)
-          }})(span()(title))
-          
-          this.palette.palettePairs.push({
-            element: element,
-            content: content,
-            killed: selection.nebula.tree.nodes.map(n => n.data).includes(content)
-          })
-        }
-    
-        this.palette.layout.list.innerHTML = "";
-        this.palette.layout.list.append(
-          ...this.palette.palettePairs.sort((a, b) => (a.killed ? 0 : 1) - (b.killed ? 0 : 1)).map(p => p.element)
-        )
+    this.palette.layout.list.innerHTML = "";
+    this.palette.layout.list.append(
+      ...this.palette.pairs.map(p => p.element)
+    )
+  }
+  private toTitles(input:string){
+    return [
+      ...new Set(
+        input.split("\n")
+          .map(v => v.trim())
+          .filter(v => v !== "")
+      )
+    ]
+  }
+  private toPairs(contents:Content[]){
+    const {selection} = this.palette;
+    const attrs:Partial<HTMLElement> = {
+      onclick: e => (<HTMLElement>e.target).classList.add("selected")
     }
+    return contents
+      .map(c => ({
+        element: li()(),
+        content: c,
+        killed: selection.nebula?.tree.nodes.map(n => n.data).includes(c) ?? false
+      }))
+      .sort((a, b) => 
+        (a.killed ? 0 : 1) - (b.killed ? 0 : 1)
+      )
+  }
 }

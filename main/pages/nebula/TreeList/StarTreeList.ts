@@ -30,31 +30,25 @@ export class StarTreeList extends UIManager {
   }
 
   public updent() {
-    const left = this.selectedNode?.element?.previousElementSibling;
-    if (!left) return;
+    const left = this.selectedNode?.element.previousElementSibling;
 
-    left.insertAdjacentElement('beforebegin', this.selectedNode!.element);
+    left?.insertAdjacentElement('beforebegin', this.selectedNode!.element);
   }
   public downdent() {
-    const right = this.selectedNode?.element?.nextElementSibling;
-    if (!right) return;
+    const right = this.selectedNode?.element.nextElementSibling;
 
-    right.insertAdjacentElement('afterend', this.selectedNode!.element);
+    right?.insertAdjacentElement('afterend', this.selectedNode!.element);
   }
   public outdent() {
-    const parent = this.selectedNode?.element?.parentElement?.parentElement;
+    const parent = this.selectedNode?.element.parentElement?.parentElement;
 
-    if (!parent) return;
-
-    parent.insertAdjacentElement('afterend', this.selectedNode!.element);
+    parent?.insertAdjacentElement('afterend', this.selectedNode!.element);
   }
   public indent() {
-    const left = this.selectedNode?.element?.previousElementSibling;
-    const leftList = this.nodePairs.find(n => n.element === left)?.layout?.list;
+    const left = this.selectedNode?.element.previousElementSibling;
+    const leftList = this.nodePairs.find(n => n.element === left)?.layout.list;
 
-    if (!leftList) return;
-
-    leftList.append(this.selectedNode!.element);
+    leftList?.append(this.selectedNode!.element);
   }
 
   public init() {

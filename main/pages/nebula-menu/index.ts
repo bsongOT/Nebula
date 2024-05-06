@@ -1,5 +1,5 @@
 import { upperMenu} from "../../global objects"
-import {data} from "../../data/Data"
+import {Nebula, data} from "../../data/Data"
 import "./menu.css"
 import { body, btn, div, span, ul, canvas } from "@/funcObject";
 import { selli } from "@/objects/UI/list/selli";
@@ -61,13 +61,12 @@ for (const sg of switchGroups){
 body(
   upperMenu(),
   div({class: "universe"})(
-    btn({onclick: () => data.addUniverse()})("New Universe"),
+    btn({onclick: () => data.universes.add(new Universe())})("New Universe"),
     btn({onclick: () => {
       const univ = memento.selection.universe;
       if(!univ) return;
-      data.addNebula("Untitled", univ)
+      data.nebulas.add(new Nebula({name: "Untitled"}))
     }})("New Nebula"),
-    div()(span()(`x: 0, y: 0`)),
     div()(
       ul({class: "switch-box"})(
         ...switchGroups.map(sg => sg.switch)
@@ -76,6 +75,7 @@ body(
         ...switchGroups.map(sg => sg.element)
       )
     ),
+    span()("x: 0, y: 0"),
     layout.list.element
   ),
   div()(

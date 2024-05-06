@@ -19,7 +19,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: calc(100% - 10px);
+    width: calc(100% - 20px);
+    padding: 0;
     height: 600px;
     z-index: 2;
 }

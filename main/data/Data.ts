@@ -10,31 +10,31 @@ import {Nebula} from "./components/Nebula"
 import {Universe} from "./components/Universe"
 import {Relation} from "./components/Relation"
 import { Packer, Unpacker } from "./DataParser"
+import { DataComponent } from "./components/DataComponent"
 
 type DataKey = "all-dusts" | "all-contents" | "all-nebulas" | "all-universes" | "all-relations"
-type DataMap = {
-  "all-dusts": Dust,
-  "all-contents": Content,
-  "all-nebulas": Nebula,
-  "all-universes": Universe,
-  "all-relations": Relation
-}
 
 export const $ = (name:string) => localStorage.getItem(name)
 export const $$ = (name:DataKey, value:string) => localStorage.setItem(name, value)
 export class Data {
-  public contents!:DataCollection<Content>;
-  public nebulas!:DataCollection<Nebula>;
-  public universes!:DataCollection<Universe>;
-  public relations!:DataCollection<Relation>;
-  public dusts!:DataCollection<Dust>;
+  public readonly dusts;
+  public readonly contents;
+  public readonly nebulas;
+  public readonly relations;
+  public readonly universes;
 
-  public load(){
-    this.dusts = this.loadCollection("all-dusts")
-    this.contents = this.loadCollection("all-contents")
-    this.nebulas = this.loadCollection("all-nebulas")
-    this.universes = this.loadCollection("all-universes")
-    this.relations = this.loadCollection("all-relations")
+  public constructor(){
+    const wildDusts = this.loadWildDataCollection("all-dusts")
+    const wildContents = this.loadWildDataCollection("all-contents")
+    const wildNebulas = this.loadWildDataCollection("all-nebulas")
+    const wildUniverses = this.loadWildDataCollection("all-universes")
+    const wildRelations = this.loadWildDataCollection("all-relations")
+
+    this.dusts = new DataCollection(wildDusts.map(d => Unpacker.dust(d)))
+    this.contents = new DataCollection(wildContents.map(c => Unpacker.content(c, this.dusts)))
+    this.nebulas = new DataCollection(wildNebulas.map(n => Unpacker.nebula(n, this.contents)))
+    this.relations = new DataCollection(wildRelations.map(r => Unpacker.relation(r, this.nebulas, this.contents, this.dusts)))
+    this.universes = new DataCollection(wildUniverses.map(u => Unpacker.universe(u, this.nebulas, this.relations)))
   }
   
   public addContent(title:string){
@@ -70,18 +70,11 @@ export class Data {
     return universe
   }
 
-  private loadCollection<T extends DataKey>(keyword:T):DataCollection<DataMap[T]>{
+  private loadWildDataCollection<T extends DataKey>(keyword:T){
     const json = JSON.parse($(keyword) ?? "[]");
     const boxes = Array.from(json) as any[];
-    const loader = {
-      "all-dusts": Unpacker.dust,
-      "all-contents": Unpacker.content,
-      "all-nebulas": Unpacker.nebula,
-      "all-universes": Unpacker.universe,
-      "all-relations": Unpacker.relation
-    }[keyword] as ((box:any) => DataMap[T])
 
-    return new DataCollection(boxes.map(loader))
+    return boxes
   }
 
   private findPos(univ:Universe):Coord{
@@ -120,4 +113,3 @@ export class Data {
 }
 
 export const data = new Data()
-data.load();
