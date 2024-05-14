@@ -31,32 +31,37 @@ body {
 }
 @keyframes twinkle {
   from {
-    background-color: #ff000000;
+    background-color: #eee;
   }
   50% {
-    background-color: #ff000066;
+    background-color: #f88;
   }
   to {
-    background-color: #ff000000;
+    background-color: #eee;
   }
 }
 .cell-picker {
   display: flex;
   flex-direction: column;
-  width: 200px;
-  height: 100px;
+  width: 190px;
+  height: 90px;
   background-color: white;
   border: 1px solid black;
+  padding: 5px;
 }
 .cell-picker > .ok-button {
   margin: 5px 10px 0 10px;
+  flex-grow: 1;
 }
 .picker-top {
   position: relative;
+  margin-bottom: 5px;
 }
 .picker-top > .close-button{
   position: absolute;
-  right: 5px;
+  right: 0;
+  border: none;
+  background: none;
 }
 .universe-map > tr > td.valid {
   box-shadow: none;
@@ -86,9 +91,6 @@ body {
   overflow: hidden;
   transform: translate(-50%, -50%) scale(0.5);
   width: 180%;
-}
-.universe-window-box > *:not(.current-window){
-  display: none;
 }
 * {
   font-family: sans-serif;

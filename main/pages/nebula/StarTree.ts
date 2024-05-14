@@ -56,9 +56,6 @@ export class StarTree extends UIManager {
     );
     this.init();
   }
-  public init() {
-    super.init();
-  }
   public switchView(view:UIManager){
     this.layout.view.innerHTML = "";
     this.layout.view.append(view.element)

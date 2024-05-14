@@ -1,35 +1,30 @@
 import { upperMenu} from "../../global objects"
-import {Nebula, data} from "../../data/Data"
+import {Content, Nebula, data} from "../../data/Data"
 import "./menu.css"
 import { body, btn, div, span, ul, canvas } from "@/funcObject";
 import { selli } from "@/objects/UI/list/selli";
-import { UniverseMap } from "./universeMap";
+import { UniverseMap } from "../../components/universeMap/universeMap";
 import { P } from "@/utils/math/coord-system";
-import { UniverseList } from "./universeList";
+import { UniverseList } from "../../components/universeList";
 import { Universe } from "../../data/components/Universe";
 import { StarTree } from "../nebula/StarTree";
-import { NebulaViewer } from "./nebula-viewer/nebulaViewer";
+import { NebulaViewer } from "../../components/nebula-viewer/nebulaViewer";
 
 const memento = {
   universeMap: {
     size: 16,
-    viewPoint: P(0, 0)
+    viewPoint: P(0, 0),
   },
-  data: {
-    universes: data.universes,
-    relations: data.relations,
-    nebulas: data.nebulas,
-    contents: data.contents,
-    dusts: data.dusts
-  },
+  data: data,
   selection: {
     universe: undefined as Universe | undefined,
-    nebula: undefined,
-    content: undefined
+    nebula: undefined as Nebula | undefined,
+    content: undefined as Content | undefined
   }
 }
 
 const layout = {
+  windowBox: div({class: "universe-window-box"})(),
   map: new UniverseMap(memento.universeMap, memento.selection, memento.data),
   minimap: canvas({width: 400})(),
   nebulaViewer: new NebulaViewer(),
@@ -49,12 +44,12 @@ const switchGroups = [
   }
 ]
 
+layout.windowBox.append(switchGroups[0].element)
+
 for (const sg of switchGroups){
   sg.switch.onclick = () => {
-    for (const s of switchGroups)
-      s.element.classList.remove("current-window")
-
-    sg.element.classList.add("current-window")
+    layout.windowBox.innerHTML = "";
+    layout.windowBox.append(sg.element)
   }
 }
 
@@ -65,16 +60,10 @@ body(
       ul({class: "switch-box"})(
         ...switchGroups.map(sg => sg.switch)
       ),
-      div({class: "universe-window-box"})(
-        ...switchGroups.map(sg => sg.element)
-      )
+      layout.windowBox
     ),
     span()("x: 0, y: 0"),
     layout.list.element
   ),
-  div()(
-    new StarTree(memento.data, memento.selection).element
-  )
+  new StarTree(memento.data, memento.selection).element
 );
-
-switchGroups[0].switch.click()

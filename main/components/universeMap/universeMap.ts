@@ -1,10 +1,9 @@
-import { engine } from "@/engine";
 import { btn, div, inputText, span, table, td, tr } from "@/funcObject";
-import { DataCollection } from "../../data/DataCollection";
 import { Universe } from "../../data/components/Universe";
-import { Coord, P } from "@/utils/math/coord-system";
-import { Nebula } from "../../data/Data";
+import { Coord, H, P } from "@/utils/math/coord-system";
+import { Data, Nebula } from "../../data/Data";
 import { UIManager } from "@/objects/UIManager";
+import "./universeMap.css"
 
 type UniverseMapInfo = {
   size: number,
@@ -18,15 +17,33 @@ type NebulaCellState =
 
 class NebulaCell {
   public readonly element:HTMLTableCellElement;
-  public position:Coord;
+  public readonly position:Coord;
   public nebula:Nebula|undefined;
   public universe:Universe|undefined;
+  
+  private readonly info;
+  private readonly selection;
 
-  public state:NebulaCellState;
+  public get state():NebulaCellState{
+    if (this.universe && this.nebula) {
+      if (!this.selection.universe) return "valid";
+      if (this.selection.universe !== this.universe) return "clear"
+      if (this.selection.nebula !== this.nebula) return "selectedAsUniverse"
+            
+      return "selectedAsNebula"
+    }
+
+    if (this.selection.universe) return "clear"
+    if (this.info.pickedPosition &&
+       this.position.eq(this.info.pickedPosition)) return "picked"
+
+    return "default"
+  }
 
   constructor(position:Coord, info:{pickedPosition?: Coord}, selection:{universe?:Universe, nebula?:Nebula}){
     this.position = position;
-    this.state = "default";
+    this.info = info;
+    this.selection = selection;
     this.element = td({
       onclick: () => this.onclick(info, selection)
     },{
@@ -74,7 +91,8 @@ export class UniverseMap extends UIManager {
   private readonly selection;
   private readonly data;
   private readonly cells;
-  constructor(attributes: UniverseMapInfo, selection: {universe?: Universe, nebula?: Nebula}, data: {universes:DataCollection<Universe>}){
+  private pickerInput = ""
+  constructor(attributes: UniverseMapInfo, selection: {universe?: Universe, nebula?: Nebula}, data: Data){
     super()
     this.info = attributes;
     this.selection = selection;
@@ -91,8 +109,20 @@ export class UniverseMap extends UIManager {
             onclick: () => this.info.pickedPosition = undefined
           })("X"),
         ),
-        inputText()(),
-        btn({class: "ok-button"})("확인")
+        inputText({onchange: e=>this.pickerInput = (<HTMLInputElement>e.target).value})(),
+        btn({class: "ok-button", onclick: () => {
+          if (!this.info.pickedPosition) return;
+          const u = new Universe({name: this.pickerInput})
+          const n = new Nebula({name: "Unnamed"})
+
+          data.universes.add(u)
+          data.addNebula(n, {
+            universe: u,
+            position: this.info.pickedPosition
+          })
+
+          this.info.pickedPosition = undefined;
+        }})("확인")
       )
     }
     this.element = div({class: "universe-map-box"})(
@@ -122,32 +152,19 @@ export class UniverseMap extends UIManager {
   }
   public update(){
     const order = this.catchOrder();
-    if (order === "resize"){
-      this.init();
-      this.fill();
-      this.showUniverse();
-      this.showNebula();
-    }
-    if (order === "redata"){
-      this.erase();
-      this.fill();
-      this.showUniverse()
-      this.showNebula();
-      return;
-    }
-    if (order === "reselectUniverse"){
-      this.showUniverse();
-      this.showNebula();
-      return;
-    }
-    if (order === "reselectNebula"){
-      this.showNebula()
-    }
-    if (order === "repick"){
-      this.pick();
+    switch(order){
+      case "resize":
+        this.init();
+      case "redata":
+        this.erase();
+        this.fill();
+      case "reselectUniverse":
+        this.showUniverse();
+      case "repick":
+        this.pick();
     }
   }
-  public catchOrder(){
+  private catchOrder(){
     if (this.cells.length !== this.info.size) return "resize"
 
     for (let i = 0; i < this.info.size; i++){
@@ -156,20 +173,19 @@ export class UniverseMap extends UIManager {
         const currentNebula = this.cells[i][j].nebula;
         const changedNebula = this.data.universes.map(u => u.get(pos)).find(n => n);
         
-        if (currentNebula !== changedNebula) return "redata";
+        if (currentNebula !== changedNebula) {
+          return "redata";
+        }
       }
     }
 
     const cellArr = this.cells.flat(1);
     const currentSelection = {
-      universe: cellArr.find(c => c.state === "selectedAsUniverse")?.universe,
-      nebula: cellArr.find(c => c.state === "selectedAsNebula")?.nebula
+      universe: cellArr.find(c => c.universe === this.selection.universe)?.universe,
+      nebula: cellArr.find(c => c.nebula === this.selection.nebula)?.nebula
     }
     if (currentSelection.universe !== this.selection.universe){
       return "reselectUniverse"
-    }
-    if (currentSelection.nebula !== this.selection.nebula){
-      return "reselectNebula"
     }
 
     const pickPos = this.info.pickedPosition;
@@ -191,7 +207,8 @@ export class UniverseMap extends UIManager {
   private erase(){
     for (const r of this.cells){
       for (const cell of r){
-        cell.state = "default";
+        cell.universe = undefined;
+        cell.nebula = undefined;
         cell.element.style.transform = "";
       }
     }
@@ -212,36 +229,12 @@ export class UniverseMap extends UIManager {
 
         cell.nebula = neb.nebula;
         cell.universe = univ;
-        cell.state = "valid"
       }
     }
-  }
-  private showNebula(){
-    const univ = this.selection.universe;
-    if (!univ) return;
-
-    for (const row of this.cells){
-      for (const cell of row){
-        if (cell.state === "selectedAsNebula"){
-          cell.state = "selectedAsUniverse";
-        }
-      }
-    }
-
-    const nebulaCell = this.cells.flat(1).find(c => c.nebula === this.selection.nebula)
-    if (!nebulaCell) return;
-
-    nebulaCell.state = "selectedAsNebula";
   }
   private showUniverse(){
     const univ = this.selection.universe;
     if (!univ) return;
-
-    for (const row of this.cells){
-      for (const cell of row){
-        cell.state = "clear";
-      }
-    }
 
     const size = this.info.size;
     const center = univ.boxSize.map(s => (size - s) / 2)
@@ -255,7 +248,6 @@ export class UniverseMap extends UIManager {
 
       if (!cell) continue;
 
-      cell.state = "selectedAsUniverse"
       cell.element.style.transform = `
         translate(${100 * center[0]}%, ${100 * center[1]}%)
         translate(${100 * (scale - 1) * (x - pivot[0])}%, ${100 * (scale - 1) * (y - pivot[1])}%)
@@ -264,13 +256,10 @@ export class UniverseMap extends UIManager {
     }
   }
   private pick(){
-    this.cells.flat(1).forEach(c => {
-      if (c.state === "picked") c.state = "default"
-    })
+    if (this.selection.universe || this.selection.nebula) return;
 
     const pos = this.info.pickedPosition;
-    if (!pos) return;
-    this.cells[pos.y][pos.x].state = "picked";
+    if(!pos) return;
 
     if (pos.x >= this.info.size / 2) {
       this.layout.picker.style.left = `${100 * (pos.x - 8) / this.info.size}%`;

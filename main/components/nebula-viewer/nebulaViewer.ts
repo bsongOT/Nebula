@@ -1,8 +1,8 @@
 import { btn, div, li, slider, span, ul } from "@/funcObject";
 import { selli } from "@/objects/UI/list/selli";
 import "./nebula-viewer.css"
-import { Nebula, data } from "../../../data/Data";
-import { DataCollection } from "../../../data/DataCollection";
+import { Nebula, data } from "../../data/Data";
+import { DataCollection } from "../../data/DataCollection";
 
 class CommonNebulaViewer {
   public readonly element:HTMLElement;

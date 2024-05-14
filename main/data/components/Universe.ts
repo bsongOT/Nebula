@@ -55,7 +55,7 @@ export class Universe implements DataComponent{
     )
   }
   public get(pos:Coord){
-    return this.nebulaInfos.find(ni => ni.worldPos.eq(pos));
+    return this.nebulaInfos.find(ni => ni.worldPos.eq(pos))?.nebula;
   }
 }
 export type NebulaInfo = {

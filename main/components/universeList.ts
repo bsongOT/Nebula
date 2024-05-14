@@ -1,7 +1,7 @@
 import { li, span, ul } from "@/funcObject";
 import { selli } from "@/objects/UI/list/selli";
-import { Universe } from "../../data/components/Universe";
-import { DataCollection } from "../../data/DataCollection";
+import { Universe } from "../data/components/Universe";
+import { DataCollection } from "../data/DataCollection";
 import { UIManager } from "@/objects/UIManager";
 
 export class UniverseList extends UIManager{
@@ -29,7 +29,7 @@ export class UniverseList extends UIManager{
       this.element.innerHTML = "";
 
       this.pairs = this.info.universes.map(u => ({
-        element: selli({onclick: () => this.selection.universe = u})(span()(u.id.toString())),
+        element: selli({onclick: () => this.selection.universe = u})(span()(u.name)),
         universe: u
       }))
 

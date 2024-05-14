@@ -29,6 +29,7 @@ type NebulaBox = {
 }
 type UniverseBox = {
     id: number,
+    name: string,
     nebulaInfos: {
         start: {x:number, y:number, z:number},
         worldPos: {x:number, y:number},
@@ -73,6 +74,7 @@ export class Packer {
   }
   static universe(universe:Universe):UniverseBox{
     return {
+      name: universe.name,
       id: universe.id,
       relations: universe.relations.map(r => r.id),
       nebulaInfos: universe.nebulaInfos.map(ni => ({
@@ -126,6 +128,7 @@ export class Unpacker {
   static universe(universeBox:UniverseBox, nebulas:DataCollection<Nebula>, relations:DataCollection<Relation>){
     const u = new Universe()
 
+    u.name = universeBox.name;
     u.id = universeBox.id;
     u.nebulaInfos = universeBox.nebulaInfos.map(
         ni => ({

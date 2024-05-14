@@ -2,7 +2,7 @@ export * from "./components/Content"
 export * from "./components/Nebula"
 
 import { Tree } from "@/data-structure/tree"
-import { Coord, HexCoord } from "../../engine/utils/math/coord-system"
+import { Coord, H, HexCoord, P } from "../../engine/utils/math/coord-system"
 import {Content} from "./components/Content"
 import { DataCollection } from "./DataCollection"
 import { Dust } from "./components/Dust"
@@ -11,8 +11,22 @@ import {Universe} from "./components/Universe"
 import {Relation} from "./components/Relation"
 import { Packer, Unpacker } from "./DataParser"
 import { DataComponent } from "./components/DataComponent"
+import { engine } from "@/engine"
 
 type DataKey = "all-dusts" | "all-contents" | "all-nebulas" | "all-universes" | "all-relations"
+type NebulaBool = {
+  nebula: Nebula,
+  inverse: boolean
+}
+type AddingContentOption = {
+  nebula: Nebula,
+  day?: Date
+}
+type AddingNebulaOption = {
+  universe: Universe,
+  position: Coord,
+  start?: HexCoord
+}
 
 export const $ = (name:string) => localStorage.getItem(name)
 export const $$ = (name:DataKey, value:string) => localStorage.setItem(name, value)
@@ -22,6 +36,35 @@ export class Data {
   public readonly nebulas;
   public readonly relations;
   public readonly universes;
+
+  public readonly specialNebulas:{
+    isolated: Nebula,
+    day: {
+      day:Date, 
+      content:Content,
+      action:"add"|"modify"|"remove"
+    }[],
+    lifetime: {
+      deads: string[],
+      modifieds: Content[],
+      livings: Content[],
+      news: Content[]
+    },
+    query: {
+      main: Nebula
+      condition: NebulaBool[][]
+    }[],
+    transform: {
+      sum: {
+        materials: Content[],
+        output: Content
+      }[],
+      inverse: {
+        material: Content,
+        outputs: Content[]
+      }[]
+    }
+  };
 
   public constructor(){
     const wildDusts = this.loadWildDataCollection("all-dusts")
@@ -35,39 +78,72 @@ export class Data {
     this.nebulas = new DataCollection(wildNebulas.map(n => Unpacker.nebula(n, this.contents)))
     this.relations = new DataCollection(wildRelations.map(r => Unpacker.relation(r, this.nebulas, this.contents, this.dusts)))
     this.universes = new DataCollection(wildUniverses.map(u => Unpacker.universe(u, this.nebulas, this.relations)))
-  }
-  
-  public addContent(title:string){
-    const content = this.contents.add(new Content())
 
-    content.title = title;
-    $$("all-contents", JSON.stringify(this.contents.map(c => Packer.content(c))))
-    
+    this.specialNebulas = {
+      isolated: new Nebula({id: -2, name: "isolated"}),
+      day: [],
+      lifetime: {
+        deads: [],
+        modifieds: [],
+        livings: [],
+        news: []
+      },
+      query: [],
+      transform: {
+        sum: [],
+        inverse: []
+      }
+    }
+
+    engine.updater.register(() => {
+
+    })
+  }
+
+  public addContent(content:Content, option:AddingContentOption){
+    this.contents.add(content)
+    this.specialNebulas.day.push({
+      day: option.day ?? new Date(),
+      content: content,
+      action: "add"
+    })
+    this.specialNebulas.lifetime.news.push(content)
+    option.nebula.palette.push(content)
     return content;
   }
-  public addNebula(name:string, at:Universe){
-    const nebula = this.nebulas.add(new Nebula())
 
-    nebula.name = name;
-    nebula.tree = new Tree<Content>()
-    
-    at.nebulaInfos.push({
-      nebula: nebula,
-      start: new HexCoord(-1, 0, 0),
-      worldPos: this.findPos(at)
-    })
+  public removeContent(content:Content){
+    const special = this.specialNebulas;
+    const {news, livings, modifieds, deads} = special.lifetime;
 
-    $$("all-nebulas", JSON.stringify(this.nebulas.map(n => Packer.nebula(n))))
-    $$("all-universes", JSON.stringify(this.universes.map(u => Packer.universe(u))))
-    
-    return nebula;
+    this.contents.remove(content.id)
+    special.day.splice(
+      special.day.findIndex(i => i.content === content), 1
+    )
+    if (news.includes(content)) news.splice(news.indexOf(content), 1)
+    if (livings.includes(content)) livings.splice(livings.indexOf(content), 1)
+    if (modifieds.includes(content)) modifieds.splice(modifieds.indexOf(content), 1)
+
+    deads.push(content.title)
+    content.id = -1;
   }
-  public addUniverse(){
-    const universe = this.universes.add(new Universe());
 
-    $$("all-universes", JSON.stringify(this.universes.map(u => Packer.universe(u))))
+  public addNebula(nebula:Nebula, option:AddingNebulaOption){
+    this.nebulas.add(nebula);
+    option.universe.nebulaInfos.push({
+      nebula: nebula,
+      worldPos: option.position,
+      start: option.start ?? H(-1, 0, 0)
+    })
+  }
 
-    return universe
+  public removeNebula(nebula:Nebula){
+    this.nebulas.remove(nebula.id);
+    for (const u of this.universes.all()){
+      const index = u.nebulaInfos.findIndex(ni => ni.nebula === nebula)
+      if (index < 0) continue;
+      u.nebulaInfos.splice(index, 1);
+    }
   }
 
   private loadWildDataCollection<T extends DataKey>(keyword:T){
@@ -77,38 +153,21 @@ export class Data {
     return boxes
   }
 
-  private findPos(univ:Universe):Coord{
-    if (univ.nebulaInfos.length === 0)
-      return new Coord(0, 0)
+  public findAddablePosition(univ:Universe){
+    const universePoses = univ.nebulaInfos.map(ni => ni.worldPos);
+    const universes = this.universes.all()
 
-    const worldPoses = univ.nebulaInfos.map(ni => ni.worldPos)
-    const xs = worldPoses.map(p => p.x)
-    const ys = worldPoses.map(p => p.y)
-
-    const [minx, maxx] = [Math.min(...xs), Math.max(...xs)]
-    const [miny, maxy] = [Math.min(...ys), Math.max(...ys)]
-
-    const width = maxx - minx + 1;
-    const height = maxy - miny + 1;
-
-    const isFull = worldPoses.length + 1 > width * height
-
-    if (isFull){
-      if (width <= height) 
-        return new Coord(maxx + 1, miny)
-      else
-        return new Coord(minx, maxy + 1)
-    }
-
-    if (width > height){
-      const wallYs = worldPoses.filter(p => p.x === maxx).map(p => p.y)
-      const wallHighestY = Math.min(...[...Array(height).keys()].map(k => k + miny).filter(y => !wallYs.includes(y)))
-      return new Coord(maxx, wallHighestY)
-    }
-
-    const bottomXs = worldPoses.filter(p => p.y === maxy).map(p => p.x)
-    const bottomLeftmostX = Math.min(...[...Array(width).keys()].map(k => k + minx).filter(x => !bottomXs.includes(x)))
-    return new Coord(bottomLeftmostX, maxy)
+    return universePoses
+      .map(
+        upos => [
+          P(1, 0), P(-1, 0), P(0, 1), P(0, -1)
+        ]
+        .map(p => upos.add(p))
+        .filter(
+          p => universes.every(u => !u.isIn(p.x, p.y)) 
+               && p.x >= 0 && p.y >= 0
+        )
+      ).flat(1)
   }
 }
 
