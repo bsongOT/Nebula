@@ -1,4 +1,3 @@
-import { upperMenu} from "../../global objects"
 import {Content, Nebula, data} from "../../data/Data"
 import "./menu.css"
 import { body, btn, div, span, ul, canvas } from "@/funcObject";
@@ -8,12 +7,11 @@ import { P } from "@/utils/math/coord-system";
 import { UniverseList } from "../../components/universeList";
 import { Universe } from "../../data/components/Universe";
 import { StarTree } from "../nebula/StarTree";
-import { NebulaViewer } from "../../components/nebula-viewer/nebulaViewer";
 
 const memento = {
   universeMap: {
     size: 16,
-    viewPoint: P(0, 0),
+    viewPoint: P(0, 0)
   },
   data: data,
   selection: {
@@ -27,43 +25,34 @@ const layout = {
   windowBox: div({class: "universe-window-box"})(),
   map: new UniverseMap(memento.universeMap, memento.selection, memento.data),
   minimap: canvas({width: 400})(),
-  nebulaViewer: new NebulaViewer(),
   list: new UniverseList(memento.data, memento.selection),
 }
 
-const switchGroups = [
-  {
-    switch: selli()(span()("World")),
-    element: layout.map.element
-  },{
-    switch: selli()(span()("Minimap")),
-    element: layout.minimap
-  },{
-    switch: selli()(span()("Nebula")),
-    element: layout.nebulaViewer.element
-  }
-]
-
-layout.windowBox.append(switchGroups[0].element)
-
-for (const sg of switchGroups){
-  sg.switch.onclick = () => {
-    layout.windowBox.innerHTML = "";
-    layout.windowBox.append(sg.element)
-  }
+const changeView = (view:HTMLElement) => {
+  layout.windowBox.innerHTML = "";
+  layout.windowBox.append(view)
 }
 
-body(
-  upperMenu(),
-  div({class: "universe"})(
-    div()(
-      ul({class: "switch-box"})(
-        ...switchGroups.map(sg => sg.switch)
-      ),
-      layout.windowBox
+const universeWindow = div({class: "universe"})(
+  div()(
+    ul({class: "switch-box"})(
+      selli({onclick: () => changeView(layout.map.element)})(span()("World")),
+      selli({onclick: () => changeView(layout.minimap)})(span()("Minimap")),
+      selli({onclick: () => changeView(layout.list.element)})(span()("List"))
     ),
-    span()("x: 0, y: 0"),
-    layout.list.element
+    layout.windowBox
+  ),
+  span()("x: 0, y: 0")
+)
+
+body(
+  div()(
+    btn()("Universe"),
+    btn()("Nebula"),
+    btn()("Content")
+  ),
+  div({class: "main-view"})(
+
   ),
   new StarTree(memento.data, memento.selection).element
 );
