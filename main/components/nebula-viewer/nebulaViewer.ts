@@ -78,6 +78,28 @@ class ImportanceNebulaViewer {
   }
 }
 
+function QueryNebulaEditor() {
+  return div()(
+    ul({class: "nebula-list"})(), // Query Nebula List
+    div()(
+    span()("Main"),
+      btn()("search"),
+    ),
+    div()(
+      span()("Query"),
+      div()(
+        span()("Main") //main
+        /**
+         * nebula
+         * and
+         * or
+         * not
+         */
+      )
+    )
+  )
+}
+
 export class NebulaViewer {
   public readonly element:HTMLElement;
   public readonly managers;
@@ -102,27 +124,9 @@ export class NebulaViewer {
       },{
         switch: selli()(span()("Importance")),
         element: this.managers.importance.element
-        },{
+      },{
         switch: selli()(span()("Query")),
-        element: div()(
-          ul()(), // Query Nebula List
-          div()(
-          span()("Main"),
-            btn()("search"),
-          ),
-          div()(
-            span()("Query"),
-            div()(
-              span()("Main") //main
-              /**
-               * nebula
-               * and
-               * or
-               * not
-               */
-            )
-          )
-        )
+        element: 
         },{
           switch: selli()(span()("Transform")),
           element: div()(
