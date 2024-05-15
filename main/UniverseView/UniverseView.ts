@@ -14,6 +14,11 @@ export type UniverseViewInfo = {
   currentSecondWindow: {
     universe: "common" | "system" | "convenient" | "list"
   },
+  currentThirdWindow: {
+    universe: {
+      system: "day" | "lifetime" | "importance" | "isolated"
+    }
+  }
   universeMap: UniverseMapInfo,
   selection: {
     universe?: Universe,
@@ -24,7 +29,7 @@ export type UniverseViewInfo = {
 export const UniverseView = (info: UniverseViewInfo) => {
   const windows = {
     common: CommonNebulaMap(info),
-    system: SystemNebulaList(),
+    system: SystemNebulaList(info),
     convenient: ConvenientNebulaList(),
     list: new ListSelector<Universe>({
       datas: data.universes,
