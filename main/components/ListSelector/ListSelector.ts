@@ -9,8 +9,9 @@ type ListSelectorInfo<T extends DataComponent> = {
     page:number,
     capacity:number,
     keyword:string,
-    itemBuilder: (data:T) => HTMLLIElement,
-    filter: (data:T, search:string) => boolean
+    itemChildrenBuilder: (data:T) => HTMLElement[],
+    filter: (data:T, search:string) => boolean,
+    selection?: T
 }
 export class ListSelector<T extends DataComponent> extends UIManager {
     public readonly element;
@@ -55,10 +56,12 @@ export class ListSelector<T extends DataComponent> extends UIManager {
         this.init();
     }
     public update() {
+        const datas = this.info.datas.all();
         if (this.pairs.length === this.info.datas.all().length) return;
+        if (datas.some((v, i) => v !== this.pairs[i].data)) return;
 
         this.pairs = this.info.datas.map(n => ({
-            element: this.info.itemBuilder(n),
+            element: li({}, {className: () => this.info.selection === n ? "selected" : ""})(...this.info.itemChildrenBuilder(n)),
             data: n
         }))
         

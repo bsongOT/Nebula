@@ -1,0 +1,14 @@
+.system-nebula-switch-box {
+    display: grid;
+    margin: 0;
+    width: 200px;
+    height: 200px;
+    grid-template-columns: 100px 100px;
+    grid-row: auto auto;
+}
+.system-nebula-switch-box > * {
+    border: none;
+}
+.system-nebula-switch-box > .selected {
+    background-color: aqua;
+}

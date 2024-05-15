@@ -1,5 +1,5 @@
 import { Container, Hexagon } from "@/objects/CanvasObject";
-import { StarTile } from "../../../global objects";
+import { StarTile } from "./StarTile";
 import { H, P } from "@/utils/math/coord-system";
 import { canvas } from "@/funcObject";
 import { Nebula } from "../../../data/Data";

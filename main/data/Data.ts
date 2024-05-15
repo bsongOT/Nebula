@@ -14,10 +14,6 @@ import { DataComponent } from "./components/DataComponent"
 import { engine } from "@/engine"
 
 type DataKey = "all-dusts" | "all-contents" | "all-nebulas" | "all-universes" | "all-relations"
-type NebulaBool = {
-  nebula: Nebula,
-  inverse: boolean
-}
 type AddingContentOption = {
   nebula: Nebula,
   day?: Date
@@ -26,6 +22,47 @@ type AddingNebulaOption = {
   universe: Universe,
   position: Coord,
   start?: HexCoord
+}
+type SystemNebulaData = {
+  isolated: Content[],
+  day: {
+    add: {
+      day:Date, 
+      content:Content
+    }[],
+    modify: {
+      day:Date, 
+      content:Content
+    }[],
+    remove: {
+      day:Date,
+      content:Content
+    }[]
+  },
+  lifetime: {
+    deads: string[],
+    modifieds: Content[],
+    livings: Content[],
+    news: Content[]
+  },
+  importance: {
+    nebula: {
+      count: number,
+      content: Content
+    }[]
+    parent: {
+      count: number,
+      content: Content
+    }[],
+    child: {
+      count: number,
+      content: Content
+    }[],
+    dust: {
+      count: number,
+      content: Content
+    }[]
+  }
 }
 
 export const $ = (name:string) => localStorage.getItem(name)
@@ -37,34 +74,7 @@ export class Data {
   public readonly relations;
   public readonly universes;
 
-  public readonly specialNebulas:{
-    isolated: Nebula,
-    day: {
-      day:Date, 
-      content:Content,
-      action:"add"|"modify"|"remove"
-    }[],
-    lifetime: {
-      deads: string[],
-      modifieds: Content[],
-      livings: Content[],
-      news: Content[]
-    },
-    query: {
-      main: Nebula
-      condition: NebulaBool[][]
-    }[],
-    transform: {
-      sum: {
-        materials: Content[],
-        output: Content
-      }[],
-      inverse: {
-        material: Content,
-        outputs: Content[]
-      }[]
-    }
-  };
+  public readonly systemNebulas:SystemNebulaData;
 
   public constructor(){
     const wildDusts = this.loadWildDataCollection("all-dusts")
@@ -79,47 +89,49 @@ export class Data {
     this.relations = new DataCollection(wildRelations.map(r => Unpacker.relation(r, this.nebulas, this.contents, this.dusts)))
     this.universes = new DataCollection(wildUniverses.map(u => Unpacker.universe(u, this.nebulas, this.relations)))
 
-    this.specialNebulas = {
-      isolated: new Nebula({id: -2, name: "isolated"}),
-      day: [],
+    this.systemNebulas = {
+      isolated: this.getIsolated(),
+      day: {
+        add: [],
+        modify: [],
+        remove: []
+      },
       lifetime: {
         deads: [],
         modifieds: [],
         livings: [],
         news: []
       },
-      query: [],
-      transform: {
-        sum: [],
-        inverse: []
+      importance: {
+        nebula: this.getImportanceNebula(),
+        parent: this.getImportanceParent(),
+        child: this.getImportanceChild(),
+        dust: this.getImportanceDust()
       }
     }
 
     engine.updater.register(() => {
-
+      //save logic
     })
   }
 
   public addContent(content:Content, option:AddingContentOption){
     this.contents.add(content)
-    this.specialNebulas.day.push({
+    this.systemNebulas.day.add.push({
       day: option.day ?? new Date(),
-      content: content,
-      action: "add"
+      content: content
     })
-    this.specialNebulas.lifetime.news.push(content)
+    this.systemNebulas.lifetime.news.push(content)
     option.nebula.palette.push(content)
     return content;
   }
 
   public removeContent(content:Content){
-    const special = this.specialNebulas;
-    const {news, livings, modifieds, deads} = special.lifetime;
+    const system = this.systemNebulas;
+    const {news, livings, modifieds, deads} = system.lifetime;
 
     this.contents.remove(content.id)
-    special.day.splice(
-      special.day.findIndex(i => i.content === content), 1
-    )
+
     if (news.includes(content)) news.splice(news.indexOf(content), 1)
     if (livings.includes(content)) livings.splice(livings.indexOf(content), 1)
     if (modifieds.includes(content)) modifieds.splice(modifieds.indexOf(content), 1)
@@ -168,6 +180,61 @@ export class Data {
                && p.x >= 0 && p.y >= 0
         )
       ).flat(1)
+  }
+
+  private getIsolated(){
+    const nebulas = this.nebulas.all();
+
+    return this.contents.all().filter(
+      c => nebulas.every(
+        n => !n.palette.includes(c)
+      )
+    )
+  }
+
+  private getImportanceNebula(){
+    const contents = this.contents.all();
+    const nebulas = this.nebulas.all();
+
+    return contents.map(c => ({
+      count: nebulas.filter(n => n.palette.includes(c)).length,
+      content: c
+    }))
+  }
+
+  private getImportanceParent(){
+    const contents = this.contents.all();
+    const nebulas = this.nebulas.all();
+
+    return contents.map(c => ({
+      count: nebulas.filter(
+        n => n.tree.nodes.some(
+          n => n.children.some(ch => ch.data === c)
+       )
+      ).length,
+      content: c
+    }))
+  }
+
+  private getImportanceChild(){
+    const contents = this.contents.all();
+    const nebulas = this.nebulas.all();
+
+    return contents.map(c => ({
+      count: nebulas.filter(
+        n => n.tree.nodes.some(
+          n => n.parent?.data === c
+        )
+      ).length,
+      content: c
+    }))
+  }
+
+  private getImportanceDust(){
+    return this.contents.all().map(c => ({
+      count: c.dusts.length,
+      content: c,
+    }))
   }
 }
 

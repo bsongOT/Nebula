@@ -3,10 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: {
-    index: './main/pages/main/index.ts',
-    nebulaMenu: "./main/pages/nebula-menu/index.ts",
-    content: './main/pages/content-page/index.ts',
-    data: "./main/pages/_develop/data.ts"
+    index: './main/index.ts'
   },
   mode: "development",
   module: {
@@ -34,25 +31,9 @@ module.exports = {
   },
   plugins : [
     new HtmlWebpackPlugin({
-      template: './main/pages/main/index.html',
+      template: './main/index.html',
       filename: "index.html",
-      chunks: ["index"]
-    }),
-    new HtmlWebpackPlugin({
-      template: './main/pages/nebula-menu/nebula-menu.html',
-      filename: "nebula-menu.html",
-      chunks: ["nebulaMenu"]
-    }),
-    new HtmlWebpackPlugin({
-      template: './main/pages/content-page/content-page.html',
-      filename: 'content-page.html',
-      chunks: ["content"]
-    }),
-    new HtmlWebpackPlugin({
-      template: './main/pages/_develop/data.html',
-      filename: 'data.html',
-      chunks: ["data"]
-    })                                                                                                                                                                                            
+    })                                                                                                                                                                                          
   ],
   devServer: {
     port: 9000

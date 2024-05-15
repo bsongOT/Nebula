@@ -5,7 +5,7 @@ import { Data, Nebula } from "../../data/Data";
 import { UIManager } from "@/objects/UIManager";
 import "./universeMap.css"
 
-type UniverseMapInfo = {
+export type UniverseMapInfo = {
   size: number,
   viewPoint: Coord,
   pickedPosition?: Coord
@@ -15,7 +15,7 @@ type NebulaCellState =
   "selectedAsUniverse" | "selectedAsNebula" |
   "picked"
 
-class NebulaCell {
+export class NebulaCell {
   public readonly element:HTMLTableCellElement;
   public readonly position:Coord;
   public nebula:Nebula|undefined;
@@ -125,9 +125,12 @@ export class UniverseMap extends UIManager {
         }})("확인")
       )
     }
-    this.element = div({class: "universe-map-box"})(
-      this.layout.table,
-      this.layout.picker
+    this.element = div()(
+      div({class: "universe-map-box"})(
+        this.layout.table,
+        this.layout.picker,
+      ),
+      span()("x: 0, y: 0")
     )
     this.cells = new Array<NebulaCell[]>()
     this.init();
@@ -160,9 +163,8 @@ export class UniverseMap extends UIManager {
         this.fill();
       case "reselectUniverse":
         this.showUniverse();
-      case "repick":
-        this.pick();
     }
+    this.pick();
   }
   private catchOrder(){
     if (this.cells.length !== this.info.size) return "resize"
@@ -187,20 +189,6 @@ export class UniverseMap extends UIManager {
     if (currentSelection.universe !== this.selection.universe){
       return "reselectUniverse"
     }
-
-    const pickPos = this.info.pickedPosition;
-        
-    for (let i = 0; i < this.info.size; i++){
-      for (let j = 0; j < this.info.size; j++){
-        if (this.cells[i][j].state === "picked"){
-          if (!pickPos) return "repick";
-          if (!pickPos.eq(P(j, i))) return "repick"
-          return "none"
-        }
-      }
-    }
-
-    if (pickPos) return "repick"
     
     return "none";
   }
