@@ -1,9 +1,12 @@
-import { btn, div, span, ul } from "@/funcObject";
+import { btn, div, span } from "@/funcObject";
 import "./SystemNebulaList.css"
 import { Parent } from "@/objects/Parent";
-import { ListSelector } from "../components/ListSelector/ListSelector";
-import { Content, Data } from "../data/Data";
+import { ListSelector } from "../../ListSelector/ListSelector";
+import { Content, Data, data } from "../../data/Data";
 import { engine } from "@/engine";
+import { DayNebulaList } from "./DayNebulaList";
+import { LifetimeNebulaList } from "./LifetimeNebulaList";
+import { ImportanceNebulaList } from "./ImportanceNebulaList";
 
 type SystemNebulaListInfo = {
   currentThirdWindow:{
@@ -13,26 +16,14 @@ type SystemNebulaListInfo = {
   },
   data:Data
 }
+
 export const SystemNebulaList = (info:SystemNebulaListInfo) => {
   const windows = {
-    day: new ListSelector<Content>({
-      datas: info.data.systemNebulas.day,
-      page: 1,
-      keyword: "",
-      capacity: 15,
-      itemChildrenBuilder: c => [
-        span()(c.title)
-      ],
-      filter: (c, s) => c.title.includes(s)
-    }).element,
-    lifetime: ul()(
-
-    ),
-    importance: ul()(
-
-    ),
+    day: DayNebulaList(info),
+    lifetime: LifetimeNebulaList(info),
+    importance: ImportanceNebulaList(info),
     isolated: new ListSelector<Content>({
-      datas: info.data.contents,
+      datas: info.data.systemNebulas.isolated,
       page: 1,
       keyword: "",
       capacity: 15,

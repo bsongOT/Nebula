@@ -60,19 +60,14 @@ const element = <T extends Tag, C extends HTMLElement = HTMLElement>(tag:T) => (
 )
 export const textarea = simpleElement("textarea");
 export const inputText = independentElement("input")
-export const slider = (attrs?:Record<string,any>) => {
-  const obj = independentElement("input")(attrs)();
+export const slider = (attrs?:Attribute<"input">, updatedAttrs?:Partial<Functionize<HTMLInputElement>>) => {
+  const obj = independentElement("input")(attrs, updatedAttrs)();
   obj.type = "range"
   return obj;
 }
 export const btn = simpleElement("button")
 export const span = simpleElement("span")
 export const a = simpleElement("a")
-export const checkbox = (attrs?:Record<string,any>) => {
-    const obj = independentElement("input")(attrs)()
-    obj.type = "checkbox"
-    return obj;
-}
 export const div = element("div")
 export const nav = element("nav")
 

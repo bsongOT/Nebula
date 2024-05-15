@@ -1,11 +1,13 @@
 import { btn, div, inputText, li, span, ul } from "@/funcObject";
 import { UIManager } from "@/objects/UIManager";
-import { DataCollection } from "../../data/DataCollection";
+import { DataCollection } from "../data/DataCollection";
 import "./ListSelector.css"
-import { DataComponent } from "../../data/components/DataComponent";
+import { DataComponent } from "../data/components/DataComponent";
+import { engine } from "@/engine";
+import { Parent } from "@/objects/Parent";
 
 type ListSelectorInfo<T extends DataComponent> = {
-    datas:DataCollection<T>,
+    datas:DataCollection<T> | T[],
     page:number,
     capacity:number,
     keyword:string,
@@ -13,6 +15,61 @@ type ListSelectorInfo<T extends DataComponent> = {
     filter: (data:T, search:string) => boolean,
     selection?: T
 }
+export const ListSelector = <T extends DataComponent>(info:ListSelectorInfo<T>) => {
+    let pairs = new Array<{element:HTMLLIElement, data:T}>()
+    let children = new Array<HTMLElement>();
+
+    const getMaxPage = () => {
+        return Math.max(1, Math.ceil(pairs.length / info.capacity))
+    }
+
+    engine.updater.register(() => {
+        const datas = info.datas instanceof DataCollection ? info.datas.all() : info.datas;
+        if (pairs.length === datas.length) return;
+        if (datas.some((v, i) => v !== pairs[i].data)) return;
+        
+        const from = (info.page - 1) * info.capacity;
+        const to = from + info.capacity;
+
+        pairs = info.datas.map(n => ({
+            element: li({}, {className: () => info.selection === n ? "selected" : ""})(...info.itemChildrenBuilder(n)),
+            data: n
+        }))
+
+        children = pairs
+            .filter(p => info.filter(p.data, info.keyword))
+            .slice(from, to)
+            .map(p => p.element)
+    })
+
+    return div()(
+        inputText({
+            oninput: e => info.keyword = (<HTMLInputElement>e.target).value
+        })(),
+        inputText({
+            type: "number", 
+            value: info.capacity.toString(), 
+            onchange: e => info.capacity = Number((<HTMLInputElement>e.target).value)
+        })(),
+        Parent({childArray: children}),
+        div()(
+            btn({
+                class: "page-changer", 
+                onclick: () => info.page-- },{
+                disabled: () => info.page <= 1
+            })("<"),
+            span({class: "page-counter"},{
+                innerText: () => `${info.page} / ${getMaxPage()}`
+            })(""),
+            btn({
+                class: "page-changer", 
+                onclick: () => info.page++ },{
+                disabled: () => info.page >= getMaxPage()
+            })(">")
+        )
+    );
+}
+/*
 export class ListSelector<T extends DataComponent> extends UIManager {
     public readonly element;
     public readonly info;
@@ -24,7 +81,7 @@ export class ListSelector<T extends DataComponent> extends UIManager {
         super();
         this.info = attributes;
         this.layout = {
-            list: ul({class: "nebula-list"})()
+            list: ul({class: "data-list"})()
         }
         this.pairs = new Array<{element:HTMLLIElement, data:T}>(),
         this.element = div()(
@@ -56,8 +113,8 @@ export class ListSelector<T extends DataComponent> extends UIManager {
         this.init();
     }
     public update() {
-        const datas = this.info.datas.all();
-        if (this.pairs.length === this.info.datas.all().length) return;
+        const datas = this.info.datas instanceof DataCollection ? this.info.datas.all() : this.info.datas;
+        if (this.pairs.length === datas.length) return;
         if (datas.some((v, i) => v !== this.pairs[i].data)) return;
 
         this.pairs = this.info.datas.map(n => ({
@@ -79,4 +136,4 @@ export class ListSelector<T extends DataComponent> extends UIManager {
     private getMaxPage(){
         return Math.max(1, Math.ceil(this.pairs.length / this.info.capacity))
     }
-}
+}*/

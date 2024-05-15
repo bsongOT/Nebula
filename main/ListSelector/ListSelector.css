@@ -1,12 +1,12 @@
-.nebula-list {
+.data-list {
     min-height: 200px;
     border: 1px solid #ccc;
 }
-.nebula-list > li {
+.data-list > li {
     height: 25px;
     border-bottom: 1px solid #ccc;
 }
-.nebula-list > li:last-child {
+.data-list > li:last-child {
     border-bottom: none;
 }
 .page-changer {

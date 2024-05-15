@@ -1,8 +1,8 @@
 import { div } from "@/funcObject";
 import { UniverseMap, UniverseMapInfo } from "./universeMap/universeMap";
-import { Universe } from "../data/components/Universe";
-import { Data, Nebula } from "../data/Data";
-import { DataCollection } from "../data/DataCollection";
+import { Universe } from "../../data/components/Universe";
+import { Data, Nebula } from "../../data/Data";
+import { DataCollection } from "../../data/DataCollection";
 
 export type CommonNebulaMapInfo = {
   universeMap: UniverseMapInfo,

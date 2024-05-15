@@ -1,7 +1,7 @@
 import { btn, div, inputText, span, table, td, tr } from "@/funcObject";
-import { Universe } from "../../data/components/Universe";
+import { Universe } from "../../../data/components/Universe";
 import { Coord, H, P } from "@/utils/math/coord-system";
-import { Data, Nebula } from "../../data/Data";
+import { Data, Nebula } from "../../../data/Data";
 import { UIManager } from "@/objects/UIManager";
 import "./universeMap.css"
 

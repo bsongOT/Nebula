@@ -3,12 +3,12 @@ import { span, li, btn, div } from "@/funcObject";
 import { Universe } from "../data/components/Universe";
 import { Parent } from "../../engine/objects/Parent";
 import { engine } from "@/engine";
-import { ListSelector } from "../components/ListSelector/ListSelector";
-import { ConvenientNebulaList } from "./ConvenientNebulaList";
-import { SystemNebulaList } from "./SystemNebulaList";
-import { CommonNebulaMap } from "./CommonNebulaMap";
+import { ListSelector } from "../ListSelector/ListSelector";
+import { ConvenientNebulaList } from "./convenience/ConvenientNebulaList";
+import { SystemNebulaList } from "./system/SystemNebulaList";
+import { CommonNebulaMap } from "./common/CommonNebulaMap";
 import "./UniverseView.css";
-import { UniverseMapInfo } from "./universeMap/universeMap";
+import { UniverseMapInfo } from "./common/universeMap/universeMap";
 
 export type UniverseViewInfo = {
   currentSecondWindow: {
