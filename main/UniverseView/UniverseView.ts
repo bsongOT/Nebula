@@ -1,7 +1,6 @@
 import { Data, Nebula, data } from "../data/Data";
 import { span, li, btn, div } from "@/funcObject";
 import { Universe } from "../data/components/Universe";
-import { Parent } from "../../engine/objects/Parent";
 import { engine } from "@/engine";
 import { ListSelector } from "../ListSelector/ListSelector";
 import { ConvenientNebulaList } from "./convenience/ConvenientNebulaList";
@@ -31,7 +30,7 @@ export const UniverseView = (info: UniverseViewInfo) => {
     common: CommonNebulaMap(info),
     system: SystemNebulaList(info),
     convenient: ConvenientNebulaList(),
-    list: new ListSelector<Universe>({
+    list: ListSelector<Universe>({
       datas: data.universes,
       page: 1,
       keyword: "",
@@ -40,21 +39,24 @@ export const UniverseView = (info: UniverseViewInfo) => {
         span()(u.name)
       ],
       filter: (u, s) => u.name.includes(s)
-    }).element
+    })
   };
-  const window = [windows[info.currentSecondWindow.universe]];
+
+  const winName = info.currentSecondWindow;
+
+  let window = [windows[winName.universe]];
 
   engine.updater.register(() => {
-    window[0] = windows[info.currentSecondWindow.universe];
+    window = [windows[winName.universe]];
   });
 
-  return div()( 
-    div({class: "universe-window-switch-box"})(
-      btn({onclick: () => info.currentSecondWindow.universe = "common"}, {className: () => info.currentSecondWindow.universe === "common" ? "selected" : ""})("Common"),
-      btn({onclick: () => info.currentSecondWindow.universe = "system"}, {className: () => info.currentSecondWindow.universe === "system" ? "selected" : ""})("System"),
-      btn({onclick: () => info.currentSecondWindow.universe = "convenient"}, {className: () => info.currentSecondWindow.universe === "convenient" ? "selected" : ""})("Convenient"),
-      btn({onclick: () => info.currentSecondWindow.universe = "list"}, {className: () => info.currentSecondWindow.universe === "list" ? "selected" : ""})("List")
-    ),
-    Parent({ className: "universe-view", childArray: window })
-  )
+  return div()([
+    div({class: "universe-window-switch-box"})([
+      btn({onclick: () => winName.universe = "common"}, {className: () => winName.universe === "common" ? "selected" : ""})("Common"),
+      btn({onclick: () => winName.universe = "system"}, {className: () => winName.universe === "system" ? "selected" : ""})("System"),
+      btn({onclick: () => winName.universe = "convenient"}, {className: () => winName.universe === "convenient" ? "selected" : ""})("Convenient"),
+      btn({onclick: () => winName.universe = "list"}, {className: () => winName.universe === "list" ? "selected" : ""})("List")
+    ]),
+    div({ className: "universe-view"})(window)
+  ])
 };

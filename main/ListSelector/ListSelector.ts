@@ -4,7 +4,6 @@ import { DataCollection } from "../data/DataCollection";
 import "./ListSelector.css"
 import { DataComponent } from "../data/components/DataComponent";
 import { engine } from "@/engine";
-import { Parent } from "@/objects/Parent";
 
 type ListSelectorInfo<T extends DataComponent> = {
     datas:DataCollection<T> | T[],
@@ -32,7 +31,7 @@ export const ListSelector = <T extends DataComponent>(info:ListSelectorInfo<T>) 
         const to = from + info.capacity;
 
         pairs = info.datas.map(n => ({
-            element: li({}, {className: () => info.selection === n ? "selected" : ""})(...info.itemChildrenBuilder(n)),
+            element: li({}, {className: () => info.selection === n ? "selected" : ""})(info.itemChildrenBuilder(n)),
             data: n
         }))
 
@@ -42,7 +41,7 @@ export const ListSelector = <T extends DataComponent>(info:ListSelectorInfo<T>) 
             .map(p => p.element)
     })
 
-    return div()(
+    return div()([
         inputText({
             oninput: e => info.keyword = (<HTMLInputElement>e.target).value
         })(),
@@ -51,8 +50,8 @@ export const ListSelector = <T extends DataComponent>(info:ListSelectorInfo<T>) 
             value: info.capacity.toString(), 
             onchange: e => info.capacity = Number((<HTMLInputElement>e.target).value)
         })(),
-        Parent({childArray: children}),
-        div()(
+        div()(children),
+        div()([
             btn({
                 class: "page-changer", 
                 onclick: () => info.page-- },{
@@ -66,8 +65,8 @@ export const ListSelector = <T extends DataComponent>(info:ListSelectorInfo<T>) 
                 onclick: () => info.page++ },{
                 disabled: () => info.page >= getMaxPage()
             })(">")
-        )
-    );
+        ])
+    ]);
 }
 /*
 export class ListSelector<T extends DataComponent> extends UIManager {

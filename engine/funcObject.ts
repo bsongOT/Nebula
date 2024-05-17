@@ -9,7 +9,7 @@ export type Functionize<T> = {
 }
 type Tag = keyof HTMLElementTagNameMap;
 type Attribute<T extends Tag> = Partial<HTMLElementTagNameMap[T]> & {class?:string};
-function update<T extends HTMLElement>(element:T, attrs?:Partial<Functionize<T>>){
+function update<T extends HTMLElement>(element:T, attrs?:Partial<Functionize<T>>, children?:HTMLElement[]|string){
     if (!document.contains(element)) return;
   
     for (const k in attrs){
@@ -19,8 +19,22 @@ function update<T extends HTMLElement>(element:T, attrs?:Partial<Functionize<T>>
       if (element[key] === data) continue;
       element[key] = data!;
     }
+
+    if (children === undefined || children === null) return;
+    if (typeof children === "string"){
+        element.innerText = children;
+        return;
+    }
+    const childUpdate = () => {
+        element.innerHTML = "";
+        element.append(...children);
+    }
+    if (children.length !== element.children.length) return childUpdate()
+    for (let i = 0; i < children.length; i++){
+        if (children[i] !== element.children[i]) return childUpdate()
+    }
   }
-const create = <T extends Tag>(tag:T, attrs?:Attribute<T>, updatedAttrs?:Partial<Functionize<HTMLElementTagNameMap[T]>>) => {
+const create = <T extends Tag>(tag:T, attrs?:Attribute<T>, updatedAttrs?:Partial<Functionize<HTMLElementTagNameMap[T]>>, children?:HTMLElement[]|string) => {
     const obj = document.createElement(tag);
     for(const key in attrs){
         const k = key as keyof Attribute<T>
@@ -51,8 +65,13 @@ const simpleElement = <T extends Tag>(tag:T) => (
 )
 const element = <T extends Tag, C extends HTMLElement = HTMLElement>(tag:T) => (
     (attrs?:Attribute<T>, updatedAttrs?:Partial<Functionize<HTMLElementTagNameMap[T]>>) => (
-        (...children:C[]) => {
-            const obj = create(tag, attrs, updatedAttrs);
+        (children?:C[]|string) => {
+            const obj = create(tag, attrs, updatedAttrs, children);
+            if (children === undefined || children === null) return obj;
+            if (typeof children === "string"){
+                obj.innerText = children;
+                return obj;
+            }
             obj.append(...children)
             return obj;
         }

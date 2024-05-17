@@ -14,7 +14,7 @@ export type CommonNebulaMapInfo = {
 }
 export const CommonNebulaMap = (info:CommonNebulaMapInfo) => {
   const {universeMap, selection, data} = info;
-  return div()(
-    new UniverseMap(universeMap, selection, data).element
-  );
+  return div()([
+    UniverseMap(universeMap, selection, data)
+  ]);
 };

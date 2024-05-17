@@ -58,18 +58,18 @@ export class NebulaPalette extends UIManager {
       },
       autoComplete: ul(this.memento.autoComplete)()
     };
-    this.element = div({class: "nebula-palette"})(
+    this.element = div({class: "nebula-palette"})([
       div()(
-        btn({onclick: () => this.startInput()})("setting")
+        [btn({onclick: () => this.startInput()})("setting")]
       ),
       this.layout.list,
       div({}, {
         className: () => this.info.isInputMode ? "palette-text-box" : "palette-text-box hidden"
-        })(
+        })([
         this.layout.input.text,
         btn({onclick: ()=>this.completeInput()})("submit")
-      ),
-    );
+      ]),
+    ]);
     this.features = {
       input: new NebulaPaletteInput(this),
       autoComplete: new AutoComplete(this)

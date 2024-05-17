@@ -28,22 +28,22 @@ export class StarTree extends UIManager {
     this.selection = selection;
     this.paletteGroups = [];
     this.layout = {
-      tree: new StarTreeList(this.selection),
+      tree: StarTreeList({}, this.selection),
       palette: new NebulaPalette(data, selection),
-      nebulaModel: new NebulaModel(selection),
+      nebulaModel: NebulaModel(selection),
       view: div()()
     };
-    this.element = div()(
-      div({class: "tree-switch-box"})(
+    this.element = div()([
+      div({class: "tree-switch-box"})([
         selli({onclick: () => this.switchView(this.layout.palette)})(span()("Palette")),
-        div({class: "bringer"})(
+        div({class: "bringer"})([
           btn()("->"),
           span()("")
-        ),
+        ]),
         selli({onclick: () => this.switchView(this.layout.tree)})(span()("Tree"))
-      ),
+      ]),
       this.layout.view,
-      div({ class: "arrow-keys" })(
+      div({ class: "arrow-keys" })([
         btn({ 
           class: "up-arrow", 
           onclick: () => this.layout.tree.updent() 
@@ -51,9 +51,9 @@ export class StarTree extends UIManager {
         btn({ class: "left-arrow", onclick: () => this.layout.tree.outdent() })("왼"),
         btn({ class: "down-arrow", onclick: () => this.layout.tree.downdent() })("밑"),
         btn({ class: "right-arrow", onclick: () => this.layout.tree.indent() })("오")
-      ),
+      ]),
       this.layout.nebulaModel.element,
-    );
+    ]);
     this.init();
   }
   public switchView(view:UIManager){

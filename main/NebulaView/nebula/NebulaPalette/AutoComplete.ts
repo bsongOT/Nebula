@@ -35,7 +35,7 @@ export class AutoComplete {
     this.pairs = pickedContents.map(c => ({
       element: li({
         onclick: e => (<HTMLElement>e.target).classList.add("selected")
-      })(span()(c.title)),
+      })(c.title),
       content: c
     }));
 

@@ -1,5 +1,4 @@
 import { btn, div, slider, span } from "@/funcObject";
-import { Parent } from "@/objects/Parent";
 import { Content, Data } from "../../data/Data";
 import { engine } from "@/engine";
 import { range } from "@/utils/utils";
@@ -36,21 +35,21 @@ export const DayNebulaList = (info: { data: Data; }) => {
         .map(n => min + 1000 * 60 * 60 * 24 * period * n)
         .filter(d => allDay.some(day => d <= day && day < d + (1000 * 60 * 60 * 24 * period)))
         .map(d => div({ onclick: () => [from, to] = [d, d + 1000 * 60 * 60 * 24 * period] })(
-          span()(new Date(d).toISOString().substring(0, 10) + "~")
-        ))
+          new Date(d).toISOString().substring(0, 10) + "~")
+        )
     );
   });
 
-  return div()(
+  return div()([
     span()("Period"),
     slider({ min: "1", max: "100", onchange: e => period = Number((<HTMLInputElement>e.target).value) }, { value: () => period.toString() }),
-    div({ class: "period-changer" })(
+    div({ class: "period-changer" })([
       btn({ onclick: () => period = 1 })("1 day"),
       btn({ onclick: () => period = 3 })("3 days"),
       btn({ onclick: () => period = 7 })("1 week"),
       btn({ onclick: () => period = 14 })("2 weeks"),
       btn({ onclick: () => period = 30 })("1 month")
-    ),
-    Parent({ childArray: listItems })
-  );
+    ]),
+    div()(listItems)
+  ]);
 };

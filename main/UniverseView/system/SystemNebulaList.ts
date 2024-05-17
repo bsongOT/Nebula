@@ -1,6 +1,5 @@
 import { btn, div, span } from "@/funcObject";
 import "./SystemNebulaList.css"
-import { Parent } from "@/objects/Parent";
 import { ListSelector } from "../../ListSelector/ListSelector";
 import { Content, Data, data } from "../../data/Data";
 import { engine } from "@/engine";
@@ -21,8 +20,8 @@ export const SystemNebulaList = (info:SystemNebulaListInfo) => {
   const windows = {
     day: DayNebulaList(info),
     lifetime: LifetimeNebulaList(info),
-    importance: ImportanceNebulaList(info),
-    isolated: new ListSelector<Content>({
+    importance: ImportanceNebulaList({interval: 1}),
+    isolated: ListSelector<Content>({
       datas: info.data.systemNebulas.isolated,
       page: 1,
       keyword: "",
@@ -31,7 +30,7 @@ export const SystemNebulaList = (info:SystemNebulaListInfo) => {
         span()(c.title)
       ],
       filter: (c, s) => c.title.includes(s)
-    }).element
+    })
   };
   const windowInfo = info.currentThirdWindow.universe;
   const window = [windows[windowInfo.system]];
@@ -40,13 +39,13 @@ export const SystemNebulaList = (info:SystemNebulaListInfo) => {
     window[0] = windows[windowInfo.system];
   });
   
-  return div()(
-    div({ class: "system-nebula-switch-box" })(
+  return div()([
+    div({ class: "system-nebula-switch-box" })([
       btn({onclick: () => windowInfo.system = "day"}, {className: () => windowInfo.system === "day" ? "selected" : ""})("Day"),
       btn({onclick: () => windowInfo.system = "lifetime"}, {className: () => windowInfo.system === "lifetime" ? "selected" : ""})("Lifetime"),
       btn({onclick: () => windowInfo.system = "importance"}, {className: () => windowInfo.system === "importance" ? "selected" : ""})("Importance"),
       btn({onclick: () => windowInfo.system = "isolated"}, {className: () => windowInfo.system === "isolated" ? "selected" : ""})("Isolated")
-    ),
-    Parent({className: "system-nebula-list", childArray: window})
-  );
+    ]),
+    div({className: "system-nebula-list"})(window)
+  ]);
 };

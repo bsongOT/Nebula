@@ -22,7 +22,7 @@ export class NebulaPaletteInput {
     }
 
     this.palette.pairs = contents.map(c =>({
-      element: li(attrs)(span()(c.title)),
+      element: li(attrs)(c.title),
       content: c,
       killed: selection.nebula?.tree.nodes.map(n => n.data).includes(c) ?? false
     }))

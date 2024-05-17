@@ -42,6 +42,14 @@ export class HexGrid<T>{
     
     return n;
   }
+  public map<U>(func:(element:T, position:HexCoord) => U){
+    const n = new HexGrid<U>(this.size);
+    let pos = H(0, 0, 0);
+    for (let i = 0; i < this.area; i++){
+      n.setVal(pos, func(this.at(pos)!, pos))
+      pos = this.next(pos);
+    }
+  }
   get area():number{
     const [x, y, z] = [this.size.x, this.size.y, this.size.z]
     return x*(y-1) + y*(z-1) + z*(x-1) + 1
