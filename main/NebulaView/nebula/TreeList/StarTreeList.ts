@@ -1,23 +1,47 @@
-import { ul } from "@/funcObject";
+import { li, ul } from "@/funcObject";
 import { Content, Nebula } from "../../../data/Data";
 import { UIManager } from "@/objects/UIManager";
 import { StarTreeNode } from "./StarTreeNode";
-import { Tree } from "@/data-structure/tree";
+import { Tree, TreeNode } from "@/data-structure/tree";
+import { engine } from "@/engine";
 
-export function TreeList<T>(info:{tree:Tree<T>}){
-
+export function TreeList<T>(info:{root:TreeNode<T>, itemChildrenBuilder: (data:T) => HTMLLIElement[]}){
+  return ul()(
+    info.root.children.map(
+      c => li()([
+        ...info.itemChildrenBuilder(c.data),
+        TreeList<T>({root: c, itemChildrenBuilder: info.itemChildrenBuilder})
+      ])
+    )
+  )
 }
 export function StarTreeList(info:{selectedNode?:HTMLLIElement}, selection: {nebula?: Nebula}) {
-  let nodePairs: {
-    element: HTMLLIElement,
-    content: Content
-  }[] = [];
+  if (!selection.nebula) return ul()()
+
+  let nodePairs: {element: HTMLLIElement, content: Content}[] = [];
+
+  const tree = selection.nebula?.tree.map(c => ({
+    content: c,
+    element: StarTreeNode(c),
+    info: {
+      childrenData: [] as Content[]
+    }
+  }));
+  const nodes = new Array<HTMLLIElement>()
+
+  engine.updater.register(() => {
+    nodes.splice(0, nodes.length);
+    nodes.push(...tree.root.children.map(c => c.data.element))
+  })
 
   function insert(...contents: Content[]) {
-    const nodes = contents.map(c => StarTreeNode(c));
+    const AddingNodePairs = contents.map(c => ({
+      element: StarTreeNode(c),
+      content: c
+    }));
 
-    nodePairs.push(...nodes);
-    element.append(...nodes.map(n => n));
+    nodePairs.push(...AddingNodePairs);
+    nodes.push(...AddingNodePairs.map(p => p.element));
   }
 
   function updent() {
@@ -44,14 +68,12 @@ export function StarTreeList(info:{selectedNode?:HTMLLIElement}, selection: {neb
 
   function init() {
     if (!selection.nebula) return;
-    const tree = selection.nebula.tree.map(c => StarTreeNode(c));
-    nodePairs = tree.nodes.map(n => n.data);
+    nodePairs.splice(0, nodePairs.length);
+    nodePairs.push(...tree.nodes.map(n => n.data));
     tree.tourNode(tree.root, n => {
-      n.data.layout.list.append(
-        ...n.children.map(c => c.data)
-      );
+      n.data.info.childrenData = n.children.map(c => c.data.content);
     });
-    element.append(
-      ...tree.root.children.map(c => c.data));
   }
+
+  return ul()(nodes)
 }

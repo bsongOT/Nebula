@@ -250,7 +250,6 @@ export function UniverseMap(info: UniverseMapInfo, selection: {universe?: Univer
     div({class: "universe-map-box"})([
       table({class: "universe-map"})(rows),
       Picker(info, data),
-    ]),
-    span()("x: 0, y: 0")
+    ])
   ])
 }

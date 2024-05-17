@@ -18,10 +18,10 @@ class Debug {
     private message = "";
     private isShown = false;
     public logger(){
-        return div()(
+        return div()([
             btn({onclick: () => this.isShown = false})("X"),
             div({}, {innerText: () => this.message})()
-        )
+        ])
     }
     public log(message?:any){
         this.message += message + "\n";

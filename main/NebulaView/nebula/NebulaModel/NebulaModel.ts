@@ -9,12 +9,14 @@ import { gridify } from "@/data-structure/utils";
 export function NebulaModel(selection: { nebula?: Nebula; }) {
     const tileBox = new Container();
     const effectBox = new Container();
+
+    let width = 500;
     
     tileBox.update = () => {
       if (!selection.nebula) return tileBox;
       tileBox.empty();
   
-      const canvasSize = element.clientWidth;
+      const canvasSize = width;
       const canvasCenter = P(1, 1).scale(canvasSize / 2);
       const grid = gridify(selection.nebula.tree);
       const size = grid.size.x;
