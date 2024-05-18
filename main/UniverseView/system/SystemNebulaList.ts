@@ -18,7 +18,7 @@ type SystemNebulaListInfo = {
 
 export const SystemNebulaList = (info:SystemNebulaListInfo) => {
   const windows = {
-    day: DayNebulaList(info),
+    day: DayNebulaList({period: 1}, info.data),
     lifetime: LifetimeNebulaList(info),
     importance: ImportanceNebulaList({interval: 1}),
     isolated: ListSelector<Content>({

@@ -25,3 +25,7 @@
     border-radius: 0 10px 10px 0;
     border-right: 1px solid #ccc
 }
+.universe-view {
+    display: flex;
+    justify-content: center;
+}

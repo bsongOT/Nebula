@@ -156,18 +156,6 @@ export function UniverseMap(info: UniverseMapInfo, selection: {universe?: Univer
         showUniverse();
     }
   }
-  function init(){
-    for (let i = 0; i < info.size; i++){
-      cells.push([])
-      for (let j = 0; j < info.size; j++){
-        cells[i].push(new NebulaCell(P(j, i), info, selection))
-      }
-    }
-    rows.splice(0, rows.length);
-    rows.push(...cells.map(r => 
-      tr()(r.map(cell => cell.element))
-    ));
-  }
   function catchOrder(){
     if (cells.length !== info.size) return "resize"
 
@@ -194,6 +182,19 @@ export function UniverseMap(info: UniverseMapInfo, selection: {universe?: Univer
     
     return "none";
   }
+  function init(){
+    for (let i = 0; i < info.size; i++){
+      cells.push([])
+      for (let j = 0; j < info.size; j++){
+        cells[i].push(new NebulaCell(P(j, i), info, selection))
+      }
+    }
+    rows.splice(0, rows.length);
+    rows.push(...cells.map(r => 
+      tr()(r.map(cell => cell.element))
+    ));
+  }
+
   function erase(){
     for (const r of cells){
       for (const cell of r){
@@ -246,10 +247,8 @@ export function UniverseMap(info: UniverseMapInfo, selection: {universe?: Univer
     }
   }
 
-  return div()([
-    div({class: "universe-map-box"})([
-      table({class: "universe-map"})(rows),
-      Picker(info, data),
-    ])
+  return div({class: "universe-map-box"})([
+    table({class: "universe-map"})(rows),
+    Picker(info, data),
   ])
 }

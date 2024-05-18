@@ -24,6 +24,7 @@ function updateChildren<T extends HTMLElement>(element:T, children?:ChildrenAttr
     const childs = typeof children === "function" ? children(element) : children
 
     if (typeof childs === "string"){
+        if (element.innerText === childs) return;
         element.innerText = childs;
         return;
     }
@@ -48,11 +49,11 @@ function update<T extends HTMLElement>(element:T, attrs?:UpdatedAttribute<T>, ch
     }
 
     if (attrs?.inlineStyle){
-        Object.assign(element.style, attrs.inlineStyle);
+        Object.assign(element.style, attrs.inlineStyle(element));
     }
 
     updateChildren(element, children);
-  }
+}
 const create = <T extends Tag>(
     tag:T, 
     attrs?:Attribute<T>, 

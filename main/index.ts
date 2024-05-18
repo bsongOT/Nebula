@@ -6,6 +6,8 @@ import { engine } from "@/engine";
 import { UniverseView } from "./UniverseView/UniverseView";
 import "./index.css"
 import { NebulaView } from "./NebulaView/NebulaView";
+import { ContentView } from "./ContentView/ContentView";
+import { DustView } from "./DustView/DustView";
 
 const memento = {
   universeMap: {
@@ -36,8 +38,8 @@ export const MainView = (info:{currentWindow:"universe"|"nebula"|"content"|"dust
   const windows = {
     universe: UniverseView(memento),
     nebula: NebulaView({openedNebulaInfos:[]}, memento.data),
-    content: div()(),
-    dust: div()(),
+    content: ContentView(),
+    dust: DustView(),
   }
   let currentWindows = [windows[info.currentWindow]];
 

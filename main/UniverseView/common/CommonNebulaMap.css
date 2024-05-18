@@ -1,0 +1,16 @@
+.common-nebula-map {
+    position: relative;
+}
+.view-point-changer-x {
+    width: 400px;
+}
+.view-point-changer-y {
+    position: absolute;
+    top: 0;
+    right: -5px;
+    appearance: slider-vertical;
+    width: 16px;
+    direction: rtl;
+    height: 400px;
+    transform: translateX(100%);
+}

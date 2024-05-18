@@ -44,12 +44,6 @@ export const UniverseView = (info: UniverseViewInfo) => {
 
   const winName = info.currentSecondWindow;
 
-  let window = [windows[winName.universe]];
-
-  engine.updater.register(() => {
-    window = [windows[winName.universe]];
-  });
-
   return div()([
     div({class: "universe-window-switch-box"})([
       btn({onclick: () => winName.universe = "common"}, {className: () => winName.universe === "common" ? "selected" : ""})("Common"),
@@ -57,6 +51,6 @@ export const UniverseView = (info: UniverseViewInfo) => {
       btn({onclick: () => winName.universe = "convenient"}, {className: () => winName.universe === "convenient" ? "selected" : ""})("Convenient"),
       btn({onclick: () => winName.universe = "list"}, {className: () => winName.universe === "list" ? "selected" : ""})("List")
     ]),
-    div({ className: "universe-view"})(window)
+    div({ className: "universe-view"})(() => [windows[winName.universe]])
   ])
 };
