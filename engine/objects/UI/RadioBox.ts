@@ -10,6 +10,6 @@ export class RadioBox {
     children: HTMLElement[]
   }){
     this.info = attrs;
-    this.element = div()(...attrs.children);
+    this.element = div()(attrs.children);
   }
 }

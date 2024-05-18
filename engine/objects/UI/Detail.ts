@@ -15,10 +15,10 @@ export class Detail {
       toggle,
       content
     }
-    this.element = div({class: "detail detail-collapsed"})(
+    this.element = div({class: "detail detail-collapsed"})([
       toggle,
       content
-    )
+    ])
 
     toggle.classList.add("detail-toggle")
     content.classList.add("detail-content")

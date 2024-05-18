@@ -25,7 +25,8 @@ type NebulaBox = {
     id:number,
     name:string,
     treeOrder: {data:number, parent:number}[],
-    palette: number[]
+    palette: number[],
+    importerIds: number[]
 }
 type UniverseBox = {
     id: number,
@@ -69,7 +70,8 @@ export class Packer {
       id: nebula.id,
       name: nebula.name,
       treeOrder: nebula.tree.map(n => n.id).arrayize(),
-      palette: nebula.palette.map(n => n.id)
+      palette: nebula.palette.map(n => n.id),
+      importerIds: nebula.importerIds
     }
   }
   static universe(universe:Universe):UniverseBox{
@@ -122,6 +124,7 @@ export class Unpacker {
     n.id = nebulaBox.id
     n.tree = Tree.treeize(nebulaBox.treeOrder).map(id => contents.get(id)!)
     n.palette = nebulaBox.palette.map(id => contents.get(id)!).filter(c => c)
+    n.importerIds = nebulaBox.importerIds;
 
     return n;
   }

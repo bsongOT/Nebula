@@ -105,7 +105,7 @@ export function Picker(info:{pickedPosition?:Coord, size:number}, data:Data){
     }
 
     const pos = info.pickedPosition;
-    if (!pos) return;
+    if (!pos) return style;
     
     if (pos.x >= info.size / 2) {
       style.left = `${100 * (pos.x - 8) / info.size}%`;
@@ -129,7 +129,7 @@ export function Picker(info:{pickedPosition?:Coord, size:number}, data:Data){
     info.pickedPosition = undefined;
   }
 
-  return div({}, {style: getPosition, className: () => `cell-picker ${info.pickedPosition ? "" : "hidden"}`})([
+  return div({}, {inlineStyle: getPosition, className: () => `cell-picker ${info.pickedPosition ? "" : "hidden"}`})([
     div({class: "picker-top"})([
       span()("New Universe"),        
       btn({ class: "close-button", onclick: onClickClose })("X"),
@@ -139,23 +139,23 @@ export function Picker(info:{pickedPosition?:Coord, size:number}, data:Data){
   ])
 }
 export function UniverseMap(info: UniverseMapInfo, selection: {universe?: Universe, nebula?: Nebula}, data: Data) {
-    const cells = new Array<NebulaCell[]>()
-    const rows = new Array<HTMLTableRowElement>()
+  const cells = new Array<NebulaCell[]>()
+  const rows = new Array<HTMLTableRowElement>()
 
-    engine.updater.register(update)
+  engine.updater.register(update)
 
-    function update(){
-      const order = catchOrder();
-      switch(order){
-        case "resize":
-          init();
-        case "redata":
-          erase();
-          fill();
-        case "reselectUniverse":
-          showUniverse();
-      }
+  function update(){
+    const order = catchOrder();
+    switch(order){
+      case "resize":
+        init();
+      case "redata":
+        erase();
+        fill();
+      case "reselectUniverse":
+        showUniverse();
     }
+  }
   function init(){
     for (let i = 0; i < info.size; i++){
       cells.push([])

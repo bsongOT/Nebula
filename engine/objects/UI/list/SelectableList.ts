@@ -11,7 +11,7 @@ export class SelectableList {
   public readonly info;
 
   constructor(attrs:SelectableListInfo){
-    this.element = ul()(...attrs.children);
+    this.element = ul()(attrs.children);
     this.info = attrs;
 
     attrs.children.forEach(c => {

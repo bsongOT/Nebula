@@ -7,34 +7,58 @@ import { engine } from "./engine";
 export type Functionize<T> = {
     [key in keyof T]: (element: T) => T[key]
 }
-type Tag = keyof HTMLElementTagNameMap;
-type Attribute<T extends Tag> = Partial<HTMLElementTagNameMap[T]> & {class?:string};
-function update<T extends HTMLElement>(element:T, attrs?:Partial<Functionize<T>>, children?:HTMLElement[]|string){
+export type UpdatedAttribute<T extends HTMLElement> = Partial<Functionize<T>> & {inlineStyle?:(element: T) => Partial<CSSStyleDeclaration>}
+export type Tag = keyof HTMLElementTagNameMap;
+export type Attribute<T extends Tag> = Partial<HTMLElementTagNameMap[T]> & {class?:string, inlineStyle?:Partial<CSSStyleDeclaration>};
+export type ChildrenAttribute<T extends HTMLElement, C extends HTMLElement = HTMLElement> = C[] | ((element:T) => C[]) | string | ((element:T) => string)
+
+function mustUpdateChildren(element:HTMLElement, children:HTMLElement[]){
+    if (children.length !== element.children.length) return true;
+    for (let i = 0; i < children.length; i++){
+        if (children[i] !== element.children[i]) return true;
+    }
+    return false;
+}
+function updateChildren<T extends HTMLElement>(element:T, children?:ChildrenAttribute<T>){
+    if (children === undefined || children === null) return;
+    const childs = typeof children === "function" ? children(element) : children
+
+    if (typeof childs === "string"){
+        element.innerText = childs;
+        return;
+    }
+
+    if (mustUpdateChildren(element, childs)) {
+        element.innerHTML = "";
+        element.append(...childs);
+    }
+}
+
+function update<T extends HTMLElement>(element:T, attrs?:UpdatedAttribute<T>, children?:ChildrenAttribute<T>){
     if (!document.contains(element)) return;
   
     for (const k in attrs){
+      if (k === "inlineStyle") continue;
+
       const key = k as keyof Partial<Functionize<T>>;
-      const data = attrs[key]?.(element);
-  
+      const data = attrs[key]?.(element) as T[keyof T];
+
       if (element[key] === data) continue;
       element[key] = data!;
     }
 
-    if (children === undefined || children === null) return;
-    if (typeof children === "string"){
-        element.innerText = children;
-        return;
+    if (attrs?.inlineStyle){
+        Object.assign(element.style, attrs.inlineStyle);
     }
-    const childUpdate = () => {
-        element.innerHTML = "";
-        element.append(...children);
-    }
-    if (children.length !== element.children.length) return childUpdate()
-    for (let i = 0; i < children.length; i++){
-        if (children[i] !== element.children[i]) return childUpdate()
-    }
+
+    updateChildren(element, children);
   }
-const create = <T extends Tag>(tag:T, attrs?:Attribute<T>, updatedAttrs?:Partial<Functionize<HTMLElementTagNameMap[T]>>, children?:HTMLElement[]|string) => {
+const create = <T extends Tag>(
+    tag:T, 
+    attrs?:Attribute<T>, 
+    updatedAttrs?:UpdatedAttribute<HTMLElementTagNameMap[T]>, 
+    children?:ChildrenAttribute<HTMLElementTagNameMap[T]>
+) => {
     const obj = document.createElement(tag);
     for(const key in attrs){
         const k = key as keyof Attribute<T>
@@ -46,40 +70,35 @@ const create = <T extends Tag>(tag:T, attrs?:Attribute<T>, updatedAttrs?:Partial
             obj[key as keyof HTMLElementTagNameMap[T]] = (attrs as any)[key]!;
         }
     }
-    engine.updater.register(() => update(obj, updatedAttrs))
+    engine.updater.register(() => update(obj, updatedAttrs, children))
     return obj;
 }
 const independentElement = <T extends Tag>(tag:T) => (
-    (attrs?:Attribute<T>, updatedAttrs?:Partial<Functionize<HTMLElementTagNameMap[T]>>) => (
+    (attrs?:Attribute<T>, updatedAttrs?:UpdatedAttribute<HTMLElementTagNameMap[T]>) => (
         () => create(tag, attrs, updatedAttrs)
     )
 )
 const simpleElement = <T extends Tag>(tag:T) => (
-    (attrs?:Attribute<T>, updatedAttrs?:Partial<Functionize<HTMLElementTagNameMap[T]>>) => (
-        (text:string) => {
+    (attrs?:Attribute<T>, updatedAttrs?:UpdatedAttribute<HTMLElementTagNameMap[T]>) => (
+        (text?:string) => {
             const obj = create(tag, attrs, updatedAttrs)
-            obj.innerText = text;
+            obj.innerText = text ?? "";
             return obj;
         }
     )
 )
 const element = <T extends Tag, C extends HTMLElement = HTMLElement>(tag:T) => (
-    (attrs?:Attribute<T>, updatedAttrs?:Partial<Functionize<HTMLElementTagNameMap[T]>>) => (
-        (children?:C[]|string) => {
+    (attrs?:Attribute<T>, updatedAttrs?:UpdatedAttribute<HTMLElementTagNameMap[T]>) => (
+        (children?:ChildrenAttribute<HTMLElementTagNameMap[T], C>) => {
             const obj = create(tag, attrs, updatedAttrs, children);
-            if (children === undefined || children === null) return obj;
-            if (typeof children === "string"){
-                obj.innerText = children;
-                return obj;
-            }
-            obj.append(...children)
+            updateChildren(obj, children)
             return obj;
         }
     )
 )
 export const textarea = simpleElement("textarea");
 export const inputText = independentElement("input")
-export const slider = (attrs?:Attribute<"input">, updatedAttrs?:Partial<Functionize<HTMLInputElement>>) => {
+export const slider = (attrs?:Attribute<"input">, updatedAttrs?:UpdatedAttribute<HTMLInputElement>) => {
   const obj = independentElement("input")(attrs, updatedAttrs)();
   obj.type = "range"
   return obj;

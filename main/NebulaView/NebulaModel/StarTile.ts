@@ -1,6 +1,6 @@
 import {Hexagon} from "@/objects/CanvasObject"
 import p5 from "p5";
-import { Content } from "../../../data/components/Content";
+import { Content } from "../../data/components/Content";
 import { r3 } from "@/utils/math/consts";
 
 export class StarTile extends Hexagon{

@@ -9,6 +9,7 @@ export class Nebula implements DataComponent{
   name:string;
   tree:Tree<Content>;
   palette:Content[];
+  importerIds:number[];
 
   constructor(info?:{
     name?: string,
@@ -18,6 +19,7 @@ export class Nebula implements DataComponent{
     this.id = info?.id ?? -1;
     this.tree = new Tree()
     this.palette = [];
+    this.importerIds = [];
   }
   toString(){
     return `

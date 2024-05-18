@@ -20,7 +20,7 @@ class Debug {
     public logger(){
         return div()([
             btn({onclick: () => this.isShown = false})("X"),
-            div({}, {innerText: () => this.message})()
+            div()(() => this.message)
         ])
     }
     public log(message?:any){

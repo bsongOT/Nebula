@@ -17,8 +17,8 @@ export class Calendar {
     const day = this.info.day ?? new Date();
     const firstDay = new Date(day.getFullYear(), day.getMonth(), 1)
 
-    const weekCells = ["일","월", "화", "수", "목", "금", "토"].map(s => td()(span()(s)))
-    const dayCells = range(31).map(s => td()(span()((s + 1).toString())))
+    const weekCells = ["일","월", "화", "수", "목", "금", "토"].map(s => td()(s))
+    const dayCells = range(31).map(s => td()((s + 1).toString()))
     const cells = [
       ...weekCells,
       ...Array(firstDay.getDate()).fill(td()()),
