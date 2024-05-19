@@ -24,7 +24,7 @@ type ContentBox = {
 type NebulaBox = {
     id:number,
     name:string,
-    treeOrder: {data:number, parent:number}[],
+    tree: {data:number, parent:number}[],
     palette: number[],
     importerIds: number[]
 }
@@ -76,7 +76,7 @@ export class Packer {
     return {
       id: nebula.id,
       name: nebula.name,
-      treeOrder: nebula.tree.map(n => n.id).arrayize(),
+      tree: nebula.tree.map(n => n.id).arrayize(),
       palette: nebula.palette.map(n => n.id),
       importerIds: nebula.importerIds
     } satisfies {[key in keyof Nebula]: any}
@@ -129,7 +129,7 @@ export class Unpacker {
     
     n.name = nebulaBox.name
     n.id = nebulaBox.id
-    n.tree = Tree.treeize(nebulaBox.treeOrder).map(id => contents.get(id)!)
+    n.tree = Tree.treeize(nebulaBox.tree).map(id => contents.get(id)!)
     n.palette = nebulaBox.palette.map(id => contents.get(id)!).filter(c => c)
     n.importerIds = nebulaBox.importerIds;
 
@@ -165,10 +165,4 @@ export class Unpacker {
     
     return r;
   }
-}
-export class Exporter {
-  
-}
-export class Importer {
-
 }

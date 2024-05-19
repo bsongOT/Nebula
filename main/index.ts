@@ -41,19 +41,18 @@ export const MainView = (info:{currentWindow:"universe"|"nebula"|"content"|"dust
     content: ContentView(),
     dust: DustView(),
   }
-  let currentWindows = [windows[info.currentWindow]];
 
-  engine.updater.register(() => {
-    currentWindows = [windows[info.currentWindow]]
-  })
+  return div({className: "main-view"})(() => [windows[info.currentWindow]])
+}
 
-  return div({className: "main-view"})(currentWindows)
+function switchWindow(windowKey:"universe" | "nebula" | "content" | "dust"){
+  memento.currentWindow = windowKey
 }
 
 body(
   div({class: "current-window-switch-box"})([
-    btn({onclick: () => memento.currentWindow = "universe"}, {className: () => memento.currentWindow === "universe" ? "selected" : ""})("Universe"),
-    btn({onclick: () => memento.currentWindow = "nebula"}, {className: () => memento.currentWindow === "nebula" ? "selected" : ""})("Nebula"),
+    btn({onclick: () => switchWindow("universe")}, {className: () => memento.currentWindow === "universe" ? "selected" : ""})("Universe"),
+    btn({onclick: () => switchWindow("nebula")}, {className: () => memento.currentWindow === "nebula" ? "selected" : ""})("Nebula"),
     btn({onclick: () => memento.currentWindow = "content"}, {className: () => memento.currentWindow === "content" ? "selected" : ""})("Content"),
     btn({onclick: () => memento.currentWindow = "dust"}, {className: () => memento.currentWindow === "dust" ? "selected" : ""})("Dust")
   ]),
@@ -65,14 +64,14 @@ body(
       btn({onclick: () => memento.currentSecondWindow.universe = "list"}, {className: () => memento.currentSecondWindow.universe === "list" ? "selected" : ""})("List")
     ]),
     div({class: "nebula-window-switch-box"})([
-      btn()("Editor"),
+      btn({})("Editor"),
       btn()("List")
     ]),
     div({class: "content-window-switch-box"})([
       btn()("Editor"),
       btn()("List")
     ]),
-    div({class: "dust-window-switch-box"})([
+    div()([
       btn()("Claim"),
       btn()("Kernel")
     ])
