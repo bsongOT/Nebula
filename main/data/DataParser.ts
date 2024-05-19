@@ -6,6 +6,7 @@ import { Relation } from "./components/Relation";
 import { NebulaInfo, Universe } from "./components/Universe";
 import { Tree } from "@/data-structure/tree";
 import { DataCollection } from "./DataCollection";
+import { DayNebula, LifetimeNebula } from "./Data";
 
 type KeyOmitFunction<T> =   { 
   [K in keyof T]: T[K] extends Function ? never : K 
@@ -103,15 +104,39 @@ export class Packer {
   }
   static relation(relation:Relation){
     return {
-        id: relation.id,
-        mainTree: relation.mainTree.id,
-        secondTree: relation.secondTree.id,
-        table: relation.table.map(c => ({
-          main: c.main.id,
-          second: c.second.id,
-          state: c.state instanceof Dust ? c.state.id : c.state
-        }))
-    } satisfies {[key in keyof Relation]: any}
+      id: relation.id,
+      mainTree: relation.mainTree.id,
+      secondTree: relation.secondTree.id,
+      table: relation.table.map(c => ({
+        main: c.main.id,
+        second: c.second.id,
+        state: c.state instanceof Dust ? c.state.id : c.state
+      }))
+    } satisfies Anyify<Relation>
+  }
+  static dayNebula(dayNebula:DayNebula){
+    return {
+      add: dayNebula.add.map(cd => ({
+        content: cd.content.id,
+        day: cd.day.getTime()
+      })),
+      modify: dayNebula.modify.map(cd => ({
+        content: cd.content.id,
+        day: cd.day.getTime()
+      })),
+      remove: dayNebula.remove.map(cd => ({
+        content: cd.content.id,
+        day: cd.day.getTime()
+      })),
+    } satisfies Anyify<DayNebula>
+  }
+  static lifetimeNebula(lifetimeNebula:LifetimeNebula){
+    return {
+      deads: lifetimeNebula.deads,
+      modifieds: lifetimeNebula.modifieds.map(c => c.id),
+      livings: lifetimeNebula.livings.map(c => c.id),
+      news: lifetimeNebula.news.map(c => c.id)
+    } satisfies Anyify<LifetimeNebula>
   }
 }
 export class Unpacker {
@@ -188,5 +213,29 @@ export class Unpacker {
         state: dusts.get(c.state) ?? c.state
       })).filter(td => td.main && td.second && td.state)
     } satisfies Relation);    
+  }
+  static dayNebula(dayNebulaBox:ReturnType<typeof Packer.dayNebula>, contents:DataCollection<Content>){
+    return {
+      add: dayNebulaBox.add.map(cd => ({
+        content: contents.get(cd.content)!,
+        day: new Date(cd.day)
+      })),
+      modify: dayNebulaBox.modify.map(cd => ({
+        content: contents.get(cd.content)!,
+        day: new Date(cd.day)
+      })),
+      remove: dayNebulaBox.remove.map(cd => ({
+        content: contents.get(cd.content)!,
+        day: new Date(cd.day)
+      }))
+    } satisfies DayNebula
+  }
+  static lifetimeNebula(lifetimeNebulaBox:ReturnType<typeof Packer.lifetimeNebula>, contents:DataCollection<Content>){
+    return {
+      deads: lifetimeNebulaBox.deads,
+      modifieds: lifetimeNebulaBox.modifieds.map(id => contents.get(id)!),
+      livings: lifetimeNebulaBox.livings.map(id => contents.get(id)!),
+      news: lifetimeNebulaBox.news.map(id => contents.get(id)!)
+    } satisfies LifetimeNebula
   }
 }

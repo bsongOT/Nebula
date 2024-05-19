@@ -2,11 +2,11 @@ import { Container, Hexagon } from "@/objects/CanvasObject";
 import { StarTile } from "./StarTile";
 import { H, P } from "@/utils/math/coord-system";
 import { canvas } from "@/funcObject";
-import { Nebula } from "../../data/Data";
+import { CommonNebula, Nebula } from "../../data/Data";
 import { UIManager } from "@/objects/UIManager";
 import { gridify } from "@/data-structure/utils";
 
-export function NebulaModel(info: { shownNebula:Nebula }) {
+export function NebulaModel(info: { shownNebula:CommonNebula }) {
     const tileBox = new Container();
     const effectBox = new Container();
 

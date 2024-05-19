@@ -1,5 +1,5 @@
 import { btn, div, inputText, li, span, textarea, ul } from "@/funcObject";
-import { Content, Nebula } from "../../data/Data";
+import { CommonNebula, Content, Nebula } from "../../data/Data";
 import { UIManager } from "@/objects/UIManager";
 import { DataCollection } from "../../data/DataCollection";
 import "./NebulaPalette.css"
@@ -10,7 +10,7 @@ type PalettePair = {
   content: Content,
   killed: boolean
 }
-export function NebulaPalette(data: { contents: DataCollection<Content> }, info: { shownNebula:Nebula }) {
+export function NebulaPalette(data: { contents: DataCollection<Content> }, info: { shownNebula:CommonNebula }) {
   let pairs = new Array<PalettePair>()
   let input = "";
   let isInputOpened = false;

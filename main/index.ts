@@ -36,12 +36,7 @@ const memento = {
     nebula: "editor",
     content: "editor",
     dust: "claim"
-  } as SecondWindowKeys,
-  currentThirdWindow: {
-    universe: {
-      system: "day" as "day" | "lifetime" | "importance" | "isolated"
-    }
-  }
+  } as SecondWindowKeys
 }
 
 type MainViewInfo = {
@@ -110,6 +105,13 @@ function switchWindow<T extends FirstWindowKey>(key:[T, SecondWindowKeys[T]?]){
   memento.currentSecondWindow[key[0]] = key[1]
 }
 
+const switchBoxHeights = {
+  universe: "0",
+  nebula: "-100%",
+  content: "-200%",
+  dust: "-300%"
+}
+
 body(
   div({class: "current-window-switch-box"})([
     btn({onclick: () => switchWindow(["universe"])}, {className: () => memento.currentWindow === "universe" ? "selected" : ""})("Universe"),
@@ -117,7 +119,8 @@ body(
     btn({onclick: () => switchWindow(["content"])}, {className: () => memento.currentWindow === "content" ? "selected" : ""})("Content"),
     btn({onclick: () => switchWindow(["dust"])}, {className: () => memento.currentWindow === "dust" ? "selected" : ""})("Dust")
   ]),
-  div({class: "current-second-window-switch-box"})([
+  div({class: "switch-box-hider"})([
+  div({class: "current-second-window-switch-box"}, {inlineStyle: () => ({top: switchBoxHeights[memento.currentWindow]})})([
     div({class: "switch-box"})([
       btn({onclick: () => switchWindow(["universe", "common"])}, {className: () => memento.currentSecondWindow.universe === "common" ? "selected" : ""})("Common"),
       btn({onclick: () => switchWindow(["universe", "system"])}, {className: () => memento.currentSecondWindow.universe === "system" ? "selected" : ""})("System"),
@@ -130,12 +133,13 @@ body(
     ]),
     div({class: "switch-box"})([
       btn({onclick: () => switchWindow(["content", "editor"])}, {className: () => memento.currentSecondWindow.content === "editor" ? "selected" : ""})("Editor"),
-      btn({onclick: () => switchWindow(["content", "list"])}, {className: () => memento.currentSecondWindow.universe === "list" ? "selected" : ""})("List")
+      btn({onclick: () => switchWindow(["content", "list"])}, {className: () => memento.currentSecondWindow.content === "list" ? "selected" : ""})("List")
     ]),
     div({class: "switch-box"})([
       btn({onclick: () => switchWindow(["dust", "claim"])}, {className: () => memento.currentSecondWindow.dust === "claim" ? "selected" : ""})("Claim"),
       btn({onclick: () => switchWindow(["dust", "kernel"])}, {className: () => memento.currentSecondWindow.dust === "kernel" ? "selected" : ""})("Kernel")
     ])
+  ])
   ]),
   MainView(memento)
 );

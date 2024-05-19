@@ -7,6 +7,10 @@ body {
 * {
     font-family: sans-serif;
 }
+.main-view {
+    display: flex;
+    justify-content: center;
+}
 .current-window-switch-box {
     display: flex;
     justify-content: center;
@@ -22,6 +26,18 @@ body {
 .current-window-switch-box > .selected {
     background-color: steelblue;
     color: white;
+}
+.switch-box-hider {
+    display: flex;
+    position: relative;
+    height: 40px;
+    overflow-y: hidden;
+    justify-content: center;
+}
+.current-second-window-switch-box {
+    position: absolute;
+    top: 0;
+    transition: 0.2s;
 }
 .switch-box {
     display: flex;

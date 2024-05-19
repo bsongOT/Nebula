@@ -20,6 +20,19 @@ type AddingNebulaOption = {
   start?: HexCoord
 }
 
+export type DayNebula = {
+  add: {content:Content, day:Date}[],
+  modify: {content:Content, day:Date}[],
+  remove: {content:Content, day:Date}[]
+}
+
+export type LifetimeNebula = {
+  deads: string[],
+  modifieds: Content[],
+  livings: Content[],
+  news: Content[]
+}
+
 export class Data {
   public readonly dusts;
   public readonly contents;
@@ -36,6 +49,8 @@ export class Data {
     const wildUniverses = DataTransporter.loadWildDataCollection("all-universes")
     const wildRelations = DataTransporter.loadWildDataCollection("all-relations")
 
+    console.log(wildContents)
+
     this.dusts = new DataCollection(wildDusts.map(d => Unpacker.dust(d)))
     this.contents = new DataCollection(wildContents.map(c => Unpacker.content(c, this.dusts)))
     this.nebulas = new DataCollection<Nebula>(wildNebulas.map(n => Unpacker.nebula(n, this.contents, this.dusts)))
@@ -45,18 +60,20 @@ export class Data {
     for (const n of this.nebulas.all()){
       if (n instanceof QueryNebula){
         for (const q of n.query){
-          Object.assign(q.nebula, this.nebulas.get(q.nebula.id));
+          q.nebula = this.nebulas.get(q.nebula.id)!;
         }
       }
       if (n instanceof CategoryNebula){
-        Object.assign(n.referenceNebula, this.nebulas.get(n.referenceNebula.id));
+        const neb = this.nebulas.get(n.referenceNebula.id);
+        if (!(neb instanceof CommonNebula)) continue;
+        n.referenceNebula = neb;
       }
     }
 
     this.systemNebulas = {
       isolated: this.getIsolated(),
-      day: DataTransporter.loadSystemNebulas("all-day-nebulas"),
-      lifetime: DataTransporter.loadSystemNebulas("all-lifetime-nebulas"),
+      day: Unpacker.dayNebula(DataTransporter.loadWildDayNebula(), this.contents),
+      lifetime: Unpacker.lifetimeNebula(DataTransporter.loadWildLifetimeNebula(), this.contents),
       importance: {
         nebula: this.getImportanceNebula(),
         parent: this.getImportanceParent(),
@@ -65,9 +82,7 @@ export class Data {
       }
     }
 
-    engine.updater.register(() => {
-      //save logic
-    })
+    engine.updater.register(() => DataTransporter.save(this))
   }
 
   public addContent(content:Content, option:AddingContentOption){

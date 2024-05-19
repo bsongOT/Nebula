@@ -1,5 +1,5 @@
 import { li, ul } from "@/funcObject";
-import { Content, Nebula } from "../../data/Data";
+import { CommonNebula, Content, Nebula } from "../../data/Data";
 import { StarTreeNode } from "./StarTreeNode";
 import { TreeNode } from "@/data-structure/tree";
 
@@ -13,7 +13,7 @@ export function TreeList<T>(info:{startNode:TreeNode<T>, itemChildrenBuilder: (d
     )
   )
 }
-export function StarTreeList(info:{selectedNode?:TreeNode<Content>, shownNebula: Nebula}) {
+export function StarTreeList(info:{selectedNode?:TreeNode<Content>, shownNebula: CommonNebula}) {
   return ul()(() => 
     info.shownNebula.tree.root.children.map(
       cn => StarTreeNode({node: cn, selectedNode:() => info.selectedNode}))

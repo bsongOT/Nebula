@@ -1,5 +1,5 @@
 import { btn, div, li } from "@/funcObject";
-import { Content, Nebula } from "../data/Data";
+import { CommonNebula, Content, Nebula } from "../data/Data";
 import { engine } from "@/engine";
 import { TreeNode } from "@/data-structure/tree";
 import { NebulaPalette } from "./NebulaPalette/NebulaPalette";
@@ -8,7 +8,7 @@ import { NebulaModel } from "./NebulaModel/NebulaModel";
 import { StarTreeList } from "./TreeList/StarTreeList";
 
 export type CommonNebulaEditorInfo = {
-    shownNebula?:Nebula,
+    shownNebula?:CommonNebula,
     selectedNode?:TreeNode<Content>,
 }
 export const CommonNebulaEditor = (info: CommonNebulaEditorInfo, data: { contents: DataCollection<Content>; nebulas: DataCollection<Nebula>; }) => {

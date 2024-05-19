@@ -1,7 +1,7 @@
 import { btn, div, inputText, span, table, td, tr } from "@/funcObject";
 import { Universe } from "../../../data/components/Universe";
 import { Coord, H, P } from "@/utils/math/coord-system";
-import { Data, Nebula } from "../../../data/Data";
+import { CommonNebula, Data, Nebula } from "../../../data/Data";
 import "./universeMap.css"
 import { engine } from "@/engine";
 
@@ -87,7 +87,7 @@ export class NebulaCell {
 
 export function insertAt(data:Data, pos:Coord, name:string) {
   const u = new Universe({name: name})
-  const n = new Nebula({name: "Unnamed"})
+  const n = new CommonNebula({name: "Unnamed"})
 
   data.universes.add(u)
   data.addNebula(n, {
