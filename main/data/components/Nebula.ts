@@ -21,8 +21,8 @@ export class CommonNebula extends Nebula {
   importerIds:number[];
   constructor(info?:Partial<CommonNebula>){
     super(info);
-    this.palette = [];
-    this.importerIds = [];
+    this.palette = info?.palette ?? [];
+    this.importerIds = info?.importerIds ?? [];
     this.tree = info?.tree ?? new Tree()
   }
 }
@@ -30,10 +30,12 @@ export class CommonNebula extends Nebula {
 export class CategoryNebula extends Nebula {
   ownerMap:{dust:Dust, content:Content}[];
   referenceContent:Content;
+  referenceNebula:CommonNebula;
   constructor(info:Partial<CategoryNebula>){
     super(info);
     this.ownerMap = info.ownerMap ?? [];
     this.referenceContent = info.referenceContent ?? new Content();
+    this.referenceNebula = info.referenceNebula ?? new CommonNebula();
   }
 }
 

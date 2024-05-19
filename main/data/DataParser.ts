@@ -1,4 +1,4 @@
-import { Coord, HexCoord } from "@/utils/math/coord-system";
+import { Coord, H, HexCoord, P } from "@/utils/math/coord-system";
 import { Content } from "./components/Content";
 import { Dust } from "./components/Dust";
 import { CategoryNebula, CommonNebula, Nebula, QueryNebula } from "./components/Nebula";
@@ -11,7 +11,24 @@ type KeyOmitFunction<T> =   {
   [K in keyof T]: T[K] extends Function ? never : K 
 }[keyof T]
 type OmitFunction<T> = {
-  [K in KeyOmitFunction<T>]: any
+  [K in KeyOmitFunction<T>]: T[K]
+}
+type Anyify<T> = {
+  [K in keyof T]: any
+}
+type NebulaTypeString = "common"|"query"|"category"|"unknown";
+
+function getNebulaType(nebula:Nebula){
+  if (nebula instanceof CommonNebula) return "common";
+  if (nebula instanceof QueryNebula) return "query";
+  if (nebula instanceof CategoryNebula) return "category";
+  return "unknown"
+}
+function getNebula(type:NebulaTypeString, info:Partial<Nebula>){
+  if (type === "common") return new CommonNebula(info);
+  if (type === "query") return new QueryNebula(info);
+  if (type === "category") return new CategoryNebula(info);
+  return new CommonNebula(info)
 }
 
 export class Packer {
@@ -46,7 +63,7 @@ export class Packer {
         id: nebula.id,
         name: nebula.name,
         kind: "query" as "query",
-        query: nebula.query.map(q => ({nebula: q.nebula.id, operator: q.operator}))
+        query: nebula.query.map(q => ({nebula: q.nebula.id, nebulaType: getNebulaType(q.nebula) as NebulaTypeString, operator: q.operator}))
       } satisfies {[key in keyof QueryNebula]: any} & {kind: string}
     }
     if (nebula instanceof CategoryNebula){
@@ -55,8 +72,9 @@ export class Packer {
         name: nebula.name,
         kind: "category" as "category",
         ownerMap: nebula.ownerMap.map(o => ({dust: o.dust.id, content: o.content.id})),
-        referenceContent: nebula.referenceContent
-      } satisfies {[key in keyof CategoryNebula]: any} & {kind: string}
+        referenceNebula: nebula.referenceNebula.id,
+        referenceContent: nebula.referenceContent.id
+      } satisfies Anyify<CategoryNebula> & {kind: string}
     }
     return {
       id: nebula.id,
@@ -81,7 +99,7 @@ export class Packer {
         },
         nebula: ni.nebula.id,
       }))
-    } satisfies Omit<OmitFunction<Universe>, "boxSize" | "range">
+    } satisfies Omit<Anyify<OmitFunction<Universe>>, "boxSize" | "range">
   }
   static relation(relation:Relation){
     return {
@@ -101,13 +119,14 @@ export class Unpacker {
     return new Dust(dustBox);
   }
   static content(contentBox:ReturnType<typeof Packer.content>, dusts:DataCollection<Dust>){
-    const c = new Content(contentBox);
-    
-    c.dusts = Tree.treeize(contentBox.dusts).map(id => dusts.get(id)!)
-
-    return c;
+    return new Content({
+      id: contentBox.id,
+      title: contentBox.title,
+      dusts: Tree.treeize(contentBox.dusts).map(id => dusts.get(id)!),
+      actor: contentBox.actor
+    } satisfies Content);
   }
-  static nebula(nebulaBox:ReturnType<typeof Packer.nebula>, contents:DataCollection<Content>){
+  static nebula(nebulaBox:ReturnType<typeof Packer.nebula>, contents:DataCollection<Content>, dusts:DataCollection<Dust>){
     if (nebulaBox.kind === "common"){
       return new CommonNebula({
         id: nebulaBox.id,
@@ -121,7 +140,8 @@ export class Unpacker {
       return new CategoryNebula({
         id: nebulaBox.id,
         name: nebulaBox.name,
-        referenceContent: nebulaBox.referenceContent,
+        referenceContent: contents.get(nebulaBox.referenceContent)!,
+        referenceNebula: new CommonNebula({id: nebulaBox.referenceNebula}),
         ownerMap: nebulaBox.ownerMap.map(o => ({dust: dusts.get(o.dust)!, content: contents.get(o.content)!}))
       } satisfies CategoryNebula)
     }
@@ -129,39 +149,44 @@ export class Unpacker {
       return new QueryNebula({
         id: nebulaBox.id,
         name: nebulaBox.name,
-        query: nebulaBox.query
+        query: nebulaBox.query.map(q => ({
+          nebula: getNebula(q.nebulaType, {id: q.nebula}),
+          operator: q.operator
+        }))
       } satisfies QueryNebula)
     }
     return new CommonNebula(nebulaBox)
   }
   static universe(universeBox:ReturnType<typeof Packer.universe>, nebulas:DataCollection<Nebula>, relations:DataCollection<Relation>){
-    const u = new Universe()
-
-    u.name = universeBox.name;
-    u.id = universeBox.id;
-    u.nebulaInfos = universeBox.nebulaInfos.map(
+    return new Universe({
+      id: universeBox.id,
+      name: universeBox.name,
+      nebulaInfos: universeBox.nebulaInfos.map(
         ni => ({
           nebula: nebulas.get(ni.nebula)!,
-          start: new HexCoord(ni.start.x, ni.start.y, ni.start.z),
-          worldPos: new Coord(ni.worldPos.x, ni.worldPos.y)
+          start: H(ni.start.x, ni.start.y, ni.start.z),
+          worldPos: P(ni.worldPos.x, ni.worldPos.y)
         })
-    )
-    u.relations = universeBox.relations.map(id => relations.get(id)!)
-
-    return u;
+      ),
+      relations: universeBox.relations.map(id => relations.get(id)!)
+    } satisfies Omit<OmitFunction<Universe>, "boxSize" | "range">)
   }
   static relation(relationBox:ReturnType<typeof Packer.relation>, nebulas:DataCollection<Nebula>, contents:DataCollection<Content>, dusts:DataCollection<Dust>){
-    const r = new Relation();
-        
-    r.mainTree = nebulas.get(relationBox.mainTree)!
-    r.secondTree = nebulas.get(relationBox.secondTree)!
-    r.id = relationBox.id
-    r.table = relationBox.table.map(c => ({
-      main: contents.get(c.main)!,
-      second: contents.get(c.second)!,
-      state: dusts.get(c.state) ?? c.state
-    })).filter(td => td.main && td.second && td.state)
-    
-    return r;
+    const mainTree = nebulas.get(relationBox.mainTree)!;
+    const secondTree = nebulas.get(relationBox.secondTree)!;
+
+    if (!(mainTree instanceof CommonNebula)) throw "Only common nebula is allowed as main tree";
+    if (!(secondTree instanceof CommonNebula)) throw "Only common nebula is allowed as second tree";
+
+    return new Relation({
+      id: relationBox.id,
+      mainTree: mainTree,
+      secondTree: secondTree,
+      table: relationBox.table.map(c => ({
+        main: contents.get(c.main)!,
+        second: contents.get(c.second)!,
+        state: dusts.get(c.state) ?? c.state
+      })).filter(td => td.main && td.second && td.state)
+    } satisfies Relation);    
   }
 }

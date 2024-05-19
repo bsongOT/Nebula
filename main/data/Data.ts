@@ -1,19 +1,15 @@
 export * from "./components/Content"
 export * from "./components/Nebula"
 
-import { Tree } from "@/data-structure/tree"
 import { Coord, H, HexCoord, P } from "../../engine/utils/math/coord-system"
 import {Content} from "./components/Content"
 import { DataCollection } from "./DataCollection"
-import { Dust } from "./components/Dust"
-import {CommonNebula, Nebula} from "./components/Nebula"
+import {CategoryNebula, CommonNebula, Nebula, QueryNebula} from "./components/Nebula"
 import {Universe} from "./components/Universe"
-import {Relation} from "./components/Relation"
-import { Packer, Unpacker } from "./DataParser"
-import { DataComponent } from "./components/DataComponent"
+import { Unpacker } from "./DataParser"
 import { engine } from "@/engine"
+import { DataTransporter } from "./DataTransporter"
 
-type DataKey = "all-dusts" | "all-contents" | "all-nebulas" | "all-universes" | "all-relations"
 type AddingContentOption = {
   nebula: CommonNebula,
   day?: Date
@@ -23,50 +19,7 @@ type AddingNebulaOption = {
   position: Coord,
   start?: HexCoord
 }
-type SystemNebulaData = {
-  isolated: Content[],
-  day: {
-    add: {
-      day:Date, 
-      content:Content
-    }[],
-    modify: {
-      day:Date, 
-      content:Content
-    }[],
-    remove: {
-      day:Date,
-      content:Content
-    }[]
-  },
-  lifetime: {
-    deads: string[],
-    modifieds: Content[],
-    livings: Content[],
-    news: Content[]
-  },
-  importance: {
-    nebula: {
-      count: number,
-      content: Content
-    }[]
-    parent: {
-      count: number,
-      content: Content
-    }[],
-    child: {
-      count: number,
-      content: Content
-    }[],
-    dust: {
-      count: number,
-      content: Content
-    }[]
-  }
-}
 
-export const $ = (name:string) => localStorage.getItem(name)
-export const $$ = (name:DataKey, value:string) => localStorage.setItem(name, value)
 export class Data {
   public readonly dusts;
   public readonly contents;
@@ -74,34 +27,36 @@ export class Data {
   public readonly relations;
   public readonly universes;
 
-  public readonly systemNebulas:SystemNebulaData;
+  public readonly systemNebulas;
 
   public constructor(){
-    const wildDusts = this.loadWildDataCollection("all-dusts")
-    const wildContents = this.loadWildDataCollection("all-contents")
-    const wildNebulas = this.loadWildDataCollection("all-nebulas")
-    const wildUniverses = this.loadWildDataCollection("all-universes")
-    const wildRelations = this.loadWildDataCollection("all-relations")
+    const wildDusts = DataTransporter.loadWildDataCollection("all-dusts")
+    const wildContents = DataTransporter.loadWildDataCollection("all-contents")
+    const wildNebulas = DataTransporter.loadWildDataCollection("all-nebulas")
+    const wildUniverses = DataTransporter.loadWildDataCollection("all-universes")
+    const wildRelations = DataTransporter.loadWildDataCollection("all-relations")
 
     this.dusts = new DataCollection(wildDusts.map(d => Unpacker.dust(d)))
     this.contents = new DataCollection(wildContents.map(c => Unpacker.content(c, this.dusts)))
-    this.nebulas = new DataCollection(wildNebulas.map(n => Unpacker.nebula(n, this.contents)))
+    this.nebulas = new DataCollection<Nebula>(wildNebulas.map(n => Unpacker.nebula(n, this.contents, this.dusts)))
     this.relations = new DataCollection(wildRelations.map(r => Unpacker.relation(r, this.nebulas, this.contents, this.dusts)))
     this.universes = new DataCollection(wildUniverses.map(u => Unpacker.universe(u, this.nebulas, this.relations)))
 
+    for (const n of this.nebulas.all()){
+      if (n instanceof QueryNebula){
+        for (const q of n.query){
+          Object.assign(q.nebula, this.nebulas.get(q.nebula.id));
+        }
+      }
+      if (n instanceof CategoryNebula){
+        Object.assign(n.referenceNebula, this.nebulas.get(n.referenceNebula.id));
+      }
+    }
+
     this.systemNebulas = {
       isolated: this.getIsolated(),
-      day: {
-        add: [],
-        modify: [],
-        remove: []
-      },
-      lifetime: {
-        deads: [],
-        modifieds: [],
-        livings: [],
-        news: []
-      },
+      day: DataTransporter.loadSystemNebulas("all-day-nebulas"),
+      lifetime: DataTransporter.loadSystemNebulas("all-lifetime-nebulas"),
       importance: {
         nebula: this.getImportanceNebula(),
         parent: this.getImportanceParent(),
@@ -158,13 +113,6 @@ export class Data {
     }
   }
 
-  private loadWildDataCollection<T extends DataKey>(keyword:T){
-    const json = JSON.parse($(keyword) ?? "[]");
-    const boxes = Array.from(json) as any[];
-
-    return boxes
-  }
-
   public findAddablePosition(univ:Universe){
     const universePoses = univ.nebulaInfos.map(ni => ni.worldPos);
     const universes = this.universes.all()
@@ -185,9 +133,9 @@ export class Data {
   private getIsolated(){
     const nebulas = this.nebulas.all();
 
-    return this.contents.all().filter(
+    return this.contents.filter(
       c => nebulas.every(
-        n => !n.palette.includes(c)
+        n => !(n instanceof CommonNebula) || !n.palette.includes(c)
       )
     )
   }
@@ -197,7 +145,7 @@ export class Data {
     const nebulas = this.nebulas.all();
 
     return contents.map(c => ({
-      count: nebulas.filter(n => n.palette.includes(c)).length,
+      count: nebulas.filter(n => n instanceof CommonNebula && n.palette.includes(c)).length,
       content: c
     }))
   }
@@ -208,7 +156,7 @@ export class Data {
 
     return contents.map(c => ({
       count: nebulas.filter(
-        neb => neb.tree.nodes.some(
+        neb => neb instanceof CommonNebula && neb.tree.nodes.some(
           n => n.children.some(ch => ch.data === c)
        )
       ).length,
@@ -222,7 +170,7 @@ export class Data {
 
     return contents.map(c => ({
       count: nebulas.filter(
-        n => n.tree.nodes.some(
+        n => n instanceof CommonNebula && n.tree.nodes.some(
           n => n.parent?.data === c
         )
       ).length,

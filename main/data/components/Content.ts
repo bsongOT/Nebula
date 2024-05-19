@@ -3,27 +3,23 @@ import { DataComponent } from "./DataComponent";
 import { Dust } from "./Dust";
 import { DataCollection } from "../DataCollection";
 
-type ContentInfo = {
-  title?:string,
-  actor?:string
-}
 export class Content implements DataComponent{
   id:number;
   title:string;
   dusts:Tree<Dust>;
   actor:string;
   
-  constructor(info?:ContentInfo){
+  constructor(info?:Partial<Content>){
     this.title = info?.title ?? "";
-    this.id = -1;
-    this.dusts = new Tree()
+    this.id = info?.id ?? -1;
+    this.dusts = info?.dusts ?? new Tree()
     this.actor = info?.actor ?? "./default-actor.js"
   }
 
-  static request(contents:DataCollection<Content>, search:ContentInfo){
+  static request(contents:DataCollection<Content>, search:Partial<Content>){
     const content = contents.find(c => {
       for (const k in search){
-        if (c[k as keyof Content] !== search[k as keyof ContentInfo]) return false;
+        if (c[k as keyof Content] !== search[k as keyof Content]) return false;
       }
       return true;
     })

@@ -4,20 +4,17 @@ import { Content, data } from "../Data";
 import { DataComponent } from "./DataComponent";
 import { Relation } from "./Relation";
 
-type UniverseInfo = {
-  name?: string
-}
 export class Universe implements DataComponent{
   name: string;
   nebulaInfos:NebulaInfo[];
   relations:Relation[];
   id: number;
   
-  constructor(info?: UniverseInfo){
+  constructor(info?: Partial<Universe>){
     this.name = info?.name ?? "Unnamed";
-    this.nebulaInfos = []
-    this.relations = []
-    this.id = -1;
+    this.nebulaInfos = info?.nebulaInfos ?? []
+    this.relations = info?.relations ?? []
+    this.id = info?.id ?? -1;
   }
   public get range(){
     const poses = this.nebulaInfos.map(n => n.worldPos)
