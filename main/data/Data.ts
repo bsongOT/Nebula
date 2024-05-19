@@ -6,7 +6,7 @@ import { Coord, H, HexCoord, P } from "../../engine/utils/math/coord-system"
 import {Content} from "./components/Content"
 import { DataCollection } from "./DataCollection"
 import { Dust } from "./components/Dust"
-import {Nebula} from "./components/Nebula"
+import {CommonNebula, Nebula} from "./components/Nebula"
 import {Universe} from "./components/Universe"
 import {Relation} from "./components/Relation"
 import { Packer, Unpacker } from "./DataParser"
@@ -15,7 +15,7 @@ import { engine } from "@/engine"
 
 type DataKey = "all-dusts" | "all-contents" | "all-nebulas" | "all-universes" | "all-relations"
 type AddingContentOption = {
-  nebula: Nebula,
+  nebula: CommonNebula,
   day?: Date
 }
 type AddingNebulaOption = {
@@ -208,7 +208,7 @@ export class Data {
 
     return contents.map(c => ({
       count: nebulas.filter(
-        n => n.tree.nodes.some(
+        neb => neb.tree.nodes.some(
           n => n.children.some(ch => ch.data === c)
        )
       ).length,

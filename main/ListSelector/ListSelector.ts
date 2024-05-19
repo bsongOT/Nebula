@@ -7,18 +7,25 @@ import { engine } from "@/engine";
 
 type ListSelectorInfo<T extends DataComponent> = {
     datas:DataCollection<T> | T[],
-    page:number,
-    capacity:number,
-    keyword:string,
+    page?:number,
+    capacity?:number,
+    keyword?:string,
     itemChildrenBuilder: (data:T) => HTMLElement[],
     filter: (data:T, search:string) => boolean,
     selection?: T
 }
-export const ListSelector = <T extends DataComponent>(info:ListSelectorInfo<T>) => {
+export const ListSelector = <T extends DataComponent>($info:ListSelectorInfo<T>) => {
+    $info.page = $info.page ?? 1;
+    $info.capacity = $info.capacity ?? 20;
+    $info.keyword = $info.keyword ?? "";
+
+    const info = $info as Required<ListSelectorInfo<T>>;
+
+
     let pairs = new Array<{element:HTMLLIElement, data:T}>()
     let children = new Array<HTMLElement>();
 
-    const getMaxPage = () => {
+    function getMaxPage(){
         return Math.max(1, Math.ceil(pairs.length / info.capacity))
     }
 

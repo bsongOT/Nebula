@@ -1,53 +1,11 @@
 import { Coord, HexCoord } from "@/utils/math/coord-system";
 import { Content } from "./components/Content";
 import { Dust } from "./components/Dust";
-import { Nebula } from "./components/Nebula";
+import { CategoryNebula, CommonNebula, Nebula, QueryNebula } from "./components/Nebula";
 import { Relation } from "./components/Relation";
 import { NebulaInfo, Universe } from "./components/Universe";
 import { Tree } from "@/data-structure/tree";
 import { DataCollection } from "./DataCollection";
-
-type DustBox = {
-  id: number,
-  claim: string,
-  kernelPath: string
-}
-type ContentBox = {
-  id:number,
-  title:string,
-  actor:string|undefined,
-  dusts:{
-    parent:number,
-    data: number
-  }[]
-}
-type NebulaBox = {
-    id:number,
-    name:string,
-    tree: {data:number, parent:number}[],
-    palette: number[],
-    importerIds: number[]
-}
-type UniverseBox = {
-    id: number,
-    name: string,
-    nebulaInfos: {
-        start: {x:number, y:number, z:number},
-        worldPos: {x:number, y:number},
-        nebula: number
-    }[],
-    relations: number[]
-}
-type RelationBox = {
-    id: number,
-    mainTree: number,
-    secondTree: number,
-    table: {
-      main: number,
-      second: number,
-      state: number
-    }[]
-}
 
 type KeyOmitFunction<T> =   { 
   [K in keyof T]: T[K] extends Function ? never : K 
@@ -57,14 +15,14 @@ type OmitFunction<T> = {
 }
 
 export class Packer {
-  static dust(dust:Dust):DustBox{
+  static dust(dust:Dust){
     return {
       id: dust.id,
       claim: dust.claim,
       kernelPath: dust.kernelPath
     } satisfies {[key in keyof Dust]: any}
   }
-  static content(content:Content):ContentBox{
+  static content(content:Content){
     return {
       id: content.id,
       title: content.title,
@@ -72,16 +30,41 @@ export class Packer {
       actor: content.actor
     } satisfies {[key in keyof Content]: any}
   }
-  static nebula(nebula:Nebula):NebulaBox{
+  static nebula(nebula:Nebula){
+    if (nebula instanceof CommonNebula){
+      return {
+        id: nebula.id,
+        name: nebula.name,
+        kind: "common" as "common",
+        tree: nebula.tree.map(n => n.id).arrayize(),
+        palette: nebula.palette.map(n => n.id),
+        importerIds: nebula.importerIds
+      } satisfies {[key in keyof CommonNebula]: any} & {kind: string}
+    }
+    if (nebula instanceof QueryNebula){
+      return {
+        id: nebula.id,
+        name: nebula.name,
+        kind: "query" as "query",
+        query: nebula.query.map(q => ({nebula: q.nebula.id, operator: q.operator}))
+      } satisfies {[key in keyof QueryNebula]: any} & {kind: string}
+    }
+    if (nebula instanceof CategoryNebula){
+      return {
+        id: nebula.id,
+        name: nebula.name,
+        kind: "category" as "category",
+        ownerMap: nebula.ownerMap.map(o => ({dust: o.dust.id, content: o.content.id})),
+        referenceContent: nebula.referenceContent
+      } satisfies {[key in keyof CategoryNebula]: any} & {kind: string}
+    }
     return {
       id: nebula.id,
       name: nebula.name,
-      tree: nebula.tree.map(n => n.id).arrayize(),
-      palette: nebula.palette.map(n => n.id),
-      importerIds: nebula.importerIds
-    } satisfies {[key in keyof Nebula]: any}
+      kind: "unknown" as "unknown"
+    }
   }
-  static universe(universe:Universe):UniverseBox{
+  static universe(universe:Universe){
     return {
       name: universe.name,
       id: universe.id,
@@ -100,7 +83,7 @@ export class Packer {
       }))
     } satisfies Omit<OmitFunction<Universe>, "boxSize" | "range">
   }
-  static relation(relation:Relation):RelationBox{
+  static relation(relation:Relation){
     return {
         id: relation.id,
         mainTree: relation.mainTree.id,
@@ -114,28 +97,44 @@ export class Packer {
   }
 }
 export class Unpacker {
-  static dust(dustBox:DustBox){
+  static dust(dustBox:ReturnType<typeof Packer.dust>){
     return new Dust(dustBox);
   }
-  static content(contentBox:ContentBox, dusts:DataCollection<Dust>){
+  static content(contentBox:ReturnType<typeof Packer.content>, dusts:DataCollection<Dust>){
     const c = new Content(contentBox);
     
     c.dusts = Tree.treeize(contentBox.dusts).map(id => dusts.get(id)!)
 
     return c;
   }
-  static nebula(nebulaBox:NebulaBox, contents:DataCollection<Content>){
-    const n = new Nebula();
-    
-    n.name = nebulaBox.name
-    n.id = nebulaBox.id
-    n.tree = Tree.treeize(nebulaBox.tree).map(id => contents.get(id)!)
-    n.palette = nebulaBox.palette.map(id => contents.get(id)!).filter(c => c)
-    n.importerIds = nebulaBox.importerIds;
-
-    return n;
+  static nebula(nebulaBox:ReturnType<typeof Packer.nebula>, contents:DataCollection<Content>){
+    if (nebulaBox.kind === "common"){
+      return new CommonNebula({
+        id: nebulaBox.id,
+        name: nebulaBox.name,
+        tree: Tree.treeize(nebulaBox.tree).map(id => contents.get(id)!),
+        palette: nebulaBox.palette.map(id => contents.get(id)!).filter(c => c),
+        importerIds: nebulaBox.importerIds
+      } satisfies CommonNebula)
+    }
+    if (nebulaBox.kind === "category"){
+      return new CategoryNebula({
+        id: nebulaBox.id,
+        name: nebulaBox.name,
+        referenceContent: nebulaBox.referenceContent,
+        ownerMap: nebulaBox.ownerMap.map(o => ({dust: dusts.get(o.dust)!, content: contents.get(o.content)!}))
+      } satisfies CategoryNebula)
+    }
+    if (nebulaBox.kind === "query"){
+      return new QueryNebula({
+        id: nebulaBox.id,
+        name: nebulaBox.name,
+        query: nebulaBox.query
+      } satisfies QueryNebula)
+    }
+    return new CommonNebula(nebulaBox)
   }
-  static universe(universeBox:UniverseBox, nebulas:DataCollection<Nebula>, relations:DataCollection<Relation>){
+  static universe(universeBox:ReturnType<typeof Packer.universe>, nebulas:DataCollection<Nebula>, relations:DataCollection<Relation>){
     const u = new Universe()
 
     u.name = universeBox.name;
@@ -151,7 +150,7 @@ export class Unpacker {
 
     return u;
   }
-  static relation(relationBox:RelationBox, nebulas:DataCollection<Nebula>, contents:DataCollection<Content>, dusts:DataCollection<Dust>){
+  static relation(relationBox:ReturnType<typeof Packer.relation>, nebulas:DataCollection<Nebula>, contents:DataCollection<Content>, dusts:DataCollection<Dust>){
     const r = new Relation();
         
     r.mainTree = nebulas.get(relationBox.mainTree)!
