@@ -8,8 +8,8 @@ import { Tree } from "@/data-structure/tree";
 import { DataCollection } from "./DataCollection";
 
 type DustBox = {
-  id: number
-  claim:string,
+  id: number,
+  claim: string,
   kernelPath: string
 }
 type ContentBox = {
@@ -49,13 +49,20 @@ type RelationBox = {
     }[]
 }
 
+type KeyOmitFunction<T> =   { 
+  [K in keyof T]: T[K] extends Function ? never : K 
+}[keyof T]
+type OmitFunction<T> = {
+  [K in KeyOmitFunction<T>]: any
+}
+
 export class Packer {
   static dust(dust:Dust):DustBox{
     return {
       id: dust.id,
       claim: dust.claim,
       kernelPath: dust.kernelPath
-    }
+    } satisfies {[key in keyof Dust]: any}
   }
   static content(content:Content):ContentBox{
     return {
@@ -63,7 +70,7 @@ export class Packer {
       title: content.title,
       dusts: content.dusts.map(d => d.id).arrayize(),
       actor: content.actor
-    }
+    } satisfies {[key in keyof Content]: any}
   }
   static nebula(nebula:Nebula):NebulaBox{
     return {
@@ -72,7 +79,7 @@ export class Packer {
       treeOrder: nebula.tree.map(n => n.id).arrayize(),
       palette: nebula.palette.map(n => n.id),
       importerIds: nebula.importerIds
-    }
+    } satisfies {[key in keyof Nebula]: any}
   }
   static universe(universe:Universe):UniverseBox{
     return {
@@ -91,7 +98,7 @@ export class Packer {
         },
         nebula: ni.nebula.id,
       }))
-    }
+    } satisfies Omit<OmitFunction<Universe>, "boxSize" | "range">
   }
   static relation(relation:Relation):RelationBox{
     return {
@@ -103,7 +110,7 @@ export class Packer {
           second: c.second.id,
           state: c.state instanceof Dust ? c.state.id : c.state
         }))
-    }
+    } satisfies {[key in keyof Relation]: any}
   }
 }
 export class Unpacker {

@@ -42,15 +42,5 @@ export const UniverseView = (info: UniverseViewInfo) => {
     })
   };
 
-  const winName = info.currentSecondWindow;
-
-  return div()([
-    div({class: "universe-window-switch-box"})([
-      btn({onclick: () => winName.universe = "common"}, {className: () => winName.universe === "common" ? "selected" : ""})("Common"),
-      btn({onclick: () => winName.universe = "system"}, {className: () => winName.universe === "system" ? "selected" : ""})("System"),
-      btn({onclick: () => winName.universe = "convenient"}, {className: () => winName.universe === "convenient" ? "selected" : ""})("Convenient"),
-      btn({onclick: () => winName.universe = "list"}, {className: () => winName.universe === "list" ? "selected" : ""})("List")
-    ]),
-    div({ className: "universe-view"})(() => [windows[winName.universe]])
-  ])
+  return div({ className: "universe-view"})(() => [windows[info.currentSecondWindow.universe]])
 };

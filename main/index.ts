@@ -57,5 +57,25 @@ body(
     btn({onclick: () => memento.currentWindow = "content"}, {className: () => memento.currentWindow === "content" ? "selected" : ""})("Content"),
     btn({onclick: () => memento.currentWindow = "dust"}, {className: () => memento.currentWindow === "dust" ? "selected" : ""})("Dust")
   ]),
+  div({class: "current-second-window-switch-box"})([
+    div({class: "universe-window-switch-box"})([
+      btn({onclick: () => memento.currentSecondWindow.universe = "common"}, {className: () => memento.currentSecondWindow.universe === "common" ? "selected" : ""})("Common"),
+      btn({onclick: () => memento.currentSecondWindow.universe = "system"}, {className: () => memento.currentSecondWindow.universe === "system" ? "selected" : ""})("System"),
+      btn({onclick: () => memento.currentSecondWindow.universe = "convenient"}, {className: () => memento.currentSecondWindow.universe === "convenient" ? "selected" : ""})("Convenient"),
+      btn({onclick: () => memento.currentSecondWindow.universe = "list"}, {className: () => memento.currentSecondWindow.universe === "list" ? "selected" : ""})("List")
+    ]),
+    div({class: "nebula-window-switch-box"})([
+      btn()("Editor"),
+      btn()("List")
+    ]),
+    div({class: "content-window-switch-box"})([
+      btn()("Editor"),
+      btn()("List")
+    ]),
+    div({class: "dust-window-switch-box"})([
+      btn()("Claim"),
+      btn()("Kernel")
+    ])
+  ]),
   MainView(memento)
 );
