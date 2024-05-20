@@ -1,5 +1,5 @@
 import { btn, div, slider, span } from "@/funcObject";
-import { UniverseMap, UniverseMapInfo } from "./universeMap/universeMap";
+import { UniverseMap, UniverseMapInfo } from "./universeMap";
 import { Universe } from "../../data/components/Universe";
 import { Data, Nebula } from "../../data/Data";
 import "./CommonNebulaMap.css"

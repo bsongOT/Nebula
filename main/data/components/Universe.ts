@@ -1,23 +1,22 @@
 import {Nebula} from "./Nebula"
 import {Coord, HexCoord, P} from "../../../engine/utils/math/coord-system"
-import { Content, data } from "../Data";
 import { DataComponent } from "./DataComponent";
 import { Relation } from "./Relation";
 
 export class Universe implements DataComponent{
   name: string;
-  nebulaInfos:NebulaInfo[];
+  nebulaLocations:NebulaLocation[];
   relations:Relation[];
   id: number;
   
   constructor(info?: Partial<Universe>){
     this.name = info?.name ?? "Unnamed";
-    this.nebulaInfos = info?.nebulaInfos ?? []
+    this.nebulaLocations = info?.nebulaLocations ?? []
     this.relations = info?.relations ?? []
     this.id = info?.id ?? -1;
   }
   public get range(){
-    const poses = this.nebulaInfos.map(n => n.worldPos)
+    const poses = this.nebulaLocations.map(n => n.worldPos)
     const xs = poses.map(p => p.x);
     const ys = poses.map(p => p.y);
 
@@ -37,11 +36,11 @@ export class Universe implements DataComponent{
     ]
   }
   public isIn(x:number, y:number){
-    return this.nebulaInfos.some(n => n.worldPos.eq(P(x, y)))
+    return this.nebulaLocations.some(n => n.worldPos.eq(P(x, y)))
   }
   public isInBoxRange(x:number, y:number){
-    const xs = this.nebulaInfos.map(n => n.worldPos.x)
-    const ys = this.nebulaInfos.map(n => n.worldPos.y)
+    const xs = this.nebulaLocations.map(n => n.worldPos.x)
+    const ys = this.nebulaLocations.map(n => n.worldPos.y)
 
     const [minx, maxx] = [Math.min(...xs), Math.max(...xs)]
     const [miny, maxy] = [Math.min(...ys), Math.max(...ys)]
@@ -52,10 +51,10 @@ export class Universe implements DataComponent{
     )
   }
   public get(pos:Coord){
-    return this.nebulaInfos.find(ni => ni.worldPos.eq(pos))?.nebula;
+    return this.nebulaLocations.find(nl => nl.worldPos.eq(pos))?.nebula;
   }
 }
-export type NebulaInfo = {
+export type NebulaLocation = {
   nebula:Nebula;
   start:HexCoord;
   worldPos:Coord;

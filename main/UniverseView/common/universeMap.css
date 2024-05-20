@@ -59,6 +59,7 @@
 }
 .universe-map > tr > td.valid {
   box-shadow: none;
+  background-color: aquamarine;
 }
 .universe-map > tr > td.grown.special {
   box-shadow:0 0 3px #f00 inset;

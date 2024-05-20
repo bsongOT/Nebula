@@ -1,10 +1,14 @@
 import { div, span } from "@/funcObject"
-import { Content, Nebula, data } from "../data/Data"
+import { CategoryNebula, Content, Data, Nebula } from "../data/Data"
 import { TreeList } from "./TreeList/StarTreeList"
 import { Tree } from "@/data-structure/tree"
 import { Dust } from "../data/components/Dust"
 
-export const CategoryNebulaEditor = (info:{nebula: Nebula}) => {
+export type CategoryNebulaEditorInfo = {
+    nebula: CategoryNebula,
+    data: Data
+}
+export const CategoryNebulaEditor = (info:CategoryNebulaEditorInfo) => {
     const tree = new Tree<Dust | Content>()
     
     /*
@@ -28,9 +32,9 @@ export const CategoryNebulaEditor = (info:{nebula: Nebula}) => {
                 return [
                     div()(cp.title),
                     div({}, {className: () => {
-                        if (data.systemNebulas.lifetime.livings.includes(cp)) return "living";
-                        if (data.systemNebulas.lifetime.modifieds.includes(cp)) return "modified";
-                        if (data.systemNebulas.lifetime.news.includes(cp)) return "new";
+                        if (info.data.systemNebulas.lifetime.livings.includes(cp)) return "living";
+                        if (info.data.systemNebulas.lifetime.modifieds.includes(cp)) return "modified";
+                        if (info.data.systemNebulas.lifetime.news.includes(cp)) return "new";
                         return "dead"
                     }})()
                 ]

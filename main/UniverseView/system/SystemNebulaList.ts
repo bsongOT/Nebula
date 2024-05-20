@@ -1,8 +1,7 @@
 import { btn, div, span } from "@/funcObject";
 import "./SystemNebulaList.css"
 import { ListSelector } from "../../ListSelector/ListSelector";
-import { Content, Data, data } from "../../data/Data";
-import { engine } from "@/engine";
+import { Content, Data } from "../../data/Data";
 import { DayNebulaList } from "./DayNebulaList";
 import { LifetimeNebulaList } from "./LifetimeNebulaList";
 import { ImportanceNebulaList } from "./ImportanceNebulaList";

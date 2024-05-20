@@ -1,4 +1,4 @@
-import {Content, Nebula, data} from "./data/Data"
+import {Content, Data, Nebula} from "./data/Data"
 import { body, btn, div } from "@/funcObject";
 import { P } from "@/utils/math/coord-system";
 import { Universe } from "./data/components/Universe";
@@ -7,7 +7,6 @@ import { CommonNebulaMap } from "./UniverseView/common/CommonNebulaMap";
 import { SystemNebulaList } from "./UniverseView/system/SystemNebulaList";
 import { ConvenientNebulaList } from "./UniverseView/convenience/ConvenientNebulaList";
 import { ListSelector } from "./ListSelector/ListSelector";
-import { Dust } from "./data/components/Dust";
 import { ContentEditor } from "./ContentView/ContentEditor";
 import { NebulaEditor } from "./NebulaView/NebulaEditor";
 
@@ -24,7 +23,7 @@ const memento = {
     size: 16,
     viewPoint: P(0, 0)
   },
-  data: data,
+  data: new Data(),
   selection: {
     universe: undefined as Universe | undefined,
     nebula: undefined as Nebula | undefined,
@@ -40,6 +39,7 @@ const memento = {
 }
 
 type MainViewInfo = {
+  data: Data,
   currentWindow: FirstWindowKey,
   currentSecondWindow: SecondWindowKeys
 }
@@ -51,17 +51,18 @@ export const MainView = (info:MainViewInfo) => {
       system: SystemNebulaList(memento),
       convenient: ConvenientNebulaList(),
       list: ListSelector({
-        datas: data.universes,
+        datas: info.data.universes,
         itemChildrenBuilder: u => [
-          div()(u.name)
+          div()(u.name),
+          div()(() => u.nebulaInfos.map(ni => `${ni.worldPos.x}, ${ni.worldPos.y}`).join(""))
         ],
         filter: (u, s) => u.name.includes(s)
       })
     },
     nebula: {
-      editor: NebulaEditor({openedNebulaInfos: []}, data),
+      editor: NebulaEditor({openedNebulaInfos: []}, info.data),
       list: ListSelector({
-        datas: data.nebulas,
+        datas: info.data.nebulas,
         itemChildrenBuilder: n => [
           div()(n.name)
         ],
@@ -71,7 +72,7 @@ export const MainView = (info:MainViewInfo) => {
     content: {
       editor: ContentEditor(),
       list: ListSelector({
-        datas: data.contents,
+        datas: info.data.contents,
         itemChildrenBuilder: c => [
           div()(c.title)
         ],
@@ -80,14 +81,14 @@ export const MainView = (info:MainViewInfo) => {
     },
     dust: {
       claim: ListSelector({
-        datas: data.dusts,
+        datas: info.data.dusts,
         itemChildrenBuilder: d => [
           div()(d.claim)
         ],
         filter: (d, s) => d.claim.includes(s)
       }),
       kernel: ListSelector({
-        datas: data.dusts,
+        datas: info.data.dusts,
         itemChildrenBuilder: d => [
           div()(d.kernelPath)
         ],

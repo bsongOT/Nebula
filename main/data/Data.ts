@@ -200,5 +200,3 @@ export class Data {
     }))
   }
 }
-
-export const data = new Data()

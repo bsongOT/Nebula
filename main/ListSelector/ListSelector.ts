@@ -28,11 +28,15 @@ export const ListSelector = <T extends DataComponent>($info:ListSelectorInfo<T>)
     function getMaxPage(){
         return Math.max(1, Math.ceil(pairs.length / info.capacity))
     }
+    function mustUpdate(datas:T[]){
+        if (pairs.length !== datas.length) return true;
+        if (datas.some((v, i) => v !== pairs[i].data)) return true;
+        return false;
+    }
 
     engine.updater.register(() => {
         const datas = info.datas instanceof DataCollection ? info.datas.all() : info.datas;
-        if (pairs.length === datas.length) return;
-        if (datas.some((v, i) => v !== pairs[i].data)) return;
+        if (!mustUpdate(datas)) return;
         
         const from = (info.page - 1) * info.capacity;
         const to = from + info.capacity;
@@ -48,7 +52,7 @@ export const ListSelector = <T extends DataComponent>($info:ListSelectorInfo<T>)
             .map(p => p.element)
     })
 
-    return div()([
+    return div({class: "list-selector"})([
         inputText({
             oninput: e => info.keyword = (<HTMLInputElement>e.target).value
         })(),
@@ -57,7 +61,7 @@ export const ListSelector = <T extends DataComponent>($info:ListSelectorInfo<T>)
             value: info.capacity.toString(), 
             onchange: e => info.capacity = Number((<HTMLInputElement>e.target).value)
         })(),
-        div()(children),
+        div()(() => children),
         div()([
             btn({
                 class: "page-changer", 
