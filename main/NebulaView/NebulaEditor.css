@@ -1,0 +1,13 @@
+.nebula-editor > .current-opened-tabs {
+    display: flex;
+}
+.nebula-editor > .current-opened-tabs > .opened-tab{
+    display: flex;
+    background-color: #eee;
+    padding: 5px;
+    border-radius: 3px;
+}
+.nebula-editor > .current-opened-tabs > .opened-tab > .close-button{
+    border: none;
+    background: none;
+}

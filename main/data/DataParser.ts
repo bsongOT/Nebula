@@ -3,7 +3,7 @@ import { Content } from "./components/Content";
 import { Dust } from "./components/Dust";
 import { CategoryNebula, CommonNebula, Nebula, QueryNebula } from "./components/Nebula";
 import { Relation } from "./components/Relation";
-import { NebulaInfo, Universe } from "./components/Universe";
+import { NebulaLocation, Universe } from "./components/Universe";
 import { Tree } from "@/data-structure/tree";
 import { DataCollection } from "./DataCollection";
 import { DayNebula, LifetimeNebula } from "./Data";
@@ -88,17 +88,17 @@ export class Packer {
       name: universe.name,
       id: universe.id,
       relations: universe.relations.map(r => r.id),
-      nebulaInfos: universe.nebulaInfos.map(ni => ({
+      nebulaLocations: universe.nebulaLocations.map(nl => ({
         start: {
-          x: ni.start.x,
-          y: ni.start.y,
-          z: ni.start.z
+          x: nl.start.x,
+          y: nl.start.y,
+          z: nl.start.z
         },
         worldPos: {
-          x: ni.worldPos.x,
-          y: ni.worldPos.y
+          x: nl.worldPos.x,
+          y: nl.worldPos.y
         },
-        nebula: ni.nebula.id,
+        nebula: nl.nebula.id,
       }))
     } satisfies Omit<Anyify<OmitFunction<Universe>>, "boxSize" | "range">
   }
@@ -186,11 +186,11 @@ export class Unpacker {
     return new Universe({
       id: universeBox.id,
       name: universeBox.name,
-      nebulaInfos: universeBox.nebulaInfos.map(
-        ni => ({
-          nebula: nebulas.get(ni.nebula)!,
-          start: H(ni.start.x, ni.start.y, ni.start.z),
-          worldPos: P(ni.worldPos.x, ni.worldPos.y)
+      nebulaLocations: universeBox.nebulaLocations.map(
+        nl => ({
+          nebula: nebulas.get(nl.nebula)!,
+          start: H(nl.start.x, nl.start.y, nl.start.z),
+          worldPos: P(nl.worldPos.x, nl.worldPos.y)
         })
       ),
       relations: universeBox.relations.map(id => relations.get(id)!)

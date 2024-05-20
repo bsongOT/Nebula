@@ -6,7 +6,7 @@ import { CommonNebula, Nebula } from "../../data/Data";
 import { UIManager } from "@/objects/UIManager";
 import { gridify } from "@/data-structure/utils";
 
-export function NebulaModel(info: { shownNebula:CommonNebula }) {
+export function NebulaModel(info: { nebula:CommonNebula }) {
     const tileBox = new Container();
     const effectBox = new Container();
 
@@ -17,7 +17,7 @@ export function NebulaModel(info: { shownNebula:CommonNebula }) {
   
       const canvasSize = width;
       const canvasCenter = P(1, 1).scale(canvasSize / 2);
-      const grid = gridify(info.shownNebula.tree);
+      const grid = gridify(info.nebula.tree);
       const size = grid.size.x;
       const pivot = H(1, 0, 1).scale(size - 1);
   

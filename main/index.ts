@@ -41,7 +41,12 @@ const memento = {
 type MainViewInfo = {
   data: Data,
   currentWindow: FirstWindowKey,
-  currentSecondWindow: SecondWindowKeys
+  currentSecondWindow: SecondWindowKeys,
+  selection: {
+    universe: Universe | undefined,
+    nebula: Nebula | undefined,
+    content: Content | undefined
+  }
 }
 
 export const MainView = (info:MainViewInfo) => {
@@ -54,13 +59,13 @@ export const MainView = (info:MainViewInfo) => {
         datas: info.data.universes,
         itemChildrenBuilder: u => [
           div()(u.name),
-          div()(() => u.nebulaInfos.map(ni => `${ni.worldPos.x}, ${ni.worldPos.y}`).join(""))
+          div()(() => u.nebulaLocations.map(nl => `${nl.worldPos.x}, ${nl.worldPos.y}`).join(""))
         ],
         filter: (u, s) => u.name.includes(s)
       })
     },
     nebula: {
-      editor: NebulaEditor({openedNebulaInfos: []}, info.data),
+      editor: NebulaEditor({openedNebulaInfos: [], selection: info.selection}, info.data),
       list: ListSelector({
         datas: info.data.nebulas,
         itemChildrenBuilder: n => [

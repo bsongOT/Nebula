@@ -3,8 +3,12 @@ import { Coord } from "@/utils/math/coord-system";
 import { Data } from "../../data/Data";
 import { insertAt } from "./universeMap";
 
-
-export function Picker(info: { pickedPosition?: Coord; size: number; }, data: Data) {
+export type PickerInfo = {
+  pickedPosition?: Coord,
+  size: number,
+  viewPoint: Coord
+}
+export function Picker(info: PickerInfo, data: Data) {
   let input = "";
   function getPosition() {
     const style = {
@@ -33,7 +37,7 @@ export function Picker(info: { pickedPosition?: Coord; size: number; }, data: Da
   const onClickClose = () => info.pickedPosition = undefined;
   const onClickOK = () => {
     if (info.pickedPosition)
-      insertAt(data, info.pickedPosition, input);
+      insertAt(data, info.pickedPosition.add(info.viewPoint), input);
     info.pickedPosition = undefined;
   };
 

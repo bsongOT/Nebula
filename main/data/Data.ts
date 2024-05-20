@@ -112,7 +112,7 @@ export class Data {
 
   public addNebula(nebula:Nebula, option:AddingNebulaOption){
     this.nebulas.add(nebula);
-    option.universe.nebulaInfos.push({
+    option.universe.nebulaLocations.push({
       nebula: nebula,
       worldPos: option.position,
       start: option.start ?? H(-1, 0, 0)
@@ -122,14 +122,14 @@ export class Data {
   public removeNebula(nebula:Nebula){
     this.nebulas.remove(nebula.id);
     for (const u of this.universes.all()){
-      const index = u.nebulaInfos.findIndex(ni => ni.nebula === nebula)
+      const index = u.nebulaLocations.findIndex(ni => ni.nebula === nebula)
       if (index < 0) continue;
-      u.nebulaInfos.splice(index, 1);
+      u.nebulaLocations.splice(index, 1);
     }
   }
 
   public findAddablePosition(univ:Universe){
-    const universePoses = univ.nebulaInfos.map(ni => ni.worldPos);
+    const universePoses = univ.nebulaLocations.map(ni => ni.worldPos);
     const universes = this.universes.all()
 
     return universePoses

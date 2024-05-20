@@ -10,7 +10,7 @@ type PalettePair = {
   content: Content,
   killed: boolean
 }
-export function NebulaPalette(data: { contents: DataCollection<Content> }, info: { shownNebula:CommonNebula }) {
+export function NebulaPalette(data: { contents: DataCollection<Content> }, info: { nebula:CommonNebula }) {
   let pairs = new Array<PalettePair>()
   let input = "";
   let isInputOpened = false;
@@ -41,9 +41,9 @@ export function NebulaPalette(data: { contents: DataCollection<Content> }, info:
       .map(c => ({
         element: li(
           {onclick: () => selectedContents.push(c)}, 
-          {className: () => `${selectedContents.includes(c) ? "selected" : ""} ${info.shownNebula.tree.nodes.map(n => n.data).includes(c) ? "dead" : ""}` })(),
+          {className: () => `${selectedContents.includes(c) ? "selected" : ""} ${info.nebula.tree.nodes.map(n => n.data).includes(c) ? "dead" : ""}` })(),
         content: c,
-        killed: info.shownNebula.tree.nodes.map(n => n.data).includes(c) ?? false
+        killed: info.nebula.tree.nodes.map(n => n.data).includes(c) ?? false
       }))
       .sort((a, b) => 
         (a.killed ? 0 : 1) - (b.killed ? 0 : 1)

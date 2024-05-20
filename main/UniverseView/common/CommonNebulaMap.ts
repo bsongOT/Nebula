@@ -46,6 +46,10 @@ export const CommonNebulaMap = (info:CommonNebulaMapInfo) => {
       max: s => isInputtingChanger[1] ? s.max : `${universeMap.viewPoint.y + 8}`,
     }),
     div()(() => `x: ${universeMap.viewPoint.x} y: ${universeMap.viewPoint.y}`),
+    div({class: "tool-box"})([
+      btn()("move"),
+      btn()("emigrate")
+    ]),
     div({class: "switch-box"})([
       btn()("Mini map"),
       btn()("Local list"),
