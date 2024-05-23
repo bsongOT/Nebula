@@ -37,6 +37,12 @@ const memento = {
     dust: "claim"
   } as SecondWindowKeys
 }
+const infos = {
+  universeMap: {
+    size: 16,
+    viewPoint: P(0, 0)
+  }
+}
 
 type MainViewInfo = {
   data: Data,
@@ -119,6 +125,12 @@ const switchBoxHeights = {
 }
 
 body(
+  // TODO: Component Stack (universe select -> nebula select -> content select)
+  div()([
+    div()("universe"),
+    div()("nebula"),
+    div()("content")
+  ]),
   div({class: "current-window-switch-box"})([
     btn({onclick: () => switchWindow(["universe"])}, {className: () => memento.currentWindow === "universe" ? "selected" : ""})("Universe"),
     btn({onclick: () => switchWindow(["nebula"])}, {className: () => memento.currentWindow === "nebula" ? "selected" : ""})("Nebula"),

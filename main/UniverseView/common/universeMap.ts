@@ -53,12 +53,13 @@ export function NebulaCell(info:NebulaCellInfo) {
     const size = info.map.size;
     const center = info.universe.boxSize.map(s => (size - s) / 2)
     const scale = (size - 2) / Math.max(...info.universe.boxSize)
-    const pivot = info.universe.range.map(r => (r.max + r.min) / 2)
+    const range = info.universe.range;
+    const pivot = range.map(r => (r.max + r.min) / 2)
     const [x, y] = [info.location.worldPos.x, info.location.worldPos.y]
 
     return {
       transform:
-      `translate(${-100 * info.position.x}%, ${-100 * info.position.y}%)
+      `translate(${-100 * range[0].min}%, ${-100 * range[1].min}%)
       translate(${100 * center[0]}%, ${100 * center[1]}%)
       translate(${100 * (scale - 1) * (x - pivot[0])}%, ${100 * (scale - 1) * (y - pivot[1])}%)
       scale(${scale})`

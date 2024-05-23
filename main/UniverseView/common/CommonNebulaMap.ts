@@ -12,47 +12,60 @@ export type CommonNebulaMapInfo = {
   },
   data: Data
 }
+type NebulaMapTool = "select" | "move" | "emigrate";
 export const CommonNebulaMap = (info:CommonNebulaMapInfo) => {
   const {universeMap, selection, data} = info;
   
   let isInputtingChanger = [false, false];
+  let tool:NebulaMapTool = "select"
+
+  function toolSelected(toolName:NebulaMapTool){
+    if (tool === toolName) return "selected"
+    return ""
+  }
   
   return div({class: "common-nebula-map"})([
-    UniverseMap(universeMap, selection, data),
-    slider({
-      class: "view-point-changer-x", 
-      oninput: e => {
-        isInputtingChanger[0] = true;
-        universeMap.viewPoint.x = Number((<HTMLInputElement>e.target).value)
-      },
-      onmouseup: () => {
-        isInputtingChanger[0] = false;
-      }}, {
-      value: s => isInputtingChanger[0] ? s.value : `${universeMap.viewPoint.x}`,
-      min: s => Math.max(0, isInputtingChanger[0] ? Number(s.min) : universeMap.viewPoint.x - 8).toString(),
-      max: s => isInputtingChanger[0] ? s.max : `${universeMap.viewPoint.x + 8}`
-    }),
-    slider({
-      class: "view-point-changer-y", 
-      oninput: e => {
-        isInputtingChanger[1] = true;
-        universeMap.viewPoint.y = Number((<HTMLInputElement>e.target).value)
-      },
-      onmouseup: () => {
-        isInputtingChanger[1] = false;
-      }}, {
-      value: s => isInputtingChanger[1] ? s.value : `${universeMap.viewPoint.y}`,
-      min: s => Math.max(0, isInputtingChanger[1] ? Number(s.min) : universeMap.viewPoint.y - 8).toString(),
-      max: s => isInputtingChanger[1] ? s.max : `${universeMap.viewPoint.y + 8}`,
-    }),
+    div({class: "universe-title"})(() => selection.universe?.name ?? ""),
+    div()([
+      UniverseMap(universeMap, selection, data),
+      slider({
+        class: "view-point-changer-x", 
+        oninput: e => {
+          isInputtingChanger[0] = true;
+          universeMap.viewPoint.x = Number((<HTMLInputElement>e.target).value)
+        },
+        onmouseup: () => {
+          isInputtingChanger[0] = false;
+        }}, {
+        value: s => isInputtingChanger[0] ? s.value : `${universeMap.viewPoint.x}`,
+        min: s => Math.max(0, isInputtingChanger[0] ? Number(s.min) : universeMap.viewPoint.x - 8).toString(),
+        max: s => isInputtingChanger[0] ? s.max : `${universeMap.viewPoint.x + 8}`
+      }),
+      slider({
+        class: "view-point-changer-y", 
+        oninput: e => {
+          isInputtingChanger[1] = true;
+          universeMap.viewPoint.y = Number((<HTMLInputElement>e.target).value)
+        },
+        onmouseup: () => {
+          isInputtingChanger[1] = false;
+        }}, {
+        value: s => isInputtingChanger[1] ? s.value : `${universeMap.viewPoint.y}`,
+        min: s => Math.max(0, isInputtingChanger[1] ? Number(s.min) : universeMap.viewPoint.y - 8).toString(),
+        max: s => isInputtingChanger[1] ? s.max : `${universeMap.viewPoint.y + 8}`,
+      })
+    ]),
     div()(() => `x: ${universeMap.viewPoint.x} y: ${universeMap.viewPoint.y}`),
     div({class: "tool-box"})([
-      btn()("move"),
-      btn()("emigrate")
+      btn({onclick: () => tool = "select"}, {className: () => toolSelected("select")})("select"),
+      btn({onclick: () => tool = "move"}, {className: () => toolSelected("move")})("move"),
+      btn({onclick: () => tool = "emigrate"}, {className: () => toolSelected("emigrate")})("emigrate")
     ]),
     div({class: "switch-box"})([
       btn()("Mini map"),
-      btn()("Local list"),
+      btn()("Local list")
+    ]),
+    div({class: "switch-box"})([
       btn()("Relations"),
       btn()("Hex")
     ])

@@ -1,6 +1,10 @@
 .common-nebula-map {
     position: relative;
 }
+.universe-title {
+    text-align: center;
+    font-size: large;
+}
 .view-point-changer-x {
     width: 400px;
 }
@@ -10,7 +14,6 @@
     right: -5px;
     appearance: slider-vertical;
     width: 16px;
-    direction: rtl;
     height: 400px;
-    transform: translateX(100%);
+    transform: translateX(100%) rotate(180deg);
 }
