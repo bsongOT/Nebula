@@ -195,8 +195,5 @@ export function UniverseMap(info: UniverseMapInfo, selection: {universe?: Univer
     }
   }
 
-  return div({class: "universe-map-box"})([
-    table({class: "universe-map"})(rows),
-    Picker(info, data)
-  ])
+  return table({class: "universe-map"})(rows)
 }

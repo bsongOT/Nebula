@@ -1,6 +1,32 @@
 .common-nebula-map {
     position: relative;
 }
+.universe-map-box > .universe-map-popup{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transition: 0.6s;
+}
+.universe-map-box > .universe-map-popup.visible{
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+}
+.common-nebula-map > .bottom-bar { 
+    position: relative;
+}
+.common-nebula-map > .bottom-bar > .instant-button-box{
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.common-nebula-map > .bottom-bar > .tool-box {
+    display: block;
+}
 .universe-title {
     text-align: center;
     font-size: large;
