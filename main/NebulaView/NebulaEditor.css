@@ -11,3 +11,18 @@
     border: none;
     background: none;
 }
+.tree-import-map {
+    height: 300px;
+}
+.nebula-palette-opener {
+    height: 100%;
+    width: 100px;
+}
+.importer-arrow {
+    width: 40px;
+    height: 20px;
+    clip-path: polygon(0 25%, 75% 25%, 75% 0, 100% 50%, 75% 100%, 75% 75%, 0 75%);
+    border: none;
+    margin: 0 5px 0 5px;
+    background: #ccc;
+}

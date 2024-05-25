@@ -56,7 +56,7 @@ export class Packer {
         kind: "common" as "common",
         tree: nebula.tree.map(n => n.id).arrayize(),
         palette: nebula.palette.map(n => n.id),
-        importerIds: nebula.importerIds
+        importers: nebula.importers.map(n => n.id)
       } satisfies {[key in keyof CommonNebula]: any} & {kind: string}
     }
     if (nebula instanceof QueryNebula){
@@ -158,7 +158,7 @@ export class Unpacker {
         name: nebulaBox.name,
         tree: Tree.treeize(nebulaBox.tree).map(id => contents.get(id)!),
         palette: nebulaBox.palette.map(id => contents.get(id)!).filter(c => c),
-        importerIds: nebulaBox.importerIds
+        importers: nebulaBox.importers.map(id => new CommonNebula({id}))
       } satisfies CommonNebula)
     }
     if (nebulaBox.kind === "category"){

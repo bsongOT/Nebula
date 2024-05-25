@@ -4,8 +4,8 @@ import { TreeNode } from "@/data-structure/tree";
 import { DataCollection } from "../data/DataCollection";
 import { engine } from "@/engine";
 import "./NebulaEditor.css"
-import { CommonNebulaEditor } from "./CommonNebulaEditor";
-import { CategoryNebulaEditor } from "./CategoryNebulaEditor";
+import { CommonNebulaEditor, CommonNebulaEditorInfo } from "./CommonNebulaEditor";
+import { CategoryNebulaEditor, CategoryNebulaEditorInfo } from "./CategoryNebulaEditor";
 import { QueryNebulaEditor } from "./QueryNebulaEditor";
 
 export type NebulaEditorInfo = {
@@ -17,12 +17,35 @@ export type NebulaEditorInfo = {
     }
 }
 export const NebulaEditor = (info:NebulaEditorInfo, data:Data) => {
+    const windowInfos = {
+        common: {
+            nebula: new CommonNebula({})
+        } satisfies CommonNebulaEditorInfo,
+        category: {
+            nebula: new CategoryNebula({}),
+            data: data
+        } satisfies CategoryNebulaEditorInfo
+    }
+    const windows = {
+        common: CommonNebulaEditor(windowInfos.common, data),
+        category: CategoryNebulaEditor(windowInfos.category),
+        query: QueryNebulaEditor()
+    }
     const openedTabs = new Array<{
         element: HTMLElement
         nebula: Nebula
     }>()
     
     engine.updater.register(() => {
+        if (info.selection.nebula){
+            if (info.selection.nebula instanceof CommonNebula){
+                windowInfos.common.nebula = info.selection.nebula
+            }
+            if (info.selection.nebula instanceof CategoryNebula){
+                windowInfos.category.nebula = info.selection.nebula
+            }
+        }
+
         const shownTabNebulas = openedTabs.map(o => o.nebula);
         const dataTabNebulas = info.openedNebulaInfos.map(n => n.nebula)
         if (shownTabNebulas.length !== dataTabNebulas.length || 
@@ -50,9 +73,9 @@ export const NebulaEditor = (info:NebulaEditorInfo, data:Data) => {
         div()(
             () => {
                 if (!info.selection.nebula) return [];
-                if (info.selection.nebula instanceof CommonNebula) return [CommonNebulaEditor(info.selection as any, data)]
-                if (info.selection.nebula instanceof CategoryNebula) return [CategoryNebulaEditor({nebula: info.selection.nebula, data: data})]
-                if (info.selection.nebula instanceof QueryNebula) return [QueryNebulaEditor()]
+                if (info.selection.nebula instanceof CommonNebula) return [windows.common]
+                if (info.selection.nebula instanceof CategoryNebula) return [windows.category]
+                if (info.selection.nebula instanceof QueryNebula) return [windows.query]
                 return []
             }
         )

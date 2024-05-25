@@ -18,11 +18,11 @@ export abstract class Nebula implements DataComponent{
 export class CommonNebula extends Nebula {
   tree:Tree<Content>;
   palette:Content[];
-  importerIds:number[];
+  importers:Nebula[];
   constructor(info?:Partial<CommonNebula>){
     super(info);
     this.palette = info?.palette ?? [];
-    this.importerIds = info?.importerIds ?? [];
+    this.importers = info?.importers ?? [];
     this.tree = info?.tree ?? new Tree()
   }
 }

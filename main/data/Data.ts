@@ -58,6 +58,11 @@ export class Data {
     this.universes = new DataCollection(wildUniverses.map(u => Unpacker.universe(u, this.nebulas, this.relations)))
 
     for (const n of this.nebulas.all()){
+      if (n instanceof CommonNebula){
+        for (let i = 0; i < n.importers.length; i++){
+          n.importers[i] = this.nebulas.get(n.importers[i].id)!
+        }
+      }
       if (n instanceof QueryNebula){
         for (const q of n.query){
           q.nebula = this.nebulas.get(q.nebula.id)!;

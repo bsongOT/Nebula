@@ -1,6 +1,41 @@
 .common-nebula-map {
     position: relative;
 }
+.common-nebula-map > .main {
+    position: relative;
+}
+.relation-mark-box {
+    display: flex;
+}
+.relation-mark {
+    position: relative;
+    width: 30px;
+    height: 30px;
+}
+.relation-mark-background {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 20px;
+    height: 20px;
+    background: #ddd;
+    transform: rotate(45deg);
+    transition: 0.2s;
+    cursor: pointer;
+}
+.relation-mark-id {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 30px;
+    text-align: center;
+    transform: translateY(-50%);
+    font-size: 12px;
+    pointer-events: none;
+}
+.selected > .relation-mark-background {
+    transform: rotate(0);
+}
 .universe-map-box > .universe-map-popup{
     position: absolute;
     top: 50%;

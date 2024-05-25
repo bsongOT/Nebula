@@ -1,4 +1,4 @@
-import { btn, div, li } from "@/funcObject";
+import { btn, button, div, li, ul } from "@/funcObject";
 import { CommonNebula, Content, Nebula } from "../data/Data";
 import { engine } from "@/engine";
 import { TreeNode } from "@/data-structure/tree";
@@ -6,23 +6,47 @@ import { NebulaPalette } from "./NebulaPalette/NebulaPalette";
 import { DataCollection } from "../data/DataCollection";
 import { NebulaModel } from "./NebulaModel/NebulaModel";
 import { StarTreeList } from "./TreeList/StarTreeList";
+import { range } from "@/utils/utils";
 
 export type CommonNebulaEditorInfo = {
     nebula:CommonNebula,
     selectedNode?:TreeNode<Content>,
 }
 export const CommonNebulaEditor = (info: CommonNebulaEditorInfo, data: { contents: DataCollection<Content>; nebulas: DataCollection<Nebula>; }) => {
-    const importerItems = new Array<HTMLLIElement>();
+    const importerPairs = new Array<{
+        element: HTMLLIElement,
+        info: {nebula: Nebula}
+    }>();
     let selectedContents = new Array<Content>();
 
-    engine.updater.register(() => {
-        if (!info.nebula) return;
-        importerItems.splice(0, importerItems.length);
-        importerItems.push(...info.nebula.importerIds.map(id => li()([
-            btn()(data.nebulas.get(id)?.name),
-            btn({ class: "importer-arrow" })("")
-        ])));
-    });
+    function importerItems() {
+        if (importerPairs.length > info.nebula.importers.length){
+            importerPairs.splice(0, importerPairs.length - info.nebula.importers.length)
+        }
+        else if (importerPairs.length < info.nebula.importers.length){
+            importerPairs.push(
+                ...range(info.nebula.importers.length - importerPairs.length)
+                   .map(() => {
+                    const info = {
+                        nebula: new CommonNebula()
+                    }
+                    return {
+                        element: li()([
+                            button()(() => info.nebula.name),
+                            btn({ class: "importer-arrow" })()
+                        ]),
+                        info: info
+                    }}
+                )
+            );
+        }
+        for (let i = 0; i < importerPairs.length; i++){
+            importerPairs[i].info.nebula = info.nebula.importers[i];
+        }
+        return [
+            ...importerPairs.map(ip => ip.element)
+        ];
+    }
 
     function putIntoNebula() {
         if (!info.nebula) return;
@@ -45,10 +69,10 @@ export const CommonNebulaEditor = (info: CommonNebulaEditorInfo, data: { content
 
     return div()([
         div({ class: "tree-import-map" })([
-            div({ class: "nebula-importer-list" })(importerItems),
+            ul({ class: "nebula-importer-list" })(importerItems),
             btn({ class: "nebula-palette-opener" })("Palette"),
-            btn({ class: "importer-arrow", onclick: putIntoNebula })(""),
-            btn({ class: "nebula-destination" }, { innerText: () => info.nebula!.name })("")
+            btn({ class: "importer-arrow", onclick: putIntoNebula })(),
+            btn({ class: "nebula-destination" }, { innerText: () => info.nebula.name })()
         ]),
         NebulaPalette(data, info),
         StarTreeList(info),

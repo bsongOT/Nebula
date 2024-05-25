@@ -109,6 +109,7 @@ export const span = simpleElement("span")
 export const a = simpleElement("a")
 export const div = element("div")
 export const nav = element("nav")
+export const button = element("button");
 
 export const table = element<"table", HTMLTableRowElement>("table")
 export const tr = element<"tr", HTMLTableCellElement>("tr")

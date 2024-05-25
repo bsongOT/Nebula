@@ -9,14 +9,14 @@ export const enum RelationState {
 
 export class Relation {
     id:number
-    mainTree:Nebula;
-    secondTree:Nebula;
+    mainTree:CommonNebula;
+    secondTree:CommonNebula;
     table:{
         main: Content,
         second: Content,
         state: number | Dust
     }[];
-    constructor(info:Partial<Omit<Relation, "mainTree" | "secondTree">> & {mainTree:CommonNebula, secondTree:CommonNebula}){
+    constructor(info:Partial<Relation> & {mainTree:CommonNebula, secondTree:CommonNebula}){
         this.mainTree = info.mainTree;
         this.secondTree = info.secondTree;
         this.table = info.table ?? [];
