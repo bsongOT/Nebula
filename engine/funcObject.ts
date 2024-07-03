@@ -1,16 +1,23 @@
 import p5 from "p5";
-import { CanvasObject } from "./objects/CanvasObject";
+import { CanvasObject } from "./CanvasObject";
 import { Tree, TreeNode } from "./data-structure/tree";
 import { Coord } from "./utils/math/coord-system";
-import { engine } from "./engine";
+import { Updated, engine } from "./engine";
 
-export type Functionize<T> = {
-    [key in keyof T]: (element: T) => T[key]
+export type Attribute<T extends Tag> = Partial<{
+    [key in keyof HTMLElementTagNameMap[T]]: HTMLElementTagNameMap[T][key] | Updated<HTMLElementTagNameMap[T], HTMLElementTagNameMap[T][key]>
+}> & {
+    class?: string,
+    inlineStyle?: Partial<CSSStyleDeclaration> | Updated<HTMLElementTagNameMap[T], Partial<CSSStyleDeclaration>>
 }
-export type UpdatedAttribute<T extends HTMLElement> = Partial<Functionize<T>> & {inlineStyle?:(element: T) => Partial<CSSStyleDeclaration>}
+export type UpdatedAttribute<T extends Tag> = Partial<{
+    [key in keyof HTMLElementTagNameMap[T]]: Updated<HTMLElementTagNameMap[T], HTMLElementTagNameMap[T][key]>
+}> & {
+    inlineStyle?: Updated<HTMLElementTagNameMap[T], Partial<CSSStyleDeclaration>>
+}
 export type Tag = keyof HTMLElementTagNameMap;
-export type Attribute<T extends Tag> = Partial<HTMLElementTagNameMap[T]> & {class?:string, inlineStyle?:Partial<CSSStyleDeclaration>};
-export type ChildrenAttribute<T extends HTMLElement, C extends HTMLElement = HTMLElement> = C[] | ((element:T) => C[]) | string | ((element:T) => string)
+export type ChildrenAttribute<T extends HTMLElement, C extends HTMLElement = HTMLElement> = 
+    C[] | string | ((element:T) => C[]) | ((element:T) => string)
 
 function mustUpdateChildren(element:HTMLElement, children:HTMLElement[]){
     if (children.length !== element.children.length) return true;
@@ -35,32 +42,32 @@ function updateChildren<T extends HTMLElement>(element:T, children?:ChildrenAttr
     }
 }
 
-function update<T extends HTMLElement>(element:T, attrs?:UpdatedAttribute<T>, children?:ChildrenAttribute<T>){
+function update<T extends Tag>(element:HTMLElementTagNameMap[T], attrs?:UpdatedAttribute<T>, children?:ChildrenAttribute<HTMLElementTagNameMap[T]>){
     if (!document.contains(element)) return;
   
     for (const k in attrs){
       if (k === "inlineStyle") continue;
 
-      const key = k as keyof Partial<Functionize<T>>;
-      const data = attrs[key]?.(element) as T[keyof T];
+      const key = k as keyof Partial<HTMLElementTagNameMap[T]>;
+      const data = attrs[key]?.attr(element) as any;
 
       if (element[key] === data) continue;
       element[key] = data!;
     }
 
     if (attrs?.inlineStyle){
-        Object.assign(element.style, attrs.inlineStyle(element));
+        Object.assign(element.style, attrs.inlineStyle.attr(element));
     }
 
     updateChildren(element, children);
 }
 const create = <T extends Tag>(
     tag:T, 
-    attrs?:Attribute<T>, 
-    updatedAttrs?:UpdatedAttribute<HTMLElementTagNameMap[T]>, 
+    attrs?:Attribute<T>,
     children?:ChildrenAttribute<HTMLElementTagNameMap[T]>
 ) => {
     const obj = document.createElement(tag);
+    if (!attrs) return obj;
     for(const key in attrs){
         const k = key as keyof Attribute<T>
 
@@ -71,44 +78,41 @@ const create = <T extends Tag>(
             obj[key as keyof HTMLElementTagNameMap[T]] = (attrs as any)[key]!;
         }
     }
+    const updatedAttrs = Object.assign({},
+        ...Object.keys(attrs)
+            .filter(k => attrs[k as keyof Attribute<T>] instanceof Updated)
+            .map(k => ({[k]: attrs[k as keyof Attribute<T>]}))
+    )
     engine.updater.register(() => update(obj, updatedAttrs, children))
     return obj;
 }
 const independentElement = <T extends Tag>(tag:T) => (
-    (attrs?:Attribute<T>, updatedAttrs?:UpdatedAttribute<HTMLElementTagNameMap[T]>) => (
-        () => create(tag, attrs, updatedAttrs)
-    )
-)
-const simpleElement = <T extends Tag>(tag:T) => (
-    (attrs?:Attribute<T>, updatedAttrs?:UpdatedAttribute<HTMLElementTagNameMap[T]>) => (
-        (text?:string) => {
-            const obj = create(tag, attrs, updatedAttrs)
-            obj.innerText = text ?? "";
-            return obj;
-        }
+    (attrs?:Attribute<T>) => (
+        () => create(tag, attrs)
     )
 )
 const element = <T extends Tag, C extends HTMLElement = HTMLElement>(tag:T) => (
-    (attrs?:Attribute<T>, updatedAttrs?:UpdatedAttribute<HTMLElementTagNameMap[T]>) => (
+    (attrs?:Attribute<T>) => (
         (children?:ChildrenAttribute<HTMLElementTagNameMap[T], C>) => {
-            const obj = create(tag, attrs, updatedAttrs, children);
+            const obj = create(tag, attrs, children);
             updateChildren(obj, children)
             return obj;
         }
     )
 )
-export const textarea = simpleElement("textarea");
+export const textarea = element<"textarea", never>("textarea");
+export const btn = element<"button", never>("button");
+export const a = element<"a", never>("a");
+
 export const inputText = independentElement("input")
-export const slider = (attrs?:Attribute<"input">, updatedAttrs?:UpdatedAttribute<HTMLInputElement>) => {
-  const obj = independentElement("input")(attrs, updatedAttrs)();
+export const slider = (attrs?:Attribute<"input">) => {
+  const obj = independentElement("input")(attrs)();
   obj.type = "range"
   return obj;
 }
-export const btn = simpleElement("button")
-export const span = simpleElement("span")
-export const a = simpleElement("a")
-export const div = element("div")
-export const nav = element("nav")
+export const span = element("span");
+export const div = element("div");
+export const nav = element("nav");
 export const button = element("button");
 
 export const table = element<"table", HTMLTableRowElement>("table")

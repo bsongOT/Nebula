@@ -3,12 +3,13 @@ import { body, btn, div } from "@/funcObject";
 import { P } from "@/utils/math/coord-system";
 import { Universe } from "./data/components/Universe";
 import "./index.css"
-import { CommonNebulaMap } from "./UniverseView/common/CommonNebulaMap";
-import { SystemNebulaList } from "./UniverseView/system/SystemNebulaList";
-import { ConvenientNebulaList } from "./UniverseView/convenience/ConvenientNebulaList";
+import { CommonNebulaMap } from "./Components/UniverseView/common/CommonNebulaMap";
+import { SystemNebulaList } from "./Components/UniverseView/system/SystemNebulaList";
+import { ConvenientNebulaList } from "./Components/UniverseView/convenience/ConvenientNebulaList";
 import { ListSelector } from "./ListSelector/ListSelector";
-import { ContentEditor } from "./ContentView/ContentEditor";
-import { NebulaEditor } from "./NebulaView/NebulaEditor";
+import { ContentEditor } from "./Components/ContentView/ContentEditor";
+import { NebulaEditor } from "./Components/NebulaView/NebulaEditor";
+import { U } from "@/engine";
 
 type FirstWindowKey = "universe"|"nebula"|"content"|"dust";
 type SecondWindowKeys = {
@@ -16,6 +17,12 @@ type SecondWindowKeys = {
   nebula: "editor" | "list"
   content: "editor" | "list"
   dust: "claim" | "kernel"
+}
+
+const settings = {
+  universeMapSize: 16,
+  viewPoint: P(0, 0),
+  
 }
 
 const memento = {
@@ -36,12 +43,6 @@ const memento = {
     content: "editor",
     dust: "claim"
   } as SecondWindowKeys
-}
-const infos = {
-  universeMap: {
-    size: 16,
-    viewPoint: P(0, 0)
-  }
 }
 
 type MainViewInfo = {
@@ -125,20 +126,34 @@ const switchBoxHeights = {
 }
 
 body(
-  // TODO: Component Stack (universe select -> nebula select -> content select)
   div()([
     div()("universe"),
     div()("nebula"),
     div()("content")
   ]),
   div({class: "current-window-switch-box"})([
-    btn({onclick: () => switchWindow(["universe"])}, {className: () => memento.currentWindow === "universe" ? "selected" : ""})("Universe"),
-    btn({onclick: () => switchWindow(["nebula"])}, {className: () => memento.currentWindow === "nebula" ? "selected" : ""})("Nebula"),
-    btn({onclick: () => switchWindow(["content"])}, {className: () => memento.currentWindow === "content" ? "selected" : ""})("Content"),
-    btn({onclick: () => switchWindow(["dust"])}, {className: () => memento.currentWindow === "dust" ? "selected" : ""})("Dust")
+    btn({
+      onclick: () => switchWindow(["universe"]),
+      className: U(() => memento.currentWindow === "universe" ? "selected" : "")
+    })("Universe"),
+    btn({
+      onclick: () => switchWindow(["nebula"]), 
+      className: U(() => memento.currentWindow === "nebula" ? "selected" : "")
+    })("Nebula"),
+    btn({
+      onclick: () => switchWindow(["content"]),
+      className: U(() => memento.currentWindow === "content" ? "selected" : "")
+    })("Content"),
+    btn({
+      onclick: () => switchWindow(["dust"]),
+      className: U(() => memento.currentWindow === "dust" ? "selected" : "")
+    })("Dust")
   ]),
   div({class: "switch-box-hider"})([
-  div({class: "current-second-window-switch-box"}, {inlineStyle: () => ({top: switchBoxHeights[memento.currentWindow]})})([
+  div({
+    class: "current-second-window-switch-box", 
+    inlineStyle: U(() => ({top: switchBoxHeights[memento.currentWindow]}))
+  })(/*[
     div({class: "switch-box"})([
       btn({onclick: () => switchWindow(["universe", "common"])}, {className: () => memento.currentSecondWindow.universe === "common" ? "selected" : ""})("Common"),
       btn({onclick: () => switchWindow(["universe", "system"])}, {className: () => memento.currentSecondWindow.universe === "system" ? "selected" : ""})("System"),
@@ -157,7 +172,7 @@ body(
       btn({onclick: () => switchWindow(["dust", "claim"])}, {className: () => memento.currentSecondWindow.dust === "claim" ? "selected" : ""})("Claim"),
       btn({onclick: () => switchWindow(["dust", "kernel"])}, {className: () => memento.currentSecondWindow.dust === "kernel" ? "selected" : ""})("Kernel")
     ])
-  ])
+  ]*/)
   ]),
   MainView(memento)
 );

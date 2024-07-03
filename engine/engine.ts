@@ -1,4 +1,9 @@
-import { btn, div, li, span, ul } from "./funcObject";
+export class Updated<E extends HTMLElement, T> {
+    constructor(public attr:((element:E)=>T)){}
+}
+export function U<E extends HTMLElement, T>(attr:((element:E) => T)){
+    return new Updated(attr)
+}
 
 class Updater {
     private list:(()=>void)[] = []
@@ -14,25 +19,6 @@ class Updater {
     }
 }
 
-class Debug {
-    private message = "";
-    private isShown = false;
-    public logger(){
-        return div()([
-            btn({onclick: () => this.isShown = false})("X"),
-            div()(() => this.message)
-        ])
-    }
-    public log(message?:any){
-        this.message += message + "\n";
-        this.isShown = true;
-    }
-    public erase(){
-        this.message = "";
-    }
-}
-
 export const engine = {
     updater: new Updater(),
-    debug: new Debug()
 }
