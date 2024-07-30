@@ -1,16 +1,188 @@
+.hidden {
+    display: none !important;
+}
+html {
+    height: 100%;
+}
+hr {
+    border-top: 1px solid #eee;
+}
 body {
+    height: 100%;
     max-width: 100%;
     margin: 0;
-    overflow-x: hidden;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: 50px 1fr;
+    background-color: bisque;
+}
+div {
+    cursor: default;
+    user-select: none;
+}
+textarea {
+    resize: none;
+    width: 100%;
+    height: 0;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+.top-right {
+    margin: auto 0;
+}
+.top-right > button {
+    border: none;
+    background: white;
+    margin: 2px;
     padding: 5px;
+    border-radius: 5px;
+    filter: drop-shadow(2px 2px 4px #ccc);
+    transition: 0.2s;
+}
+.top-right > button:hover {
+    background: #eff;
+}
+.top-right > button.selected {
+    transform: translateY(7px);
+    background: #cff;
+}
+.left-side {
+    padding: 5px;
+    background: white;
+    margin: 0 10px 10px 10px;
+    filter: drop-shadow(2px 2px 4px #aaa);
+    overflow-y: auto;
+}
+.left-side > .special-tab {
+    padding: 5px;
+}
+.left-side > .special-tab.selected {
+    background: #ddd;
+}
+.special-tab:hover {
+    background: #eee;
+}
+.tab-list {
+    margin: 0;
+    padding: 0;
+}
+.tab-list > li {
+    list-style: none;
+    margin: 0;
+}
+.tab-step {
+    padding: 5px;
+}
+.tab-list .tab-step:hover {
+    background: #eee;
+}
+.tab-list > .selected > .tab-step {
+    background: #ddd;
 }
 * {
     font-family: sans-serif;
 }
-
 .main-view {
+    padding: 20px;
+    background: white;
+    filter: drop-shadow(2px 2px 4px #aaa);
+    overflow-y: scroll;
+    margin: 0 10px 10px 0;
+}
+.holder {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+}
+.current-tab {
+    position: relative;
+    transition: 0.3s;
+    margin: 10px auto;
+    width: fit-content;
+    z-index: 1;
+    top: 0;
+}
+.waiting-for-select {
+    transform: scale(4) translateY(-50%);
+    top: 50%;
+}
+.icon-button {
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    border-radius: 100%;
+    border: none;
+    background: none;
+    transition: 0.2s;
+    width: 20px;
+    height: 20px;
+}
+.icon-button.collapsed {
+    transform: translateY(-50%);
+}
+.icon-button:hover {
+    background-color: #ccc;
+}
+.tab-button {
+    min-width: 30px;
+    height: 30px;
+    border-radius: 0;
+    border: none;
+}
+.tab-button:hover {
+    filter: brightness(90%);
+}
+.tab-button:nth-child(2) {
+    border-radius: 5px 0 0 5px;
+}
+.tab-button:last-child {
+    border-radius: 0 5px 5px 0;
+}
+.tab-button.selected {
+    filter: brightness(80%);
+}
+.tab-panel {
     display: flex;
     justify-content: center;
+    margin-top: 10px;
+}
+.tab-adder {
+    width: 90px;
+    height: 120px;
+}
+.tab-stack {
+    width: 90px;
+    height: 120px;
+}
+.tab-stack-name {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30px;
+}
+.tab-stack.selected > .tab-stack-blocks {
+    transform: rotate(-90deg);
+}
+.tab-stack.selected > .tab-stack-name {
+    background: skyblue;
+}
+.tab-stack-blocks {
+    width: 100%;
+    height: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: 0.3s;
+}
+.stack-block {
+    width: 30px;
+    height: 30px;
+}
+.stack-block.valid {
+    background: red;
 }
 .current-window-switch-box {
     display: flex;

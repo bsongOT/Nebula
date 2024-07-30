@@ -5,6 +5,7 @@ import { Content, Data } from "../../../data/Data";
 import { DayNebulaList } from "./DayNebulaList";
 import { LifetimeNebulaList } from "./LifetimeNebulaList";
 import { ImportanceNebulaList } from "./ImportanceNebulaList";
+import { U } from "@/engine";
 
 type SystemNebulaListInfo = {
   data:Data
@@ -20,9 +21,7 @@ export const SystemNebulaList = (info:SystemNebulaListInfo) => {
       page: 1,
       keyword: "",
       capacity: 15,
-      itemChildrenBuilder: c => [
-        span()(c.title)
-      ],
+      componentBuilder: ({data}) => span()(data.title),
       filter: (c, s) => c.title.includes(s)
     })
   };
@@ -30,10 +29,22 @@ export const SystemNebulaList = (info:SystemNebulaListInfo) => {
   
   return div()([
     div({ class: "system-nebula-switch-box" })([
-      btn({onclick: () => windowName = "day"}, {className: () => windowName === "day" ? "selected" : ""})("Day"),
-      btn({onclick: () => windowName = "lifetime"}, {className: () => windowName === "lifetime" ? "selected" : ""})("Lifetime"),
-      btn({onclick: () => windowName = "importance"}, {className: () => windowName === "importance" ? "selected" : ""})("Importance"),
-      btn({onclick: () => windowName = "isolated"}, {className: () => windowName === "isolated" ? "selected" : ""})("Isolated")
+      btn({
+        onclick: () => windowName = "day", 
+        className: U(() => windowName === "day" ? "selected" : "")
+      })("Day"),
+      btn({
+        onclick: () => windowName = "lifetime", 
+        className: U(() => windowName === "lifetime" ? "selected" : "")
+      })("Lifetime"),
+      btn({
+        onclick: () => windowName = "importance", 
+        className: U(() => windowName === "importance" ? "selected" : "")
+      })("Importance"),
+      btn({
+        onclick: () => windowName = "isolated",
+        className: U(() => windowName === "isolated" ? "selected" : "")
+      })("Isolated")
     ]),
     div({className: "system-nebula-list"})(() => [windows[windowName]])
   ]);

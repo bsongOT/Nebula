@@ -1,7 +1,7 @@
 import { Coord, H, HexCoord, P } from "@/utils/math/coord-system";
 import { Content } from "./components/Content";
 import { Dust } from "./components/Dust";
-import { CategoryNebula, CommonNebula, Nebula, QueryNebula } from "./components/Nebula";
+import { Nebula, QueryNebula } from "./components/Nebula";
 import { Relation } from "./components/Relation";
 import { NebulaLocation, Universe } from "./components/Universe";
 import { Tree } from "@/data-structure/tree";
@@ -16,20 +16,6 @@ type OmitFunction<T> = {
 }
 type Anyify<T> = {
   [K in keyof T]: any
-}
-type NebulaTypeString = "common"|"query"|"category"|"unknown";
-
-function getNebulaType(nebula:Nebula){
-  if (nebula instanceof CommonNebula) return "common";
-  if (nebula instanceof QueryNebula) return "query";
-  if (nebula instanceof CategoryNebula) return "category";
-  return "unknown"
-}
-function getNebula(type:NebulaTypeString, info:Partial<Nebula>){
-  if (type === "common") return new CommonNebula(info);
-  if (type === "query") return new QueryNebula(info);
-  if (type === "category") return new CategoryNebula(info);
-  return new CommonNebula(info)
 }
 
 export class Packer {
@@ -49,39 +35,12 @@ export class Packer {
     } satisfies {[key in keyof Content]: any}
   }
   static nebula(nebula:Nebula){
-    if (nebula instanceof CommonNebula){
-      return {
-        id: nebula.id,
-        name: nebula.name,
-        kind: "common" as "common",
-        tree: nebula.tree.map(n => n.id).arrayize(),
-        palette: nebula.palette.map(n => n.id),
-        importers: nebula.importers.map(n => n.id)
-      } satisfies {[key in keyof CommonNebula]: any} & {kind: string}
-    }
-    if (nebula instanceof QueryNebula){
-      return {
-        id: nebula.id,
-        name: nebula.name,
-        kind: "query" as "query",
-        query: nebula.query.map(q => ({nebula: q.nebula.id, nebulaType: getNebulaType(q.nebula) as NebulaTypeString, operator: q.operator}))
-      } satisfies {[key in keyof QueryNebula]: any} & {kind: string}
-    }
-    if (nebula instanceof CategoryNebula){
-      return {
-        id: nebula.id,
-        name: nebula.name,
-        kind: "category" as "category",
-        ownerMap: nebula.ownerMap.map(o => ({dust: o.dust.id, content: o.content.id})),
-        referenceNebula: nebula.referenceNebula.id,
-        referenceContent: nebula.referenceContent.id
-      } satisfies Anyify<CategoryNebula> & {kind: string}
-    }
     return {
       id: nebula.id,
       name: nebula.name,
-      kind: "unknown" as "unknown"
-    }
+      tree: nebula.tree.map(n => n.id).arrayize(),
+      palette: nebula.palette.map(n => n.id),
+    } satisfies {[key in keyof Nebula]: any}
   }
   static universe(universe:Universe){
     return {
@@ -152,35 +111,12 @@ export class Unpacker {
     } satisfies Content);
   }
   static nebula(nebulaBox:ReturnType<typeof Packer.nebula>, contents:DataCollection<Content>, dusts:DataCollection<Dust>){
-    if (nebulaBox.kind === "common"){
-      return new CommonNebula({
+      return new Nebula({
         id: nebulaBox.id,
         name: nebulaBox.name,
         tree: Tree.treeize(nebulaBox.tree).map(id => contents.get(id)!),
         palette: nebulaBox.palette.map(id => contents.get(id)!).filter(c => c),
-        importers: nebulaBox.importers.map(id => new CommonNebula({id}))
-      } satisfies CommonNebula)
-    }
-    if (nebulaBox.kind === "category"){
-      return new CategoryNebula({
-        id: nebulaBox.id,
-        name: nebulaBox.name,
-        referenceContent: contents.get(nebulaBox.referenceContent)!,
-        referenceNebula: new CommonNebula({id: nebulaBox.referenceNebula}),
-        ownerMap: nebulaBox.ownerMap.map(o => ({dust: dusts.get(o.dust)!, content: contents.get(o.content)!}))
-      } satisfies CategoryNebula)
-    }
-    if (nebulaBox.kind === "query"){
-      return new QueryNebula({
-        id: nebulaBox.id,
-        name: nebulaBox.name,
-        query: nebulaBox.query.map(q => ({
-          nebula: getNebula(q.nebulaType, {id: q.nebula}),
-          operator: q.operator
-        }))
-      } satisfies QueryNebula)
-    }
-    return new CommonNebula(nebulaBox)
+      } satisfies Nebula)
   }
   static universe(universeBox:ReturnType<typeof Packer.universe>, nebulas:DataCollection<Nebula>, relations:DataCollection<Relation>){
     return new Universe({
@@ -199,9 +135,6 @@ export class Unpacker {
   static relation(relationBox:ReturnType<typeof Packer.relation>, nebulas:DataCollection<Nebula>, contents:DataCollection<Content>, dusts:DataCollection<Dust>){
     const mainTree = nebulas.get(relationBox.mainTree)!;
     const secondTree = nebulas.get(relationBox.secondTree)!;
-
-    if (!(mainTree instanceof CommonNebula)) throw "Only common nebula is allowed as main tree";
-    if (!(secondTree instanceof CommonNebula)) throw "Only common nebula is allowed as second tree";
 
     return new Relation({
       id: relationBox.id,

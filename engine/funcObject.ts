@@ -2,7 +2,7 @@ import p5 from "p5";
 import { CanvasObject } from "./CanvasObject";
 import { Tree, TreeNode } from "./data-structure/tree";
 import { Coord } from "./utils/math/coord-system";
-import { Updated, engine } from "./engine";
+import { Repeated, Updated, engine } from "./engine";
 
 export type Attribute<T extends Tag> = Partial<{
     [key in keyof HTMLElementTagNameMap[T]]: HTMLElementTagNameMap[T][key] | Updated<HTMLElementTagNameMap[T], HTMLElementTagNameMap[T][key]>
@@ -17,7 +17,7 @@ export type UpdatedAttribute<T extends Tag> = Partial<{
 }
 export type Tag = keyof HTMLElementTagNameMap;
 export type ChildrenAttribute<T extends HTMLElement, C extends HTMLElement = HTMLElement> = 
-    C[] | string | ((element:T) => C[]) | ((element:T) => string)
+    C[] | string | Repeated<(info:any) => HTMLElement, any> | ((element:T) => C[]) | ((element:T) => string)
 
 function mustUpdateChildren(element:HTMLElement, children:HTMLElement[]){
     if (children.length !== element.children.length) return true;
@@ -33,6 +33,27 @@ function updateChildren<T extends HTMLElement>(element:T, children?:ChildrenAttr
     if (typeof childs === "string"){
         if (element.innerText === childs) return;
         element.innerText = childs;
+        return;
+    }
+
+    if (childs instanceof Repeated) {
+        const datas = typeof childs.datas === 'function' ? childs.datas() : childs.datas 
+        const diff = Math.abs(element.children.length - datas.length);
+        if (element.children.length > datas.length){
+            for (let i = 0; i < diff; i++) {
+                element.lastElementChild?.remove()
+                childs.infos.pop();
+            }
+        }
+        else if (element.children.length < datas.length){
+            for (let i = element.children.length; i < datas.length; i++) {
+                childs.infos.push(childs.toInfo(datas[i]))
+                element.append(childs.component(childs.infos[i]))
+            }
+        }
+        for (let i = 0; i < childs.infos.length; i++){
+            Object.assign(childs.infos[i], childs.toInfo(datas[i]))
+        }
         return;
     }
 
@@ -67,15 +88,22 @@ const create = <T extends Tag>(
     children?:ChildrenAttribute<HTMLElementTagNameMap[T]>
 ) => {
     const obj = document.createElement(tag);
-    if (!attrs) return obj;
+    if (!attrs) {
+        engine.updater.register(() => update(obj, undefined, children));
+        return obj;
+    }
     for(const key in attrs){
         const k = key as keyof Attribute<T>
 
         if (k === "class"){
             obj.classList.add(...attrs.class!.split(" "))
         }
+        else if (k === "inlineStyle"){
+            Object.assign(obj.style, attrs.inlineStyle instanceof Updated ? attrs.inlineStyle.attr(obj) : attrs.inlineStyle)
+        }
         else {
-            obj[key as keyof HTMLElementTagNameMap[T]] = (attrs as any)[key]!;
+            const attr = (attrs as any)[key]!;
+            obj[key as keyof HTMLElementTagNameMap[T]] = attr instanceof Updated ? attr.attr(obj) : attr;
         }
     }
     const updatedAttrs = Object.assign({},
@@ -104,12 +132,15 @@ export const textarea = element<"textarea", never>("textarea");
 export const btn = element<"button", never>("button");
 export const a = element<"a", never>("a");
 
+export const hr = independentElement("hr");
 export const inputText = independentElement("input")
 export const slider = (attrs?:Attribute<"input">) => {
   const obj = independentElement("input")(attrs)();
   obj.type = "range"
   return obj;
 }
+export const select = element<"select", HTMLOptionElement>("select");
+export const option = element<"option", never>("option")
 export const span = element("span");
 export const div = element("div");
 export const nav = element("nav");

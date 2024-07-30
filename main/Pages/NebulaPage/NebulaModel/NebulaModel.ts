@@ -2,10 +2,11 @@ import { Container, Hexagon } from "@/CanvasObject";
 import { StarTile } from "./StarTile";
 import { H, P } from "@/utils/math/coord-system";
 import { canvas } from "@/funcObject";
-import { CommonNebula, Nebula } from "../../../data/Data";
+import { Nebula } from "../../../data/Data";
 import { gridify } from "@/data-structure/utils";
+import context from "../../../context";
 
-export function NebulaModel(info: { nebula:CommonNebula }) {
+export function NebulaModel() {
     const tileBox = new Container();
     const effectBox = new Container();
 
@@ -14,9 +15,11 @@ export function NebulaModel(info: { nebula:CommonNebula }) {
     tileBox.update = () => {
       tileBox.empty();
   
+      const nebula = context.selection.nebula;
+      if (!nebula) return tileBox;
       const canvasSize = width;
       const canvasCenter = P(1, 1).scale(canvasSize / 2);
-      const grid = gridify(info.nebula.tree);
+      const grid = gridify(nebula.tree);
       const size = grid.size.x;
       const pivot = H(1, 0, 1).scale(size - 1);
   

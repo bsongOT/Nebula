@@ -13,7 +13,7 @@ export const LifetimeNebulaList = (info: { data: Data; }) => {
     capacity: 15,
     keyword: "",
     filter: (c: Content, s:string) => c.title.includes(s),
-    itemChildrenBuilder: (c: Content) => new Array<HTMLElement>()
+    componentBuilder: (info:{data:Content}) => div()()
   };
 
   return div()([

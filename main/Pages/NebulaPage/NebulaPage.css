@@ -1,0 +1,55 @@
+.nebula-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+.tree-import-map {
+    display: flex;
+    height: 200px;
+    align-items: center;
+}
+.nebula-model {
+    aspect-ratio: 1;
+    border: 1px solid;
+}
+.nebula-palette-opener {
+    height: 100%;
+    width: 120px;
+    margin-right: 10px;
+}
+.importer-arrow {
+    width: 80px;
+    height: 30px;
+    clip-path: polygon(0 25%, 75% 25%, 75% 0, 100% 50%, 75% 100%, 75% 75%, 0 75%);
+    border: none;
+    margin: 0 5px 0 5px;
+    background: #ccc;
+}
+.nebula-importer-list {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+.nebula-importer-list > li{
+    display: flex;
+    align-items: center;
+    height: 40px;
+    margin-right: 10px;
+}
+.nebula-importer-list > li > :first-child{
+    width: 100px;
+    height: 36px;
+    font-size: 13px;
+    margin-right: 10px;
+}
+.nebula-importer-list > .importer-adder > button{
+    background: none;
+    border: none;
+    border-radius: 100%;
+    width: 20px;
+    height: 20px;
+    margin: 0 40px 0 40px;
+    transition: 0.2s;
+}
+.nebula-importer-list > .importer-adder > button:hover{
+    background: #ddd
+}

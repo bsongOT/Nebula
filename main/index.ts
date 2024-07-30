@@ -1,23 +1,14 @@
-import {Content, Data, Nebula} from "./data/Data"
-import { body, btn, div } from "@/funcObject";
+import { body, btn, div, hr, li, ul } from "@/funcObject";
 import { P } from "@/utils/math/coord-system";
-import { Universe } from "./data/components/Universe";
 import "./index.css"
-import { CommonNebulaMap } from "./Components/UniverseView/common/CommonNebulaMap";
-import { SystemNebulaList } from "./Components/UniverseView/system/SystemNebulaList";
-import { ConvenientNebulaList } from "./Components/UniverseView/convenience/ConvenientNebulaList";
+import { CommonNebulaMap } from "./Pages/UniverseView/CommonNebulaMap";
+import { ContentEditor } from "./Pages/ContentPage/ContentPage";
+import { NebulaPage } from "./Pages/NebulaPage/NebulaPage";
+import { Repeat, Repeated, U } from "@/engine";
+import context from "./context";
 import { ListSelector } from "./ListSelector/ListSelector";
-import { ContentEditor } from "./Components/ContentView/ContentEditor";
-import { NebulaEditor } from "./Components/NebulaView/NebulaEditor";
-import { U } from "@/engine";
-
-type FirstWindowKey = "universe"|"nebula"|"content"|"dust";
-type SecondWindowKeys = {
-  universe: "common" | "system" | "convenient" | "list" 
-  nebula: "editor" | "list"
-  content: "editor" | "list"
-  dust: "claim" | "kernel"
-}
+import { Content, Nebula } from "./data/Data";
+import { Universe } from "./data/components/Universe";
 
 const settings = {
   universeMapSize: 16,
@@ -25,154 +16,203 @@ const settings = {
   
 }
 
-const memento = {
-  universeMap: {
-    size: 16,
-    viewPoint: P(0, 0)
-  },
-  data: new Data(),
-  selection: {
-    universe: undefined as Universe | undefined,
-    nebula: undefined as Nebula | undefined,
-    content: undefined as Content | undefined
-  },
-  currentWindow: "universe" as FirstWindowKey,
-  currentSecondWindow: {
-    universe: "common",
-    nebula: "editor",
-    content: "editor",
-    dust: "claim"
-  } as SecondWindowKeys
-}
-
-type MainViewInfo = {
-  data: Data,
-  currentWindow: FirstWindowKey,
-  currentSecondWindow: SecondWindowKeys,
-  selection: {
-    universe: Universe | undefined,
-    nebula: Nebula | undefined,
-    content: Content | undefined
-  }
-}
-
-export const MainView = (info:MainViewInfo) => {
-  const windows = {
-    universe: {
-      common: CommonNebulaMap(memento),
-      system: SystemNebulaList(memento),
-      convenient: ConvenientNebulaList(),
-      list: ListSelector({
-        datas: info.data.universes,
-        itemChildrenBuilder: u => [
-          div()(u.name),
-          div()(() => u.nebulaLocations.map(nl => `${nl.worldPos.x}, ${nl.worldPos.y}`).join(""))
-        ],
-        filter: (u, s) => u.name.includes(s)
-      })
-    },
-    nebula: {
-      editor: NebulaEditor({openedNebulaInfos: [], selection: info.selection}, info.data),
-      list: ListSelector({
-        datas: info.data.nebulas,
-        itemChildrenBuilder: n => [
-          div()(n.name)
-        ],
-        filter: (n, s) => n.name.includes(s)
-      })
-    },
-    content: {
-      editor: ContentEditor(),
-      list: ListSelector({
-        datas: info.data.contents,
-        itemChildrenBuilder: c => [
-          div()(c.title)
-        ],
-        filter: (c, s) => c.title.includes(s)
-      })
-    },
-    dust: {
-      claim: ListSelector({
-        datas: info.data.dusts,
-        itemChildrenBuilder: d => [
-          div()(d.claim)
-        ],
-        filter: (d, s) => d.claim.includes(s)
-      }),
-      kernel: ListSelector({
-        datas: info.data.dusts,
-        itemChildrenBuilder: d => [
-          div()(d.kernelPath)
-        ],
-        filter: d => d.kernelPath !== "" //TODO: check file exist?
-      })
+const windows = {
+  "all-universes": div()(),
+  "all-relations": div()(),
+  "all-nebulas": ListSelector({
+    datas: context.data.nebulas,
+    componentBuilder: (info) => div({
+      onclick: () => {
+        context.selection.nebula = info.data
+        selectedTab = "nebula"
+        if (workspaceInfos.some(wi => "nebula" in wi.stack && wi.stack.nebula === info.data)) return;
+        workspaceInfos.push({stack: {nebula: info.data, contents: []}})
+      }
+    })(() => info.data.name),
+    filter: (content, search) => content.name.includes(search),
+    onInsert: (name) => context.data.addNebula(new Nebula({
+        name: name === "" ? undefined : name
+    }), {
+    }),
+    onRemove: (nebulas) => {
+        nebulas.forEach(n => context.data.removeNebula(n))
     }
+  }),
+  "all-contents": ListSelector({
+    datas: context.data.contents,
+    componentBuilder: (info) => div({
+      onclick: () => {
+        context.selection.content = info.data
+        selectedTab = "content"
+        if (workspaceInfos.some(wi => wi.stack === info.data)) return;
+        workspaceInfos.push({stack: info.data})
+      }
+    })(() => info.data.title),
+    filter: (content, search) => content.title.includes(search),
+    onInsert: (name) => context.data.addContent(new Content({
+        title: name === "" ? undefined : name
+    }), {
+        day: new Date()
+    }),
+    onRemove: (contents) => {
+        contents.forEach(c => context.data.removeContent(c))
+    }
+  }),
+  universe: CommonNebulaMap({
+    universeMap: {
+      size: settings.universeMapSize,
+      viewPoint: settings.viewPoint
+    }
+  }),
+  relation: div()(),
+  nebula: NebulaPage({}),
+  content: ContentEditor(),
+  none: div()()
+}
+
+type Tab = "all-universes" | "all-relations" | "all-nebulas" | "all-contents" | "universe" | "relation" | "nebula" | "content" | "none"
+
+let selectedTab = "none" as Tab;
+
+type WorkspaceTabInfo = {
+  stack:Content | {
+    nebula:Nebula,
+    contents:Content[]
+  } | {
+    universe:Universe,
+    nebulaStack:{
+      nebula:Nebula,
+      contents:Content[]
+    }[]
   }
-  
-  return div({className: "main-view"})(() => [(windows[info.currentWindow] as any)[info.currentSecondWindow[info.currentWindow]]])
 }
-
-function switchWindow<T extends FirstWindowKey>(key:[T, SecondWindowKeys[T]?]){
-  memento.currentWindow = key[0]
-  if (!key[1]) return;
-  memento.currentSecondWindow[key[0]] = key[1]
-}
-
-const switchBoxHeights = {
-  universe: "0",
-  nebula: "-100%",
-  content: "-200%",
-  dust: "-300%"
+const workspaceInfos = [] as WorkspaceTabInfo[];
+function workspaceTab(info:WorkspaceTabInfo){
+  const className = U(() => {
+    if (info.stack instanceof Content) return selectedTab === "content" && info.stack === context.selection.content ? "selected" : "";
+    if ("nebula" in info.stack) return selectedTab === "nebula" && info.stack.nebula === context.selection.nebula ? "selected" : "";
+    return selectedTab === "universe" && info.stack.universe === context.selection.universe ? "selected" : "";    
+  })
+  const onclick = () => {
+    if (info.stack instanceof Content) {
+      context.selection = {
+        universe: undefined,
+        relation: undefined,
+        nebula: undefined,
+        content: info.stack
+      }
+      selectedTab = "content"
+      return;
+    }
+    if ("nebula" in info.stack) {
+      context.selection = {
+        universe: undefined,
+        relation: undefined,
+        nebula: info.stack.nebula,
+        content: undefined
+      }
+      selectedTab = "nebula";
+      return;
+    }
+    return info.stack.universe.name; 
+  }
+  return (
+    li({className, onclick})([
+      div({className: "tab-step"})(() => {
+        if (info.stack instanceof Content) return info.stack.title;
+        if ("nebula" in info.stack) return info.stack.nebula.name;
+        return info.stack.universe.name;
+      })
+    ])
+  )
 }
 
 body(
-  div()([
-    div()("universe"),
-    div()("nebula"),
-    div()("content")
+  div({className: "top-left"})([
+
   ]),
-  div({class: "current-window-switch-box"})([
+  div({className: "top-right"})([
     btn({
-      onclick: () => switchWindow(["universe"]),
-      className: U(() => memento.currentWindow === "universe" ? "selected" : "")
-    })("Universe"),
-    btn({
-      onclick: () => switchWindow(["nebula"]), 
-      className: U(() => memento.currentWindow === "nebula" ? "selected" : "")
-    })("Nebula"),
-    btn({
-      onclick: () => switchWindow(["content"]),
-      className: U(() => memento.currentWindow === "content" ? "selected" : "")
+      className: U(() => `${selectedTab === "content" ? "selected" : ""}`.trim()),
+      onclick: () => {
+        if (context.selection.content) selectedTab = "content"
+        else selectedTab = "all-contents"
+      }
     })("Content"),
     btn({
-      onclick: () => switchWindow(["dust"]),
-      className: U(() => memento.currentWindow === "dust" ? "selected" : "")
-    })("Dust")
+      className: U(() => `${selectedTab === "nebula" ? "selected" : ""}`.trim()),
+      onclick: () => {
+        if (context.selection.nebula) selectedTab = "nebula"
+        else selectedTab = "all-nebulas"
+      }
+    })("Nebula"),
+    btn({
+      className: U(() => `${selectedTab === "relation" ? "selected" : ""}`.trim()),
+      onclick: () => {
+        if (context.selection.relation) selectedTab = "relation"
+        else selectedTab = "all-relations"
+      }
+    })("Relation"),
+    btn({
+      className: U(() => `${selectedTab === "universe" ? "selected" : ""}`.trim()),
+      onclick: () => {
+        if (context.selection.content) selectedTab = "universe"
+        else selectedTab = "all-universes"
+      }
+    })("Universe"),
+    btn()("Holder")
+  ]),  
+  div({className: "left-side"})([
+    div({
+      className: U(() => `special-tab ${selectedTab === "all-universes" ? "selected" : ""}`.trim()),
+      onclick: () => {
+        selectedTab = "all-universes"
+        context.selection = {
+          content: undefined,
+          nebula: undefined,
+          relation: undefined,
+          universe: undefined
+        }
+      }
+    })("All Universes"),
+    div({
+      className: U(() => `special-tab ${selectedTab === "all-relations" ? "selected" : ""}`.trim()),
+      onclick: () => {
+        selectedTab = "all-relations"
+        context.selection = {
+          content: undefined,
+          nebula: undefined,
+          relation: undefined,
+          universe: undefined
+        }
+      }
+    })("All Relations"),
+    div({
+      className: U(() => `special-tab ${selectedTab === "all-nebulas" ? "selected" : ""}`.trim()),
+      onclick: () => {
+        selectedTab = "all-nebulas"
+        context.selection = {
+          content: undefined,
+          nebula: undefined,
+          relation: undefined,
+          universe: undefined
+        }
+      }
+    })("All Nebulas"),
+    div({
+      className: U(() => `special-tab ${selectedTab === "all-contents" ? "selected" : ""}`.trim()),
+      onclick: () => {
+        selectedTab = "all-contents"
+        context.selection = {
+          content: undefined,
+          nebula: undefined,
+          relation: undefined,
+          universe: undefined
+        }
+      }
+    })("All Contents"),
+    hr()(),
+    ul({className: "tab-list"})(Repeat(workspaceTab, workspaceInfos, wi => wi))
   ]),
-  div({class: "switch-box-hider"})([
-  div({
-    class: "current-second-window-switch-box", 
-    inlineStyle: U(() => ({top: switchBoxHeights[memento.currentWindow]}))
-  })(/*[
-    div({class: "switch-box"})([
-      btn({onclick: () => switchWindow(["universe", "common"])}, {className: () => memento.currentSecondWindow.universe === "common" ? "selected" : ""})("Common"),
-      btn({onclick: () => switchWindow(["universe", "system"])}, {className: () => memento.currentSecondWindow.universe === "system" ? "selected" : ""})("System"),
-      btn({onclick: () => switchWindow(["universe", "convenient"])}, {className: () => memento.currentSecondWindow.universe === "convenient" ? "selected" : ""})("Convenient"),
-      btn({onclick: () => switchWindow(["universe", "list"])}, {className: () => memento.currentSecondWindow.universe === "list" ? "selected" : ""})("List")
-    ]),
-    div({class: "switch-box"})([
-      btn({onclick: () => switchWindow(["nebula", "editor"])}, {className: () => memento.currentSecondWindow.nebula === "editor" ? "selected" : ""})("Editor"),
-      btn({onclick: () => switchWindow(["nebula", "list"])}, {className: () => memento.currentSecondWindow.nebula === "list" ? "selected" : ""})("List")
-    ]),
-    div({class: "switch-box"})([
-      btn({onclick: () => switchWindow(["content", "editor"])}, {className: () => memento.currentSecondWindow.content === "editor" ? "selected" : ""})("Editor"),
-      btn({onclick: () => switchWindow(["content", "list"])}, {className: () => memento.currentSecondWindow.content === "list" ? "selected" : ""})("List")
-    ]),
-    div({class: "switch-box"})([
-      btn({onclick: () => switchWindow(["dust", "claim"])}, {className: () => memento.currentSecondWindow.dust === "claim" ? "selected" : ""})("Claim"),
-      btn({onclick: () => switchWindow(["dust", "kernel"])}, {className: () => memento.currentSecondWindow.dust === "kernel" ? "selected" : ""})("Kernel")
-    ])
-  ]*/)
-  ]),
-  MainView(memento)
+  div({class: "main-view"})(() => [windows[selectedTab]])
 );

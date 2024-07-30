@@ -1,16 +1,16 @@
 import { btn, div, inputText, span } from "@/funcObject";
 import { Coord } from "@/utils/math/coord-system";
-import { Data } from "../../../data/Data";
-import { insertAt } from "./universeMap";
+import { Data, Nebula } from "../../data/Data";
 import { U } from "@/engine";
+import context from "../../context";
+import { Universe } from "../../data/components/Universe";
 
 export type PickerInfo = {
   pickedPosition?: Coord,
   size: number,
   viewPoint: Coord
 }
-export function Picker(info: PickerInfo, data: Data) {
-  let input = "";
+export function Picker(info: PickerInfo) {
   function getPosition() {
     const style = {
       left: "0",
@@ -35,10 +35,16 @@ export function Picker(info: PickerInfo, data: Data) {
 
     return style;
   }
-  const onClickClose = () => info.pickedPosition = undefined;
-  const onClickOK = () => {
-    if (info.pickedPosition)
-      insertAt(data, info.pickedPosition.add(info.viewPoint), input);
+  const onClickNew = () => {
+    if (!info.pickedPosition) return;
+    const u = new Universe()
+    const n = new Nebula()
+  
+    context.data.universes.add(u)
+    context.data.addNebula(n, {
+      universe: u,
+      position: info.pickedPosition.add(info.viewPoint)
+    })
     info.pickedPosition = undefined;
   };
 
@@ -46,11 +52,7 @@ export function Picker(info: PickerInfo, data: Data) {
     inlineStyle: U(getPosition), 
     className: U(() => `cell-picker ${info.pickedPosition ? "" : "hidden"}`)
   })([
-    div({ class: "picker-top" })([
-      span()("New Universe"),
-      btn({ class: "close-button", onclick: onClickClose })("X"),
-    ]),
-    inputText({ onchange: e => input = (<HTMLInputElement>e.target).value })(),
-    btn({ class: "ok-button", onclick: onClickOK })("확인")
+    div({onclick: onClickNew})("New Universe"),
+    div()("Move here")
   ]);
 }

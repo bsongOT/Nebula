@@ -1,10 +1,10 @@
-import { div, span, table, td, tr } from "@/funcObject";
-import { NebulaLocation, Universe } from "../../../data/components/Universe";
+import { div, slider, span, table, td, tr } from "@/funcObject";
+import { NebulaLocation, Universe } from "../../data/components/Universe";
 import { Coord, H, P } from "@/utils/math/coord-system";
-import { CommonNebula, Data, Nebula } from "../../../data/Data";
 import "./universeMap.css"
 import { U, engine } from "@/engine";
 import { Picker } from "./Picker";
+import context from "../../context";
 
 export type UniverseMapInfo = {
   size: number,
@@ -17,10 +17,6 @@ type NebulaCellState =
   "picked";
 type NebulaCellInfo = {
   readonly position: Coord,
-  selection: {
-    universe?:Universe,
-    nebula?:Nebula
-  },
   location?: NebulaLocation,
   universe?: Universe,
   map: {
@@ -29,17 +25,32 @@ type NebulaCellInfo = {
   }
 }
 
+function ViewPointChangerX(info:{viewPoint:Coord}){
+  let isInputted = false;
+  return slider({
+    class: "view-point-changer-x", 
+    oninput: e => {
+      isInputted = true;
+      info.viewPoint.x = Number((<HTMLInputElement>e.target).value)
+    },
+    onmouseup: () => isInputted = false,
+    value: U(s => isInputted ? s.value : `${info.viewPoint.x}`),
+    min: U(s => Math.max(0, isInputted ? Number(s.min) : info.viewPoint.x - 8).toString()),
+    max: U(s => isInputted ? s.max : `${info.viewPoint.x + 8}`)
+  })
+}
+
 export function NebulaCell(info:NebulaCellInfo) {
   function state():NebulaCellState{
     if (info.universe && info.location) {
-      if (!info.selection.universe) return "valid";
-      if (info.selection.universe !== info.universe) return "clear"
-      if (info.selection.nebula !== info.location.nebula) return "selectedAsUniverse"
+      if (!context.selection.universe) return "valid";
+      if (context.selection.universe !== info.universe) return "clear"
+      if (context.selection.nebula !== info.location.nebula) return "selectedAsUniverse"
             
       return "selectedAsNebula"
     }
 
-    if (info.selection.universe) return "clear"
+    if (context.selection.universe) return "clear"
     if (info.map.pickedPosition &&
        info.position.eq(info.map.pickedPosition)) return "picked"
 
@@ -48,7 +59,7 @@ export function NebulaCell(info:NebulaCellInfo) {
 
   function calculatePosition(){
     if (!info.universe || !info.location) return {transform: ""};
-    if (info.universe !== info.selection.universe) return {transform: ""};
+    if (info.universe !== context.selection.universe) return {transform: ""};
 
     const size = info.map.size;
     const center = info.universe.boxSize.map(s => (size - s) / 2)
@@ -71,10 +82,10 @@ export function NebulaCell(info:NebulaCellInfo) {
       info.map.pickedPosition = info.position;
       return;
     }
-    if (info.selection.universe === info.universe){
-      info.selection.nebula = info.location?.nebula;
+    if (context.selection.universe === info.universe){
+      context.selection.nebula = info.location?.nebula;
     }
-    info.selection.universe = info.universe;
+    context.selection.universe = info.universe;
   }
 
   function className() {
@@ -93,31 +104,19 @@ export function NebulaCell(info:NebulaCellInfo) {
       className: U(className),
       inlineStyle: U(calculatePosition)
     })([
-    span({class: "nebula-title",
-      innerText: U(() => {
+    span({class: "nebula-title"})(
+      () => {
         switch (state()){
           case "selectedAsUniverse":
           case "selectedAsNebula":
             return info.location?.nebula.name ?? "";
         }
         return "";
-      })
-    })("")
+    })
   ])
 }
 
-export function insertAt(data:Data, pos:Coord, name:string) {
-  const u = new Universe({name: name})
-  const n = new CommonNebula({name: "Unnamed"})
-
-  data.universes.add(u)
-  data.addNebula(n, {
-    universe: u,
-    position: pos
-  })
-}
-
-export function UniverseMap(info: UniverseMapInfo, selection: {universe?: Universe, nebula?: Nebula}, data: Data) {
+export function UniverseMap(info: UniverseMapInfo) {
   const cells = new Array<NebulaCellInfo[]>()
   const rows = new Array<HTMLTableRowElement>()
 
@@ -140,7 +139,7 @@ export function UniverseMap(info: UniverseMapInfo, selection: {universe?: Univer
       for (let j = 0; j < info.size; j++){
         const pos = info.viewPoint.add(P(j, i));
         const currentNebula = cells[i][j].location?.nebula;
-        const changedNebula = data.universes.map(u => u.get(pos)).find(n => n);
+        const changedNebula = context.data.universes.map(u => u.get(pos)).find(n => n);
         
         if (currentNebula !== changedNebula) {
           return "redata";
@@ -156,8 +155,7 @@ export function UniverseMap(info: UniverseMapInfo, selection: {universe?: Univer
       for (let j = 0; j < info.size; j++){
         cells[i].push({
           map: info,
-          position: P(j, i),
-          selection: selection
+          position: P(j, i)
         })
       }
     }
@@ -179,7 +177,7 @@ export function UniverseMap(info: UniverseMapInfo, selection: {universe?: Univer
     const view = info.viewPoint;
     const size = info.size;
 
-    for (const univ of data.universes.all()){
+    for (const univ of context.data.universes.all()){
       for (const neb of univ.nebulaLocations){
         const [x, y] = [neb.worldPos.x, neb.worldPos.y]
         const [dx, dy] = [x - view.x, y - view.y]
@@ -195,5 +193,9 @@ export function UniverseMap(info: UniverseMapInfo, selection: {universe?: Univer
     }
   }
 
-  return table({class: "universe-map"})(rows)
+  return div()([
+    table({class: "universe-map"})(rows),
+    ViewPointChangerX(info),
+    Picker(info)
+  ])
 }

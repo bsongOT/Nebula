@@ -1,41 +1,18 @@
-import { Coord } from "../../../engine/utils/math/coord-system";
-import { Tree, TreeNode } from "../../../engine/data-structure/tree"
+import { Tree } from "../../../engine/data-structure/tree"
 import { Content } from "../Data";
-import { DataCollection } from "../DataCollection";
 import { DataComponent } from "./DataComponent";
-import { Dust } from "./Dust";
 
-export abstract class Nebula implements DataComponent{
+export class Nebula implements DataComponent{
   id:number;
   name:string;
-
-  constructor(info?:Partial<Nebula>){
-    this.name = info?.name ?? "";
-    this.id = info?.id ?? -1;
-  }
-}
-
-export class CommonNebula extends Nebula {
   tree:Tree<Content>;
   palette:Content[];
-  importers:Nebula[];
-  constructor(info?:Partial<CommonNebula>){
-    super(info);
-    this.palette = info?.palette ?? [];
-    this.importers = info?.importers ?? [];
-    this.tree = info?.tree ?? new Tree()
-  }
-}
 
-export class CategoryNebula extends Nebula {
-  ownerMap:{dust:Dust, content:Content}[];
-  referenceContent:Content;
-  referenceNebula:CommonNebula;
-  constructor(info:Partial<CategoryNebula>){
-    super(info);
-    this.ownerMap = info.ownerMap ?? [];
-    this.referenceContent = info.referenceContent ?? new Content();
-    this.referenceNebula = info.referenceNebula ?? new CommonNebula();
+  constructor(info?:Partial<Nebula>){
+    this.name = info?.name ?? "Nebula";
+    this.id = info?.id ?? -1;
+    this.tree = info?.tree ?? new Tree()
+    this.palette = info?.palette ?? [];
   }
 }
 
@@ -48,10 +25,9 @@ export class QueryCalculation {
   }
 }
 
-export class QueryNebula extends Nebula {
+export class QueryNebula {
   query:QueryCalculation[];
   constructor(info?:Partial<QueryNebula>){
-    super(info);
     this.query = info?.query ?? []
   }
 }

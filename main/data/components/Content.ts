@@ -10,7 +10,7 @@ export class Content implements DataComponent{
   actor:string;
   
   constructor(info?:Partial<Content>){
-    this.title = info?.title ?? "";
+    this.title = info?.title ?? "Content";
     this.id = info?.id ?? -1;
     this.dusts = info?.dusts ?? new Tree()
     this.actor = info?.actor ?? "./default-actor.js"

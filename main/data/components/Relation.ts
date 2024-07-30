@@ -1,7 +1,7 @@
 import { Tree } from "../../../engine/data-structure/tree";
 import {Content} from "./Content"
 import { Dust } from "./Dust";
-import { CommonNebula, Nebula } from "./Nebula";
+import { Nebula } from "./Nebula";
 
 export const enum RelationState {
   none = -1
@@ -9,14 +9,14 @@ export const enum RelationState {
 
 export class Relation {
     id:number
-    mainTree:CommonNebula;
-    secondTree:CommonNebula;
+    mainTree:Nebula;
+    secondTree:Nebula;
     table:{
         main: Content,
         second: Content,
         state: number | Dust
     }[];
-    constructor(info:Partial<Relation> & {mainTree:CommonNebula, secondTree:CommonNebula}){
+    constructor(info:Partial<Relation> & {mainTree:Nebula, secondTree:Nebula}){
         this.mainTree = info.mainTree;
         this.secondTree = info.secondTree;
         this.table = info.table ?? [];

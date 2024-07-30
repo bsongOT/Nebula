@@ -1,7 +1,24 @@
+.zoom-button {
+    height: 25px;
+    margin-bottom: 5px;
+}
 .common-nebula-map {
     position: relative;
+    padding: 20px;
 }
-.common-nebula-map > .main {
+.common-nebula-map > .view {
+    display: flex;
+    width: 100%;
+    max-width: 1100px;
+}
+.common-nebula-map .main {
+    position: relative;
+    top: 20px;
+}
+.common-nebula-map .side {
+    flex-grow: 1;
+}
+.universe-map-container {
     position: relative;
 }
 .relation-mark-box {
@@ -63,7 +80,6 @@
     display: block;
 }
 .universe-title {
-    text-align: center;
     font-size: large;
 }
 .view-point-changer-x {
@@ -72,8 +88,8 @@
 .view-point-changer-y {
     position: absolute;
     top: 0;
-    right: -5px;
-    appearance: slider-vertical;
+    left: -36px;
+    writing-mode: vertical-lr;
     width: 16px;
     height: 400px;
     transform: translateX(100%) rotate(180deg);

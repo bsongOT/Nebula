@@ -116,7 +116,7 @@ export class Tree<T>{
     const mapping = (node:TreeNode<T>, target:TreeNode<U>) => {
       for (let c of node.children){
         const n = new TreeNode<U>(tree, func(c.data, index))
-        tree.insert(target, n)
+        tree.insert(n, target)
         index++;
         mapping(c, n)
       }
@@ -143,7 +143,7 @@ export class Tree<T>{
     const treeOrder = array.map(v => new TreeNode(tree, v.data))
     
     for (let i = 0; i < array.length; i++){
-      tree.insert(treeOrder[array[i].parent] ?? tree.root, treeOrder[i])
+      tree.insert(treeOrder[i], treeOrder[array[i].parent] ?? tree.root)
     }
 
     return tree;
