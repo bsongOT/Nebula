@@ -1,21 +1,41 @@
-import { H } from "@/utils/math/coord-system";
+import { H, HexCoord } from "@/utils/math/coord-system";
 import { HexWorld } from "./hexworld";
-import { Tree } from "./tree";
+import { Tree, TreeNode } from "./tree";
+import { HexGrid } from "./hexgrid";
 
-export function gridify<T>(tree:Tree<T>){
-  const grid = new HexWorld<T>();
+export function toPaths<T>(tree:Tree<T>){
+  const threshold = 15;
+  const paths = new Array<{pos:HexCoord, node:TreeNode<T>}[]>();
+  const travel = tree.traverse();
 
-  let pos = H(0, -1, 0);
-  let prevD = 0;
+  let pos = H(0, 0, 0);
+  let path = new Array<{pos:HexCoord, node:TreeNode<T>}>()
 
-  tree.tourNode(tree.root, (n, d) => {
-    if (prevD < d) pos.z += d - prevD;
-    else if (prevD === d) pos.y++;
-    else pos.x += prevD - d;
+  for (let i = 0; i < travel.length; i++){
+    const d = travel[i].depth;
+    const nextD = travel[i + 1]?.depth;
+    
+    path.push({
+      pos: H(pos.x, pos.y, pos.z),
+      node: travel[i].node
+    })
+    
+    if (nextD == undefined) {
+      paths.push(path);
+      break;
+    }
 
-    grid.setVal(pos, n.data);
-    prevD = d;
-  })
+    if (path.length >= threshold){
+      paths.push(path)
+      path = [];
+      pos = H(0, 0, d);
+      continue;
+    }
 
-  return grid;
+    if (d < nextD) pos.z += nextD - d;
+    else if (d === nextD) pos.y++;
+    else pos.x += d - nextD;
+  }
+  
+  return paths;
 }

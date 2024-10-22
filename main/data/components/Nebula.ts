@@ -6,13 +6,11 @@ export class Nebula implements DataComponent{
   id:number;
   name:string;
   tree:Tree<Content>;
-  palette:Content[];
 
   constructor(info?:Partial<Nebula>){
     this.name = info?.name ?? "Nebula";
     this.id = info?.id ?? -1;
     this.tree = info?.tree ?? new Tree()
-    this.palette = info?.palette ?? [];
   }
 }
 

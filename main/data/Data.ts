@@ -9,15 +9,11 @@ import {Universe} from "./components/Universe"
 import { Unpacker } from "./DataParser"
 import { engine } from "@/engine"
 import { DataTransporter } from "./DataTransporter"
+import { SystemNebulaProvider } from "./SystemNebulaProvider"
 
 type AddingContentOption = {
   nebula?: Nebula,
   day?: Date
-}
-type AddingNebulaOption = {
-  universe?: Universe,
-  position?: Coord,
-  start?: HexCoord
 }
 
 export type DayNebula = {
@@ -41,6 +37,48 @@ export class Data {
   public readonly universes;
 
   public readonly systemNebulas;
+
+  public get systemUniverse(){
+    const univ = new Universe({name: "system"});
+    const provider = new SystemNebulaProvider();
+    univ.nebulaLocations.push(
+      {
+        nebula: provider.dayNebula(1),
+        start: H(14, 0, 0),
+        pathIndex: 0
+      },{
+        nebula: provider.isolatedNebula(),
+        start: H(12, 0, 2),
+        pathIndex: 0
+      },{
+        nebula: provider.importanceNebula(1),
+        start: H(11, 0, 3),
+        pathIndex: 0
+      },{
+        nebula: provider.mentionNebula(),
+        start: H(9, 0, 5),
+        pathIndex: 0
+      }
+    )
+    return univ;
+  }
+  public get independentUniverse(){
+    const univ = new Universe({name: "independent"})
+
+    univ.nebulaLocations.push(
+      ...this.nebulas.filter(neb => 
+                        this.universes.all()
+                        .every(u => !u.nebulaLocations.find(nl => nl.nebula === neb))
+                      )
+                      .map(neb => ({
+                        nebula: neb,
+                        start: H(-1, 0, 0),
+                        pathIndex: 0
+                      }))
+    )
+
+    return univ;
+  }
 
   public constructor(){
     const wildDusts = DataTransporter.loadWildDataCollection("all-dusts")
@@ -70,14 +108,15 @@ export class Data {
     engine.updater.register(() => DataTransporter.save(this))
   }
 
-  public addContent(content:Content, option:AddingContentOption){
+  public addContent(content:Content){
     this.contents.add(content)
+    const day = new Date()
+    day.setHours(0, 0, 0, 0);
     this.systemNebulas.day.add.push({
-      day: option.day ?? new Date(),
+      day: day,
       content: content
     })
     this.systemNebulas.lifetime.news.push(content)
-    option.nebula?.palette.push(content)
     return content;
   }
 
@@ -95,14 +134,8 @@ export class Data {
     content.id = -1;
   }
 
-  public addNebula(nebula:Nebula, option:AddingNebulaOption){
+  public addNebula(nebula:Nebula){
     this.nebulas.add(nebula);
-    if (!option.universe || !option.position) return;
-    option.universe.nebulaLocations.push({
-      nebula: nebula,
-      worldPos: option.position,
-      start: option.start ?? H(-1, 0, 0)
-    })
   }
 
   public removeNebula(nebula:Nebula){
@@ -114,29 +147,12 @@ export class Data {
     }
   }
 
-  public findAddablePosition(univ:Universe){
-    const universePoses = univ.nebulaLocations.map(ni => ni.worldPos);
-    const universes = this.universes.all()
-
-    return universePoses
-      .map(
-        upos => [
-          P(1, 0), P(-1, 0), P(0, 1), P(0, -1)
-        ]
-        .map(p => upos.add(p))
-        .filter(
-          p => universes.every(u => !u.isIn(p.x, p.y)) 
-               && p.x >= 0 && p.y >= 0
-        )
-      ).flat(1)
-  }
-
   private getIsolated(){
     const nebulas = this.nebulas.all();
 
     return this.contents.filter(
       c => nebulas.every(
-        n => !n.palette.includes(c)
+        n => !n.tree.nodes.map(n => n.data).includes(c)
       )
     )
   }
@@ -146,7 +162,7 @@ export class Data {
     const nebulas = this.nebulas.all();
 
     return contents.map(c => ({
-      count: nebulas.filter(n => n.palette.includes(c)).length,
+      count: nebulas.filter(n => n.tree.nodes.map(n => n.data).includes(c)).length,
       content: c
     }))
   }
@@ -157,9 +173,9 @@ export class Data {
 
     return contents.map(c => ({
       count: nebulas.filter(
-        neb => neb.tree.nodes.some(
+        neb => neb.tree.nodes.filter(n => n !== neb.tree.root).some(
           n => n.children.some(ch => ch.data === c)
-       )
+        )
       ).length,
       content: c
     }))

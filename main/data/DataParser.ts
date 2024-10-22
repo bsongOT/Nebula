@@ -38,8 +38,7 @@ export class Packer {
     return {
       id: nebula.id,
       name: nebula.name,
-      tree: nebula.tree.map(n => n.id).arrayize(),
-      palette: nebula.palette.map(n => n.id),
+      tree: nebula.tree.map(n => n.id).arrayize()
     } satisfies {[key in keyof Nebula]: any}
   }
   static universe(universe:Universe){
@@ -53,13 +52,10 @@ export class Packer {
           y: nl.start.y,
           z: nl.start.z
         },
-        worldPos: {
-          x: nl.worldPos.x,
-          y: nl.worldPos.y
-        },
         nebula: nl.nebula.id,
+        pathIndex: nl.pathIndex ?? 0
       }))
-    } satisfies Omit<Anyify<OmitFunction<Universe>>, "boxSize" | "range">
+    } satisfies Anyify<OmitFunction<Universe>>
   }
   static relation(relation:Relation){
     return {
@@ -114,8 +110,7 @@ export class Unpacker {
       return new Nebula({
         id: nebulaBox.id,
         name: nebulaBox.name,
-        tree: Tree.treeize(nebulaBox.tree).map(id => contents.get(id)!),
-        palette: nebulaBox.palette.map(id => contents.get(id)!).filter(c => c),
+        tree: Tree.treeize(nebulaBox.tree).map(id => contents.get(id)!)
       } satisfies Nebula)
   }
   static universe(universeBox:ReturnType<typeof Packer.universe>, nebulas:DataCollection<Nebula>, relations:DataCollection<Relation>){
@@ -126,7 +121,7 @@ export class Unpacker {
         nl => ({
           nebula: nebulas.get(nl.nebula)!,
           start: H(nl.start.x, nl.start.y, nl.start.z),
-          worldPos: P(nl.worldPos.x, nl.worldPos.y)
+          pathIndex: nl.pathIndex ?? 0
         })
       ),
       relations: universeBox.relations.map(id => relations.get(id)!)

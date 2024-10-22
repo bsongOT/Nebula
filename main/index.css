@@ -29,37 +29,66 @@ textarea {
     outline: none;
     font-size: 16px;
 }
+.title {
+    border: none;
+    padding: 0;
+    outline: none;
+    font-weight: bold;
+    font-size: 30px;
+    margin: 5px;
+}
 .top-right {
     margin: auto 0;
-}
-.top-right > button {
-    border: none;
-    background: white;
-    margin: 2px;
-    padding: 5px;
-    border-radius: 5px;
-    filter: drop-shadow(2px 2px 4px #ccc);
-    transition: 0.2s;
-}
-.top-right > button:hover {
-    background: #eff;
-}
-.top-right > button.selected {
-    transform: translateY(7px);
-    background: #cff;
+    z-index: 1;
+    position: relative;
+    > button {
+        border: none;
+        background: white;
+        margin: 2px;
+        padding: 5px;
+        border-radius: 5px;
+        filter: drop-shadow(2px 2px 4px #ccc);
+        transition: 0.2s;
+        &:hover {
+            background: #eff;
+        }
+        &.selected {
+            transform: translateY(7px);
+            background: #cff;
+        }
+    }
 }
 .left-side {
-    padding: 5px;
+    display: flex;
+    flex-direction: column;
     background: white;
     margin: 0 10px 10px 10px;
     filter: drop-shadow(2px 2px 4px #aaa);
     overflow-y: auto;
-}
-.left-side > .special-tab {
-    padding: 5px;
-}
-.left-side > .special-tab.selected {
-    background: #ddd;
+    .home {
+        font-size: 19px;
+    }
+    > .breadcrumb {
+        display: flex;
+        padding: 0.2rem;
+        background: wheat;
+    }
+    > .special-tab {
+        padding: 5px;
+    }
+    > .special-tab.selected {
+        background: #ddd;
+    }
+    > .carousel {
+        width: 100%;
+        overflow-x: hidden;
+        > .row {
+            display: flex;
+            width: 300%;
+            position: relative;
+            transition: 0.2s;
+        }
+    }
 }
 .special-tab:hover {
     background: #eee;
@@ -85,9 +114,8 @@ textarea {
     font-family: sans-serif;
 }
 .main-view {
-    padding: 20px;
-    background: white;
-    filter: drop-shadow(2px 2px 4px #aaa);
+    display: flex;
+    gap: 10px;
     overflow-y: scroll;
     margin: 0 10px 10px 0;
 }
@@ -103,6 +131,10 @@ textarea {
     width: fit-content;
     z-index: 1;
     top: 0;
+}
+.search-bar {
+    display: flex;
+    padding: 5px;
 }
 .waiting-for-select {
     transform: scale(4) translateY(-50%);
@@ -235,4 +267,63 @@ textarea {
 .switch-box > :last-child {
     border-radius: 0 10px 10px 0;
     border-right: 1px solid #ccc
+}
+.static-tool-box{
+    display: inline-flex;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    translate: 0 -50%;
+}
+.holder-notice {
+    position: absolute;
+    left: 0;
+    top: 0;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: red;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+.holder-list {
+    position: absolute;
+    width: 30vw;
+    height: 70vh;
+    background: white;
+    margin: 0;
+    top: 30px;
+    right: 0;
+    box-shadow: 0px 0px 16px #888;
+    padding: 10px
+}
+.tab {
+    display: flex;
+    background: white;
+    padding: 5px;
+    border-radius: 5px;
+    filter: drop-shadow(2px 2px 4px #ccc);
+    margin-right: 5px;
+}
+.tab.selected {
+    background: yellow;
+}
+.relation-view {
+    flex-basis: 100%;
+    background: white;
+    filter: drop-shadow(2px 2px 4px #aaa);
+    padding: 20px;
+}
+.relation-table {
+    display: grid;
+    transition: 0.3s;
+    grid-template-columns: 100px 1fr;
+    grid-template-rows: 100px 1fr;
+    background: white;
+}
+.relation-table .selected {
+    background: yellowgreen;
 }

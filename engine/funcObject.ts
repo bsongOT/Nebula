@@ -2,7 +2,7 @@ import p5 from "p5";
 import { CanvasObject } from "./CanvasObject";
 import { Tree, TreeNode } from "./data-structure/tree";
 import { Coord } from "./utils/math/coord-system";
-import { Repeated, Updated, engine } from "./engine";
+import { Updated, engine } from "./engine";
 
 export type Attribute<T extends Tag> = Partial<{
     [key in keyof HTMLElementTagNameMap[T]]: HTMLElementTagNameMap[T][key] | Updated<HTMLElementTagNameMap[T], HTMLElementTagNameMap[T][key]>
@@ -17,16 +17,9 @@ export type UpdatedAttribute<T extends Tag> = Partial<{
 }
 export type Tag = keyof HTMLElementTagNameMap;
 export type ChildrenAttribute<T extends HTMLElement, C extends HTMLElement = HTMLElement> = 
-    C[] | string | Repeated<(info:any) => HTMLElement, any> | ((element:T) => C[]) | ((element:T) => string)
+    C[] | [C[]] | [string] | [(element:T) => string]
 
-function mustUpdateChildren(element:HTMLElement, children:HTMLElement[]){
-    if (children.length !== element.children.length) return true;
-    for (let i = 0; i < children.length; i++){
-        if (children[i] !== element.children[i]) return true;
-    }
-    return false;
-}
-function updateChildren<T extends HTMLElement>(element:T, children?:ChildrenAttribute<T>){
+function updateChildren<T extends HTMLElement>(element:T, children?:HTMLElement[] | ((element:T) => string)){
     if (children === undefined || children === null) return;
     const childs = typeof children === "function" ? children(element) : children
 
@@ -36,34 +29,19 @@ function updateChildren<T extends HTMLElement>(element:T, children?:ChildrenAttr
         return;
     }
 
-    if (childs instanceof Repeated) {
-        const datas = typeof childs.datas === 'function' ? childs.datas() : childs.datas 
-        const diff = Math.abs(element.children.length - datas.length);
-        if (element.children.length > datas.length){
-            for (let i = 0; i < diff; i++) {
-                element.lastElementChild?.remove()
-                childs.infos.pop();
-            }
-        }
-        else if (element.children.length < datas.length){
-            for (let i = element.children.length; i < datas.length; i++) {
-                childs.infos.push(childs.toInfo(datas[i]))
-                element.append(childs.component(childs.infos[i]))
-            }
-        }
-        for (let i = 0; i < childs.infos.length; i++){
-            Object.assign(childs.infos[i], childs.toInfo(datas[i]))
-        }
-        return;
+    for (let i = 0; i < childs.length; i++){
+        const old = element.children[i];
+        const recent = childs[i];
+        if (old === recent) continue;
+        if (old) old.before(recent);
+        else element.insertAdjacentElement("beforeend", recent);
     }
-
-    if (mustUpdateChildren(element, childs)) {
-        element.innerHTML = "";
-        element.append(...childs);
+    for (let i = childs.length; i < element.children.length; i++){
+        element.children[i].remove();
     }
 }
 
-function update<T extends Tag>(element:HTMLElementTagNameMap[T], attrs?:UpdatedAttribute<T>, children?:ChildrenAttribute<HTMLElementTagNameMap[T]>){
+function update<T extends Tag>(element:HTMLElementTagNameMap[T], attrs?:UpdatedAttribute<T>, children?:HTMLElement[] | ((element:HTMLElementTagNameMap[T]) => string)){
     if (!document.contains(element)) return;
   
     for (const k in attrs){
@@ -82,14 +60,28 @@ function update<T extends Tag>(element:HTMLElementTagNameMap[T], attrs?:UpdatedA
 
     updateChildren(element, children);
 }
+function getUpdatedAttrs<T extends Tag>(attrs?:Attribute<T>){
+    if (!attrs) return;
+
+}
 const create = <T extends Tag>(
     tag:T, 
     attrs?:Attribute<T>,
-    children?:ChildrenAttribute<HTMLElementTagNameMap[T]>
+    ...children:ChildrenAttribute<HTMLElementTagNameMap[T]>
 ) => {
     const obj = document.createElement(tag);
+    const childs = children[0];
+
     if (!attrs) {
-        engine.updater.register(() => update(obj, undefined, children));
+        if (childs instanceof Array || typeof childs === 'function'){
+            engine.updater.register(() => update(obj, undefined, childs))
+            console.log("Child Updating!!")
+        }
+        else {
+            if (typeof childs === 'string') obj.innerText = childs;
+            else if (children[0] instanceof HTMLElement) obj.append(...children as HTMLElement[])
+            engine.updater.register(() => update(obj));
+        }
         return obj;
     }
     for(const key in attrs){
@@ -111,7 +103,17 @@ const create = <T extends Tag>(
             .filter(k => attrs[k as keyof Attribute<T>] instanceof Updated)
             .map(k => ({[k]: attrs[k as keyof Attribute<T>]}))
     )
-    engine.updater.register(() => update(obj, updatedAttrs, children))
+
+    if (childs instanceof Array || typeof childs === 'function'){
+        engine.updater.register(() => update(obj, updatedAttrs, childs))
+        console.log("Child Updating!!")
+    }
+    else {
+        if (typeof childs === 'string') obj.innerText = childs;
+        else if (children[0] instanceof HTMLElement) obj.append(...children as HTMLElement[])
+        engine.updater.register(() => update(obj, updatedAttrs));
+    }
+
     return obj;
 }
 const independentElement = <T extends Tag>(tag:T) => (
@@ -121,9 +123,8 @@ const independentElement = <T extends Tag>(tag:T) => (
 )
 const element = <T extends Tag, C extends HTMLElement = HTMLElement>(tag:T) => (
     (attrs?:Attribute<T>) => (
-        (children?:ChildrenAttribute<HTMLElementTagNameMap[T], C>) => {
-            const obj = create(tag, attrs, children);
-            updateChildren(obj, children)
+        (...children:ChildrenAttribute<HTMLElementTagNameMap[T], C>) => {
+            const obj = create(tag, attrs, ...children);
             return obj;
         }
     )

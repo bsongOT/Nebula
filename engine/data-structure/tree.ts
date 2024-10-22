@@ -99,13 +99,27 @@ export class Tree<T>{
     const tour = (n:TreeNode<T>, depth:number) => {
       for(let c of n.children){
         func(c, depth)
-        tour(c, depth??0 + 1)
+        tour(c, (depth??0) + 1)
       }
     }
     return tour(start, 0)
   }
   tour(func:(n:T, depth:number)=>void){
     return this.tourNode(this.root, (node, depth)=>func(node.data, depth))
+  }
+  traverse(){
+    let arr = new Array<{node:TreeNode<T>, depth: number}>()
+    const traverse = (node:TreeNode<T>, depth?:number) => {
+      for (const c of node.children){
+        arr.push({
+          node: c,
+          depth: depth ?? 0
+        });
+        traverse(c, (depth ?? 0) + 1);
+      }
+    }
+    traverse(this.root);
+    return arr;
   }
   every(condition:(n:T)=>boolean){
     return this.nodes.map(n => n.data).every(condition)
