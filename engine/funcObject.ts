@@ -1,5 +1,4 @@
 import p5 from "p5";
-import { CanvasObject } from "./CanvasObject";
 import { Tree, TreeNode } from "./data-structure/tree";
 import { Coord } from "./utils/math/coord-system";
 import { Updated, engine } from "./engine";
@@ -28,7 +27,6 @@ function updateChildren<T extends HTMLElement>(element:T, children?:HTMLElement[
         element.innerText = childs;
         return;
     }
-
     for (let i = 0; i < childs.length; i++){
         const old = element.children[i];
         const recent = childs[i];
@@ -36,7 +34,7 @@ function updateChildren<T extends HTMLElement>(element:T, children?:HTMLElement[
         if (old) old.before(recent);
         else element.insertAdjacentElement("beforeend", recent);
     }
-    for (let i = childs.length; i < element.children.length; i++){
+    for (let i = element.children.length - 1; i >= childs.length; i--){
         element.children[i].remove();
     }
 }
@@ -60,10 +58,6 @@ function update<T extends Tag>(element:HTMLElementTagNameMap[T], attrs?:UpdatedA
 
     updateChildren(element, children);
 }
-function getUpdatedAttrs<T extends Tag>(attrs?:Attribute<T>){
-    if (!attrs) return;
-
-}
 const create = <T extends Tag>(
     tag:T, 
     attrs?:Attribute<T>,
@@ -75,11 +69,10 @@ const create = <T extends Tag>(
     if (!attrs) {
         if (childs instanceof Array || typeof childs === 'function'){
             engine.updater.register(() => update(obj, undefined, childs))
-            console.log("Child Updating!!")
         }
         else {
             if (typeof childs === 'string') obj.innerText = childs;
-            else if (children[0] instanceof HTMLElement) obj.append(...children as HTMLElement[])
+            else if (children[0] instanceof Element) obj.append(...children as HTMLElement[])
             engine.updater.register(() => update(obj));
         }
         return obj;
@@ -106,11 +99,10 @@ const create = <T extends Tag>(
 
     if (childs instanceof Array || typeof childs === 'function'){
         engine.updater.register(() => update(obj, updatedAttrs, childs))
-        console.log("Child Updating!!")
     }
     else {
         if (typeof childs === 'string') obj.innerText = childs;
-        else if (children[0] instanceof HTMLElement) obj.append(...children as HTMLElement[])
+        else if (children[0] instanceof Element) obj.append(...children as HTMLElement[])
         engine.updater.register(() => update(obj, updatedAttrs));
     }
 
@@ -158,34 +150,16 @@ export const li = element("li")
 export const body = (...children:HTMLElement[]) => (
     document.body.append(...children)
 )
-export const canvas = (attrs?:Record<string, any>) => (
-    (...children:CanvasObject[]) => {
-        const childTree = new Tree<CanvasObject>()
-        const obj = div()()
-        const p = new p5((pp:p5) => {
-            pp.setup = ()=>{
-                const w = attrs?.width ?? pp.windowWidth;
-                const h = attrs?.height ?? w;
-                pp.createCanvas(w, h).parent(obj)
-                children.forEach(c => childTree.insert(new TreeNode(childTree, c)))
-            }
-            pp.draw = ()=>{
-                pp.background("#aaaaaa")
-
-                childTree.tourNode(childTree.root,
-                n => {
-                    (n as any).node = n;
-                    n.data.update();
-                    n.data.render(pp)
-                })
-            }
-            pp.mousePressed = () => {
-                childTree.tour(n => {
-                    if (n.isIn(new Coord(p.mouseX, p.mouseY)))
-                        console.log("clicked")//n.onclick()
-                })
-            }
+export const canvas = (attrs?:Partial<HTMLCanvasElement>) => (
+    (useP5:(p5:p5) => void) => 
+        new Promise<HTMLCanvasElement>(resolve => {
+            const p = new p5((pp:p5) => {
+                pp.setup = ()=>{
+                    const w = attrs?.width ?? pp.windowWidth;
+                    const h = attrs?.height ?? w;
+                    resolve(pp.createCanvas(w, h).elt)
+                    useP5(p)
+                }
+            })
         })
-        return obj;
-    }
 )

@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: {
-    index: './main/index.ts'
+    index: './frontend/index.ts'
   },
   mode: "development",
   module: {
@@ -31,9 +31,14 @@ module.exports = {
   },
   plugins : [
     new HtmlWebpackPlugin({
-      template: './main/index.html',
+      template: './frontend/index.html',
       filename: "index.html",
-    })                                                                                                                                                                                          
+    }),
+    new HtmlWebpackPlugin({
+      template: './frontend/workspace-select.html',
+      filename: "workspace-select.html",
+      chunks: []
+    })                                                                                                                                                               
   ],
   devServer: {
     port: 9000

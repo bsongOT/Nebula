@@ -12,17 +12,20 @@ export class Tree<T>{
   public root:TreeNode<T>;
 
   get length(){
-    return this.nodes.length;
+    return this.nodes.length - 1;
+  }
+  get leafs(){
+    return this.traverse().map(i => i.node).filter(n => n.children.length === 0);
   }
   constructor(){
-    this.nodes = [this.root = new TreeNode(this, undefined as any)];
+    this.nodes = [this.root = new TreeNode(undefined as any)];
   }
   static fromNode<T>(treeNodeLike:TreeNodeLike<T>){
     let tree = new Tree<T>()
     
     const copyTree = (from:TreeNodeLike<T>, to:TreeNode<T>)=>{
       for (let i = 0; i < from.children.length; i++){
-        tree.insert(to, new TreeNode(tree, from.children[i].data))
+        tree.insert(to, new TreeNode(from.children[i].data))
         copyTree(from.children[i], to.children[i])
       }
     }
@@ -68,6 +71,7 @@ export class Tree<T>{
     }
     node.parent = undefined;
     this.nodes = this.nodes.filter(n => n !== node);
+    for (const c of node.children) this.remove(c)
   }
   at(index:number){
     const len = this.length;
@@ -129,7 +133,7 @@ export class Tree<T>{
     let index = 0;
     const mapping = (node:TreeNode<T>, target:TreeNode<U>) => {
       for (let c of node.children){
-        const n = new TreeNode<U>(tree, func(c.data, index))
+        const n = new TreeNode<U>(func(c.data, index))
         tree.insert(n, target)
         index++;
         mapping(c, n)
@@ -154,7 +158,7 @@ export class Tree<T>{
   }
   static treeize<U>(array:{parent:number, data:U}[]){
     const tree = new Tree<U>()
-    const treeOrder = array.map(v => new TreeNode(tree, v.data))
+    const treeOrder = array.map(v => new TreeNode(v.data))
     
     for (let i = 0; i < array.length; i++){
       tree.insert(treeOrder[i], treeOrder[array[i].parent] ?? tree.root)
@@ -165,7 +169,6 @@ export class Tree<T>{
 }
 export class TreeNode<T>{
   data:T;
-  tree:Tree<T>;
   parent?:TreeNode<T>;
   children:TreeNode<T>[];
   get leftFriend():TreeNode<T>|undefined{
@@ -178,8 +181,7 @@ export class TreeNode<T>{
     const cren = this.parent.children;
     return cren[cren.indexOf(this) + 1]
   }
-  constructor(tree:Tree<T>, data:T){
-    this.tree = tree;
+  constructor(data:T){
     this.data = data;
     this.children = [];
   }

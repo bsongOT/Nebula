@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Workspace Selector</title>
+</head>
+<body>
+    <button>Workspace 폴더 선택</button>
+    <script>
+        document.querySelector("button").addEventListener("click", async function(){
+            if (await window.electron.selectWorkspace()) window.location = 'index.html';
+        })
+    </script>
+</body>
+</html>

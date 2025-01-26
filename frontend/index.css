@@ -1,0 +1,225 @@
+html {
+    height: 100%;
+}
+hr {
+    border-top: 1px solid #eee;
+}
+body {
+    height: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 10px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: auto 50px 1fr;
+    background-color: bisque;
+}
+div {
+    cursor: default;
+    user-select: none;
+}
+ul {
+    padding-left: 25px;
+}
+textarea {
+    resize: none;
+    width: 100%;
+    height: 0;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+.page {
+    position: relative;
+    flex-basis: 100%;
+    background: white;
+    padding: 20px;
+    filter: drop-shadow(2px 2px 4px #aaa);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.title {
+    border: none;
+    padding: 0;
+    outline: none;
+    font-weight: bold;
+    font-size: 30px;
+    margin: 5px;
+}
+.top-menu {
+    grid-column: 1/3;
+    display: flex;
+    padding: 10px 10px 0 10px;
+}
+.top-fixed-menu {
+    display: flex;
+    position: fixed;
+    top: 5px;
+    right: 10px;
+    > * {
+        transition: 0.15s;
+    }
+    > .notification {
+        position: relative;
+        line-height: 17px;
+    }
+}
+.circle-button {
+    display: flex;
+    border-radius: 100%;
+    width: 20px;
+    height: 20px;
+    justify-content: center;
+    align-items: center;
+}
+.hidden {
+    display: none !important;
+}
+.button:hover {
+    background: lightcoral;
+}
+.hover-sandybrown:hover {
+    background: sandybrown;
+}
+.hover-skyblue:hover {
+    background: skyblue;
+}
+.hover-eee:hover {
+    background: #eee;
+}
+.hover-ccc:hover {
+    background: #ccc;
+}
+.hover-color-999:hover {
+    color: #999;
+}
+.blink {
+    animation: blink-effect 1s step-end infinite;
+}
+
+@keyframes blink-effect {
+    50% {
+        opacity: 0;
+    }
+}
+.tap-panel {
+    margin: auto 0;
+    z-index: 1;
+    position: relative;
+    grid-column: 1/3;
+    > button {
+        border: none;
+        background: white;
+        margin: 2px;
+        padding: 5px;
+        border-radius: 5px;
+        filter: drop-shadow(2px 2px 4px #ccc);
+        transition: 0.2s;
+    }
+}
+.left-side {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    margin: 0 10px 10px 0;
+    filter: drop-shadow(2px 2px 4px #aaa);
+    overflow-y: auto;
+    .home {
+        font-size: 19px;
+    }
+    > .breadcrumb {
+        display: flex;
+        padding: 0.2rem;
+        background: wheat;
+    }
+    > .special-tab {
+        padding: 5px;
+    }
+    > .special-tab.selected {
+        background: #ddd;
+    }
+    > .carousel {
+        width: 100%;
+        height: 100%;
+        overflow-x: hidden;
+        > .row {
+            display: flex;
+            width: 300%;
+            height: 100%;
+            position: relative;
+            transition: 0.2s;
+        }
+    }
+}
+* {
+    font-family: sans-serif;
+}
+.main-view {
+    display: flex;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+}
+.search-bar {
+    display: flex;
+    padding: 5px;
+    background: white;
+    border-radius: 10px;
+    width: 40%;
+    filter: drop-shadow(2px 4px 6px #ccc);
+    margin: 0 auto;
+}
+.search-bar > input {
+    outline: none;
+    border: none;
+    background: none;
+}
+.button {
+    border: none;
+    background: none;
+    transition: 0.2s;
+    border-radius: 20px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+.tab {
+    display: flex;
+    background: white;
+    padding: 5px;
+    border-radius: 5px;
+    filter: drop-shadow(2px 2px 4px #ccc);
+    margin-right: 5px;
+}
+.tab.selected {
+    background: yellow;
+}
+.relation-view {
+    flex-basis: 100%;
+    background: white;
+    filter: drop-shadow(2px 2px 4px #aaa);
+    padding: 20px;
+}
+.relation-table {
+    display: grid;
+    transition: 0.3s;
+    grid-template-columns: 100px 1fr;
+    grid-template-rows: 100px 1fr;
+    background: white;
+}
+.relation-table .selected {
+    background: yellowgreen;
+}
+.content-tool-box > :hover, .content-tool-box > .selected {
+    translate: -15px;
+    background: skyblue !important;
+}
+.relation-dust-title {
+    transition: 0.2s;
+    padding: 2px;
+    border-radius: 5px;
+}

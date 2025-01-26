@@ -1,5 +1,0 @@
-export * from "./CanvasObject"
-export * from "./Container"
-export * from "./Hexagon"
-export * from "./Line"
-export * from "./Square"

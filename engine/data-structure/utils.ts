@@ -4,7 +4,7 @@ import { Tree, TreeNode } from "./tree";
 import { HexGrid } from "./hexgrid";
 
 export function toPaths<T>(tree:Tree<T>){
-  const threshold = 15;
+  const threshold = 30;
   const paths = new Array<{pos:HexCoord, node:TreeNode<T>}[]>();
   const travel = tree.traverse();
 

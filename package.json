@@ -2,27 +2,31 @@
   "name": "nebula",
   "version": "1.0.0",
   "description": "",
+  "main": "backend/electron/electron.js",
   "private": true,
   "scripts": {
     "test": "npx webpack serve",
-    "start": "electron .",
+    "start": "electron . && tsc --build --clean",
     "dev": "ts-node server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Songgot",
   "license": "ISC",
   "devDependencies": {
     "@types/p5": "^1.7.0",
     "css-loader": "^6.8.1",
+    "electron": "^33.0.2",
+    "electron-builder": "^25.1.8",
     "html-webpack-plugin": "^5.5.3",
     "style-loader": "^3.3.3",
     "ts-loader": "^9.4.4",
     "typescript": "^5.2.2",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1"
+    "webpack-dev-server": "^4.15.2"
   },
   "dependencies": {
+    "electron-store": "^8.2.0",
     "p5": "^1.7.0",
     "pixi.js": "^8.3.2",
     "ts-node": "^10.9.2"
