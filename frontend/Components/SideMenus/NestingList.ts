@@ -110,9 +110,18 @@ function ContentItem(i:{depth: number, node: TreeNode<Content>}){
             }
         }),
         className: "hover-ccc",
-        onclick: () => {
+        onclick: e => {
             if (i.node.data.id < 0) return;
-            context.selection.content = i.node.data;
+            if (e.ctrlKey || e.metaKey) {
+                context.secondSelection = {
+                    universe: context.selection.universe,
+                    nebula: context.selection.nebula,
+                    content: i.node.data
+                }
+                context.tabs.push(context.secondSelection);
+                context.screenSplit = true;
+            }
+            else context.selection.content = i.node.data;
         }
     }
     return (

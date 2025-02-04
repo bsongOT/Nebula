@@ -20,26 +20,35 @@ import { RandomButton } from "./Components/PageOpeners/RandomButton";
 import { SettingButton } from "./Components/PageOpeners/SettingButton";
 import { QueryButton } from "./Components/PageOpeners/QueryButton";
 import { FilePage } from "./Pages/ContentPage/FilePage";
+import { ClipboardPage } from "./Pages/ClipboardPage";
 
 document.addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.code === 'Slash'){
     context.screenSplit = !context.screenSplit;
     return;
   }
-  if ((e.ctrlKey || e.metaKey) && e.code === 'KeyT'){
+  else if ((e.ctrlKey || e.metaKey) && e.code === 'KeyT'){
     e.preventDefault();
-    e.stopImmediatePropagation();
     const newTab = {};
     context.selection = newTab;
     context.tabs.push(newTab);
     return;
   }
+  else if ((e.ctrlKey || e.metaKey) && e.code === "KeyO"){
+    context.searching = true;
+  }
+  else if(e.code === "Escape") {
+    context.popupPage = "";
+    context.searching = false;
+    context.searchString = "";
+    context.searchIndex = 0;
+    if (document.activeElement instanceof HTMLInputElement){
+      document.activeElement.blur()
+    }
+  }
 })
 document.addEventListener("click", e => {
   const elt = e.target as HTMLElement;
-  if (![...document.querySelectorAll(".search-bar, .search-page")].some(p => p.contains(elt))){
-    context.searching = false;
-  }
   context.isSideActive = document.querySelector(".left-side")?.contains(elt) ?? false;
 })
 
@@ -69,11 +78,11 @@ body(
   div({ class: "tap-panel" })(
     TabWrapper(),
   ),
-  div({ className: U(() => `left-side ${context.searching ? "hidden" : ""}`.trim()) })(
+  div({ class: "left-side" })(
     Breadcrumb(),
     Carousel()
   ),
-  div({className: U(() => `main-view ${context.searching ? "hidden" : ""}`.trim())})(
+  div({ class: 'main-view' })(
     (() => {
       const arr = new Array<HTMLElement>();
       const nebulaPageNavigator = NebulaPageNavigator();
@@ -84,22 +93,57 @@ body(
       const universePage = UniversePage();
       const noSelectionPage = NoSelectionPage();
 
+      const secondContentPage = ContentEditor();
       const secondNebulaPage = NebulaPage({get nebula(){return context.secondSelection?.nebula ?? context.selection?.nebula}, pageAddition: 1})
+      const secondRelationPage = RelationPage();
+      const secondUniversePage = UniversePage();
+      const secondNoSelectionPage = div({class: "page"})();
 
       engine.updater.register(() => {
         arr.splice(0, arr.length);
         if (context.selection.nebula) arr.push(nebulaPageNavigator);
         if (context.screenSplit){
-          arr.push(noSelectionPage)
-          if (context.selection.universe) arr.push(universePage);
-          if (context.selection.relation) arr.push(relationPage);
-          if (context.selection.nebula) arr.push(nebulaPage);
-          if (context.selection.content) arr.push(contentPage);
-          if (context.openedFile !== "") arr.push(filePage);
-          if (!context.secondSelection) arr.splice(1, arr.length - 3)
+          arr.push(noSelectionPage, universePage);
+          if (context.secondSelection){
+            if (context.selection.content) arr[1] = contentPage;
+            else if (context.selection.nebula) arr[1] = nebulaPage;
+            else if (context.selection.relation) arr[1] = relationPage;
+            else if (context.selection.universe) arr[1] = universePage;
+            else arr[1] = noSelectionPage;
+
+            if (context.secondSelection.content) arr[2] = secondContentPage;
+            else if (context.secondSelection.nebula) arr[2] = secondNebulaPage;
+            else if (context.secondSelection.relation) arr[2] = secondRelationPage;
+            else if (context.secondSelection.universe) arr[2] = secondUniversePage;
+            else arr[2] = secondNoSelectionPage;
+          }
           else {
-            arr.splice(1, arr.length - 2)
-            arr.push(secondNebulaPage)
+            if (context.selection.content) {
+              if (context.openedFile === ""){
+                arr[1] = nebulaPage;
+                arr[2] = contentPage;
+              }
+              else {
+                arr[1] = contentPage;
+                arr[2] = filePage;
+              }
+            }
+            else if (context.selection.nebula) {
+              arr[1] = relationPage;
+              arr[2] = nebulaPage;
+            }
+            else if (context.selection.relation) {
+              arr[1] = universePage;
+              arr[2] = relationPage;
+            }
+            else if (context.selection.universe) {
+              arr[1] = noSelectionPage;
+              arr[2] = universePage;
+            }
+            else {
+              arr[1] = secondNoSelectionPage;
+              arr[2] = noSelectionPage;
+            }
           }
         }
         else {
@@ -114,5 +158,6 @@ body(
     })()
   ),
   SearchPage(),
-  NoticePage()
+  NoticePage(),
+  ClipboardPage()
 );

@@ -6,7 +6,8 @@ export function TabWrapper() {
     const style:Updated<HTMLElement, Partial<HTMLElement["style"]>> = U(() => ({
         display: "flex",
         transition: "0.2s",
-        translate: context.searching ? "30%" : ""
+        translate: context.searching ? "30%" : "",
+        zIndex: context.searching ? "1" : ""
     }))
 
     return (

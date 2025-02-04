@@ -5,7 +5,8 @@
   "main": "backend/electron/electron.js",
   "private": true,
   "scripts": {
-    "test": "npx webpack serve",
+    "test": "webpack serve",
+    "compile": "tsc backend/electron/*.ts",
     "start": "electron . && tsc --build --clean",
     "dev": "ts-node server.js"
   },

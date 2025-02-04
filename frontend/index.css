@@ -3,6 +3,8 @@ html {
 }
 hr {
     border-top: 1px solid #eee;
+    margin-left: 0;
+    margin-right: 0;
 }
 body {
     height: 100%;
@@ -18,6 +20,9 @@ body {
 div {
     cursor: default;
     user-select: none;
+}
+h1, h2, h3, h4 {
+    margin: 0;
 }
 ul {
     padding-left: 25px;
@@ -60,10 +65,6 @@ textarea {
     > * {
         transition: 0.15s;
     }
-    > .notification {
-        position: relative;
-        line-height: 17px;
-    }
 }
 .circle-button {
     display: flex;
@@ -97,7 +98,6 @@ textarea {
 .blink {
     animation: blink-effect 1s step-end infinite;
 }
-
 @keyframes blink-effect {
     50% {
         opacity: 0;
@@ -108,15 +108,6 @@ textarea {
     z-index: 1;
     position: relative;
     grid-column: 1/3;
-    > button {
-        border: none;
-        background: white;
-        margin: 2px;
-        padding: 5px;
-        border-radius: 5px;
-        filter: drop-shadow(2px 2px 4px #ccc);
-        transition: 0.2s;
-    }
 }
 .left-side {
     display: flex;
@@ -222,4 +213,7 @@ textarea {
     transition: 0.2s;
     padding: 2px;
     border-radius: 5px;
+}
+.content-text::selection {
+    background: none;
 }

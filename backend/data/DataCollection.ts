@@ -40,6 +40,7 @@ export class DataCollection<T extends DataComponent> {
     if (arr[end].id < value) return -1;
     if (arr[start].id === value) return start;
     if (arr[end].id === value) return end;
+    if (start === end) return -1;
 
     const t = Math.floor((start + end) / 2);
     if (arr[t].id >= value) return this.binarySearch(start, t, value)

@@ -55,30 +55,41 @@ type PackedUniverse = {
     }[],
     relations:number[]
 }
+type PackedDayNebula = {
+    id:number,
+    name:string,
+    tree: {
+        parent:number,
+        data:number
+    }[]
+}
 export class DataSaver {
-    public static save(data:Data){
-        this.saveDusts(data.dusts);
-        this.saveContents(data.contents);
-        this.saveNebulas(data.nebulas);
-        this.saveRelations(data.relations);
-        this.saveUniverses(data.universes);
+    private constructor(){}
+    public static async save(data:Data){
+        await this.saveDusts(data.dusts);
+        await this.saveContents(data.contents);
+        await this.saveNebulas(data.nebulas);
+        await this.saveRelations(data.relations);
+        await this.saveUniverses(data.universes);
+        await this.saveDayNebula(data.systemUniverse.dayNebula);
+        await this.saveFileAliases(data.fileAliases);
     }
-    private static saveDusts(dusts:DataCollection<Dust>){
+    private static async saveDusts(dusts:DataCollection<Dust>){
         const electron = window.electron;
         const array:PackedDust[] = dusts.map(d => ({
             id: d.id,
             claim: d.claim
         }))
-        electron.write("./nebula/dusts.json", JSON.stringify(array, null, 1));
+        await electron.write("./nebula/dusts.json", JSON.stringify(array, null, 1));
     }
-    private static saveContents(contents:DataCollection<Content>){
+    private static async saveContents(contents:DataCollection<Content>){
         const electron = window.electron;
         const array:PackedContent[] = contents.map(c => ({
             id: c.id,
             title: c.title,
             dusts: c.dusts.map(d => d.id).arrayize()
         }))
-        electron.write("./nebula/contents.json", JSON.stringify(array, null, 1));
+        await electron.write("./nebula/contents.json", JSON.stringify(array, null, 1));
     }
     private static async saveNebulas(nebulas:DataCollection<Nebula>){
         const electron = window.electron;
@@ -89,7 +100,7 @@ export class DataSaver {
         }))
         await electron.write("./nebula/nebulas.json", JSON.stringify(array, null, 1));
     }
-    private static saveRelations(relations:DataCollection<Relation>){
+    private static async saveRelations(relations:DataCollection<Relation>){
         const electron = window.electron;
         const array:PackedRelation[] = relations.map(r => ({
             id: r.id,
@@ -101,9 +112,9 @@ export class DataSaver {
                 state: ci.state?.id ?? -1
             }))
         }))
-        electron.write("./nebula/relations.json", JSON.stringify(array, null, 1))
+        await electron.write("./nebula/relations.json", JSON.stringify(array, null, 1))
     }
-    private static saveUniverses(universes:DataCollection<Universe>){
+    private static async saveUniverses(universes:DataCollection<Universe>){
         const electron = window.electron;
         const array:PackedUniverse[] = universes.map(u => ({
             id: u.id,
@@ -114,15 +125,43 @@ export class DataSaver {
             })),
             relations: u.relations.map(r => r.id)
         }))
+        await electron.write("./nebula/universes.json", JSON.stringify(array, null, 1))
+    }
+    private static async saveDayNebula(dayNebula:Nebula){
+        const electron = window.electron;
+        const packedDayNebula:PackedDayNebula = {
+            id: dayNebula.id,
+            name: "일지",
+            tree: dayNebula.tree.map(c => {
+                if (c.id < 0) {
+                    if (c.title === "추가") return -0.1;
+                    else if (c.title === "수정") return -0.2;
+                    else if (c.title.endsWith("년")) return -Number(c.title.slice(0, -1));
+                    else if (c.title.endsWith("월")) return -Number(c.title.slice(0, -1));
+                    else if (c.title.endsWith("일")) return -Number(c.title.slice(0, -1));
+                    else return NaN;
+                }
+                else {
+                    return c.id
+                }
+            }).arrayize()
+        }
+        await electron.write("./nebula/day-nebula.json", JSON.stringify(packedDayNebula, null, 1))
+    }
+    private static async saveFileAliases(fileAliases:Record<string, string>){
+        await window.electron.write("./nebula/file-aliases.json", JSON.stringify(fileAliases, null, 1));
     }
 }
 export class DataLoader {
+    private constructor(){}
     public static async load(){
         const dusts = await this.loadDusts();
         const contents = await this.loadContents();
         const nebulas = await this.loadNebulas();
         const relations = await this.loadRelations();
         const universes = await this.loadUniverses();
+        const dayNebula = await this.loadDayNebula();
+        const fileAliases = await this.loadFileAliases();
         
         for (const content of contents.all()){
             content.dusts = content.dusts.map(d => dusts.get(d.id) ?? d);
@@ -145,6 +184,25 @@ export class DataLoader {
                 start: nl.start
             }))
             universe.relations = universe.relations.map(r => relations.get(r.id) ?? r)
+        }
+        dayNebula.tree = dayNebula.tree.map(c => c.id < 0 ? c : (contents.get(c.id) ?? c));
+        for (const contentNodeInfo of dayNebula.tree.traverse()){
+            const content = contentNodeInfo.node.data;
+            const depth = contentNodeInfo.depth;
+            if (content.id >= 0) continue;
+            if (depth === 0) content.title += "년";
+            else if (depth === 1) content.title += "월";
+            else if (depth === 2) content.title += "일"
+        }
+
+        return {
+            dusts,
+            contents,
+            nebulas,
+            relations,
+            universes,
+            dayNebula,
+            fileAliases
         }
     }
     private static async loadDusts(){
@@ -220,5 +278,30 @@ export class DataLoader {
             })),
             relations: u.relations.map(r => new Relation({id: r, mainTree: new Nebula(), secondTree: new Nebula()}))
         } satisfies Universe)))
+    }
+    private static async loadDayNebula(){
+        const electron = window.electron;
+        const text = await electron.read("./nebula/day-nebula.json");
+        const json = JSON.parse(text === "" ? "{}" : text) as PackedDayNebula;
+
+        return new Nebula({
+            id: -1,
+            name: "일지",
+            tree: Tree.treeize(json?.tree ?? []).map(i => {
+                if (i < 0){
+                    if (i < -0.05 && i > -0.15) return new Content({title: "추가"});
+                    if (i < -0.15 && i > -0.25) return new Content({title: "수정"});
+                    return new Content({title: -i + "", id: i})
+                }
+                else {
+                    return new Content({id: i})
+                }
+            })
+        } satisfies Nebula)
+    }
+    private static async loadFileAliases(){
+        const electron = window.electron;
+        const text = await electron.read("./nebula/file-aliases.json");
+        return JSON.parse(text === "" ? "{}" : text) as Record<string, string>;
     }
 }

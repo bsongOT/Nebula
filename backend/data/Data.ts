@@ -6,10 +6,10 @@ import { DataCollection } from "./DataCollection"
 import { Nebula } from "./components/Nebula"
 import { Unpacker } from "./DataParser"
 import { engine } from "@/engine"
-import { DataTransporter } from "./DataTransporter"
 import { SystemUniverse } from "./components/SystemUniverse"
 import { Dust } from "./components/Dust"
 import { TreeNode } from "@/data-structure/tree"
+import { DataLoader, DataSaver } from "./DataLoader"
 
 export type DayNebula = {
   add: {content:Content, day:Date}[],
@@ -41,13 +41,25 @@ export class Notify {
     this.isolatedNebulas = this.getIsolatedNebulas();
     this.returnedRoutines = this.getReturnedRoutines();
     this.contentStates = this.getContentStates();
+    engine.updater.register(() => {
+      this.isolatedContents.splice(0, this.isolatedContents.length);
+      this.isolatedContents.push(...this.getIsolatedContents());
+
+      this.isolatedNebulas.splice(0, this.isolatedNebulas.length);
+      this.isolatedNebulas.push(...this.getIsolatedNebulas());
+
+      this.returnedRoutines.splice(0, this.returnedRoutines.length);
+      this.returnedRoutines.push(...this.getReturnedRoutines());
+    })
   }
   private getIsolatedContents(){
     const nebulas = this.data.nebulas.all();
 
-    return this.data.contents.filter(
-      c => nebulas.every(
-        n => !n.tree.nodes.map(n => n.data).includes(c)
+    return (
+      this.data.contents.filter(
+        c => nebulas.length === 0 || nebulas.every(
+          n => !n.tree.traverse().map(i => i.node.data).includes(c)
+        )
       )
     )
   }
@@ -62,12 +74,17 @@ export class Notify {
   }
   private getReturnedRoutines(){
     const routines = this.data.routines;
-    const dayNeb = this.data.systemNebulas.day;
+    const dayNeb = this.data.systemUniverse.dayNebula;
     const today = new Date().getTime();
     const mspd = 1000 * 60 * 60 * 24; 
 
     return routines.filter(r => {
-      const day = dayNeb.modify.find(i => i.content === r.content)?.day
+      const node = dayNeb.tree.traverse().find(i => i.node.data === r.content)?.node;
+      if (!node) return false;
+      const year = Number(node.parent?.parent?.parent?.parent?.data.title.slice(0, -1) ?? 0);
+      const month = Number(node.parent?.parent?.parent?.data.title.slice(0, -1) ?? 0);
+      const date = Number(node.parent?.parent?.data.title.slice(0, -1) ?? 0);
+      const day = new Date(year, month - 1, date);
       if (!day) return false;
       if ((day.getTime() - today) / mspd < r.cycle) return false;
       return true;
@@ -85,73 +102,82 @@ export class Data {
   public readonly relations;
   public readonly universes;
 
-  public readonly systemNebulas;
   public readonly systemUniverse;
 
   public readonly routines;
   public readonly notifications;
+  public readonly fileAliases;
 
-  public constructor(){
-    const wildDusts = DataTransporter.loadWildDataCollection("all-dusts")
-    const wildContents = DataTransporter.loadWildDataCollection("all-contents")
-    const wildNebulas = DataTransporter.loadWildDataCollection("all-nebulas")
-    const wildUniverses = DataTransporter.loadWildDataCollection("all-universes")
-    const wildRelations = DataTransporter.loadWildDataCollection("all-relations")
+  public static async create(){
+    const loadedData = await DataLoader.load();
+    return new Data(loadedData)
+  }
+  private constructor(loadedData:Awaited<ReturnType<typeof DataLoader.load>>){
+    this.dusts = loadedData.dusts;
+    this.contents = loadedData.contents;
+    this.nebulas = loadedData.nebulas;
+    this.relations = loadedData.relations;
+    this.universes = loadedData.universes;
 
-    this.dusts = new DataCollection(wildDusts.map(d => Unpacker.dust(d)))
-    this.contents = new DataCollection(wildContents.map(c => Unpacker.content(c, this.dusts)))
-    this.nebulas = new DataCollection<Nebula>(wildNebulas.map(n => Unpacker.nebula(n, this.contents, this.dusts)))
-    this.relations = new DataCollection(wildRelations.map(r => Unpacker.relation(r, this.nebulas, this.contents, this.dusts)))
-    this.universes = new DataCollection(wildUniverses.map(u => Unpacker.universe(u, this.nebulas, this.relations)))
-
-    this.systemNebulas = {
-      isolated: this.getIsolated(),
-      day: Unpacker.dayNebula(DataTransporter.loadWildDayNebula(), this.contents),
-      lifetime: Unpacker.lifetimeNebula(DataTransporter.loadWildLifetimeNebula(), this.contents),
-      importance: {
-        nebula: this.getImportanceNebula(),
-        parent: this.getImportanceParent(),
-        child: this.getImportanceChild(),
-        dust: this.getImportanceDust()
-      }
-    }
     this.routines = new Array<{
       content:Content,
       cycle:number
     }>()
+    this.systemUniverse = new SystemUniverse(this, loadedData);
     this.notifications = new Notify(this);
-    this.systemUniverse = new SystemUniverse(this);
+    this.fileAliases = loadedData.fileAliases;
 
-    engine.updater.register(() => DataTransporter.save(this))
+    for (const c of this.contents.all()){
+      window.electron.write(`contents/${c.title}.md`, c.dusts.traverse().map(i => "\t".repeat(i.depth) + "- " + i.node.data.claim).join("\n"))
+    }
+
+    let saveCompleted = true;
+    engine.updater.register(() => {
+      if (!saveCompleted) return;
+      saveCompleted = false;
+      DataSaver.save(this).then(() => saveCompleted = true);
+    });
   }
 
   public addContent(content:Content){
     this.contents.add(content)
-    if (content.dusts.traverse().length === 0){
+    if (content.dusts.length === 0){
       content.dusts.insert(new TreeNode(this.dusts.add(new Dust())))
     }
     const day = new Date()
-    day.setHours(0, 0, 0, 0);
-    this.systemNebulas.day.add.push({
-      day: day,
-      content: content
-    })
-    this.systemNebulas.lifetime.news.push(content)
+    const yearOfDay = day.getFullYear() + "년"
+    const monthOfDay = day.getMonth() + 1 + "월"
+    const dateOfDay = day.getDate() + "일"
+
+    const dayNebula = this.systemUniverse.dayNebula;
+    const yearNode = dayNebula.tree.root.children.find(n => n.data.title === yearOfDay) ?? dayNebula.tree.insert(new TreeNode(new Content({title: yearOfDay})));
+    const monthNode = yearNode.children.find(n => n.data.title === monthOfDay) ?? dayNebula.tree.insert(new TreeNode(new Content({title: monthOfDay})), yearNode);
+    const dayNode = monthNode.children.find(n => n.data.title === dateOfDay) ?? dayNebula.tree.insert(new TreeNode(new Content({title: dateOfDay})), monthNode);
+    const addNode = dayNode.children.find(n => n.data.title === "추가") ?? dayNebula.tree.insert(new TreeNode(new Content({title: "추가"})), dayNode);
+    
+    dayNebula.tree.insert(new TreeNode(content), addNode);
+
     return content;
   }
 
+  public registerModifiedContent(content:Content){
+    const day = new Date()
+    const yearOfDay = day.getFullYear() + "년"
+    const monthOfDay = day.getMonth() + 1 + "월"
+    const dateOfDay = day.getDate() + "일"
+
+    const dayNebula = this.systemUniverse.dayNebula;
+    const yearNode = dayNebula.tree.root.children.find(n => n.data.title === yearOfDay) ?? dayNebula.tree.insert(new TreeNode(new Content({title: yearOfDay})));
+    const monthNode = yearNode.children.find(n => n.data.title === monthOfDay) ?? dayNebula.tree.insert(new TreeNode(new Content({title: monthOfDay})), yearNode);
+    const dayNode = monthNode.children.find(n => n.data.title === dateOfDay) ?? dayNebula.tree.insert(new TreeNode(new Content({title: dateOfDay})), monthNode);
+    const modifyNode = dayNode.children.find(n => n.data.title === "수정") ?? dayNebula.tree.insert(new TreeNode(new Content({title: "수정"})), dayNode);
+    if (modifyNode.children.find(n => n.data === content)) return;
+
+    dayNebula.tree.insert(new TreeNode(content), modifyNode)
+  }
+
   public removeContent(content:Content){
-    const system = this.systemNebulas;
-    const {news, livings, modifieds, deads} = system.lifetime;
-
     this.contents.remove(content.id)
-
-    if (news.includes(content)) news.splice(news.indexOf(content), 1)
-    if (livings.includes(content)) livings.splice(livings.indexOf(content), 1)
-    if (modifieds.includes(content)) modifieds.splice(modifieds.indexOf(content), 1)
-
-    deads.push(content.title)
-    content.id = -1;
   }
 
   public addNebula(nebula:Nebula){
@@ -166,57 +192,5 @@ export class Data {
       if (index < 0) continue;
       u.nebulaLocations.splice(index, 1);
     }
-  }
-
-  private getIsolated(){
-    const nebulas = this.nebulas.all();
-
-    return this.contents.filter(
-      c => nebulas.every(
-        n => !n.tree.nodes.map(n => n.data).includes(c)
-      )
-    )
-  }
-
-  private getImportanceNebula(){
-    const contents = this.contents.all();
-    const nebulas = this.nebulas.all();
-
-    return contents.map(c => ({
-      count: nebulas.filter(n => n.tree.nodes.map(n => n.data).includes(c)).length,
-      content: c
-    }))
-  }
-
-  private getImportanceParent(){
-    const contents = this.contents.all();
-    const nebulas = this.nebulas.all();
-
-    return contents.map(c => ({
-      count: nebulas.filter(
-        neb => neb.tree.nodes.filter(n => n !== neb.tree.root).some(
-          n => n.children.some(ch => ch.data === c)
-        )
-      ).length,
-      content: c
-    }))
-  }
-
-  private getImportanceChild(){
-    return this.contents.map(c => ({
-      count: this.nebulas.filter(
-        n => n.tree.nodes.some(
-          n => n.parent?.data === c
-        )
-      ).length,
-      content: c
-    }))
-  }
-
-  private getImportanceDust(){
-    return this.contents.map(c => ({
-      count: c.dusts.length,
-      content: c,
-    }))
   }
 }

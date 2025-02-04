@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.ElectronAPI = void 0;
 var electron_1 = require("electron");
 var ElectronAPI = /** @class */ (function () {

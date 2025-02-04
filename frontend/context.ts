@@ -10,7 +10,7 @@ export type Selection = {
     content?: Content,
 }
 const context = {
-    data: new Data(),
+    data: await Data.create(),
     tabs: new Array<Selection>(),
     selection: {} as Selection,
     secondSelection: undefined as Selection | undefined,
@@ -24,16 +24,26 @@ const context = {
     currentNebulaPageNumber: 0,
     searching: false,
     searchString: "",
-    noticeOpened: false,
+    searchIndex: 0,
+    popupPage: "" as "" | "notice" | "clipboard" | "query" | "random",
     isSideActive: false,
     isOpenedPageNavigator: false,
     isRecordingContent: false,
     isTextFocused: false,
     scrollVisibleContentNodes: new Set<TreeNode<Content>>(),
+    clipboardLists: {
+        content: new Array<Content>(),
+        nebula: new Array<Nebula>(),
+        universe: new Array<Universe>(),
+        get length(){
+            return this.content.length + this.nebula.length + this.universe.length;
+        }
+    },
     drageeStar: undefined as TreeNode<Content> | undefined,
     dragStartY: 0,
     dragProgress: 0,
-    waitingContents: new Array<TreeNode<Content>>()
+    waitingContents: new Array<TreeNode<Content>>(),
+    noticeSelectedContents: new Array<Content>()
 }
 
 export default context;

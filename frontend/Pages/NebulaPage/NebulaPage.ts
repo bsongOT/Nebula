@@ -90,6 +90,7 @@ export function NebulaPage(info:{nebula?:Nebula, pageAddition?: number}){
                         const nebula = info.nebula;
                         if (!nebula) return []
                         const pageNumber = pageNum();
+                        if (pageNumber <= 0) return [];
                         return (
                             nebula.tree.traverse()
                                 .map(i => [
@@ -258,7 +259,7 @@ export function NebulaModel(info:{nebula?:Nebula}){
         if (!context.drageeStar) return;
         if (!info.nebula) return;
 
-        const nebs = context.data.nebulas.filter(n => n.tree.nodes.some(cn => cn.data === context.drageeStar!.data))
+        const nebs = context.data.nebulas.filter(n => n.tree.traverse().some(i => i.node.data === context.drageeStar!.data))
         if (context.dragProgress > 0.8) {
             const neb = nebs[nebs.indexOf(info.nebula) + 1];
             if (!neb) return;
@@ -332,7 +333,7 @@ export function NebulaModel(info:{nebula?:Nebula}){
 
         if (!context.drageeStar) return;
 
-        const nebs = context.data.nebulas.filter(neb => neb.tree.nodes.some(tn => tn.data === context.drageeStar!.data));
+        const nebs = context.data.nebulas.filter(neb => neb.tree.traverse().some(i => i.node.data === context.drageeStar!.data));
         const currentIndex = nebs.indexOf(info.nebula);
         const scrolledStar = stars.find(s => s.node === context.drageeStar);
         const scrolledStarHexPos = paths.flat().find(i => i.node === context.drageeStar)?.pos;

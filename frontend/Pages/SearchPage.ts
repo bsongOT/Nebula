@@ -1,241 +1,110 @@
 import { Repeat, U, Updated } from "@/engine";
-import { Attribute, div } from "@/funcObject";
+import { Attribute, div, hr, tr } from "@/funcObject";
 import context from "../context";
 import { Content, Nebula } from "../../backend/data/Data";
 import { hangulSeperate } from "@/utils/utils";
 import { Universe } from "../../backend/data/components/Universe";
 
 export function SearchPage(){
-    const style:Updated<HTMLElement, Partial<HTMLElement["style"]>> = U(() => ({
+    const upperLength = 5;
+    let searchedList = {
+        contents: new Array<Content>(),
+        nebulas: new Array<Nebula>(),
+        universes: new Array<Universe>(),
+        get length(){ 
+            return this.contents.length + this.nebulas.length + this.universes.length;
+        },
+        get displayedLength(){
+            return Math.min(this.contents.length, upperLength) + Math.min(this.nebulas.length, upperLength) + Math.min(this.universes.length, upperLength);
+        }
+    }
+    const containerStyle:Attribute<"div">["inlineStyle"] = U(() => ({
         display: context.searching ? "flex" : "none",
-        gap: "10px",
         position: "fixed",
-        top: "94px",
-        left: "50%",
-        translate: "-50%",
-        height: "calc(100% - 104px)",
-        width: "calc(100% - 20px)",
-        justifyContent: "center"
+        top: "0",
+        left: "0",
+        justifyContent: "center",
+        width: "100%",
+        height: "100%",
+        backdropFilter: "blur(5px) brightness(80%)"
     }))
-    return (
-        div({className: "search-page", inlineStyle: style})(
-            ContentsAdder(),
-            ContentsSearcher(),
-            NebulasSearcher(),
-            UniversesSearcher()
-        )
-    )
-}
-function ContentsAdder(){
-    function gotoDayNebula(){
-        context.searching = false;
-        context.selection.universe = context.data.systemUniverse;
-        context.selection.nebula = context.data.systemUniverse.dayNebula;
-    }
-    const attr:Attribute<"div"> = {
-        inlineStyle: {
-            width: "25%",
-            maxWidth: "250px",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column"
-        }
-    }
-    const titleAttr:Attribute<"div"> = {
-        inlineStyle: {
-            padding: "10px",
-            background: "cornflowerblue",
-            borderRadius: "10px",
-            filter: "drop-shadow(2px 2px 4px #aaa)",
-            marginBottom: "20px"
-        }
-    }
-    const bodyAttr:Attribute<"div"> = {
-        inlineStyle: {
-            overflowY: "auto",
-            flexGrow: "1",
-            background: "white",
-            borderRadius: "10px"
-        }
+    const style:Partial<HTMLElement["style"]>= {
+        display: "flex",
+        height: "calc(90% - 104px)",
+        width: "80%",
+        translate: "0 94px",
+        flexDirection: "column",
+        overflowY: "auto",
+        background: "white",
+        boxShadow: "2px 2px 4px #ccc",
+        borderRadius: "10px"
     }
 
+    document.addEventListener("keydown", e => {
+        if (!context.searching) return;
+        if (e.code === "ArrowDown"){
+            context.searchIndex++;
+            if (searchedList.length === 0) context.searchIndex %= 3;
+            else context.searchIndex %= searchedList.displayedLength;
+        }
+        else if (e.code === "ArrowUp"){
+            context.searchIndex--;
+            if (searchedList.length === 0) context.searchIndex = (context.searchIndex + 3) % 3;
+            else context.searchIndex = (context.searchIndex + searchedList.displayedLength) % searchedList.displayedLength;
+        }
+    })
     return (
-        div(attr)(
-            div(titleAttr)("컨텐츠 추가"),
-            div(bodyAttr)(
-                div()(Repeat(ContentLine, () => {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const todayTime = today.getTime()
-                    return (
-                        context.data.systemNebulas.day.add
-                            .filter(i => i.day.getTime() >= todayTime)
+        div({inlineStyle: containerStyle, onclick: () => {context.searching = false}})(
+            div({inlineStyle: style, onclick: e => e.stopPropagation()})(
+                div({inlineStyle: U(() => ({
+                    padding: "5px",
+                    display: (searchedList.length === 0) ? "" : "none"
+                }))})(
+                    div()("생성"),
+                    div({inlineStyle: {paddingLeft: "5px"}})(
+                        div({inlineStyle: U(() => ({background: context.searchIndex === 0 ? "#ccc" : ""}))})(() => `컨텐츠(${context.searchString}) 생성`),
+                        div({inlineStyle: U(() => ({background: context.searchIndex === 1 ? "#ccc" : ""}))})(() => `네뷸라(${context.searchString}) 생성`),
+                        div({inlineStyle: U(() => ({background: context.searchIndex === 2 ? "#ccc" : ""}))})(() => `유니버스(${context.searchString}) 생성`)
+                    ),
+                    hr()(),
+                ),
+                div({inlineStyle: {padding: "5px"}})(
+                    div()("컨텐츠"),
+                    div({inlineStyle: {paddingLeft: "5px"}})(
+                        Repeat(
+                            i => div({inlineStyle: U(() => ({background: context.searchIndex === i.index ? "#ccc" : ""}))})(() => i.content.title),
+                            () => {
+                                searchedList.contents = context.data.contents.filter(c => hangulSeperate(c.title).includes(hangulSeperate(context.searchString)))
+                                return searchedList.contents.map((content, index) => ({content, index})).slice(0, upperLength);
+                            }
+                        )
                     )
-                })),
-                div({class: "hover-color-999", onclick: gotoDayNebula})("자세히 보기")
+                ),
+                div({inlineStyle: {padding: "5px"}})(
+                    div()("네뷸라"),
+                    div({inlineStyle: {paddingLeft: "5px"}})(
+                        Repeat(
+                            i => div({inlineStyle: U(() => ({background: context.searchIndex === i.index ? "#ccc" : ""}))})(() => i.nebula.name),
+                            () => {
+                                searchedList.nebulas = context.data.nebulas.filter(n => hangulSeperate(n.name).includes(hangulSeperate(context.searchString)))
+                                return searchedList.nebulas.map((nebula, i) => ({nebula, index: i + upperLength})).slice(0, upperLength);
+                            }
+                        )
+                    )
+                ),
+                div({inlineStyle: {padding: "5px"}})(
+                    div()("유니버스"),
+                    div({inlineStyle: {paddingLeft: "5px"}})(
+                        Repeat(
+                            i => div()(() => i.universe.name),
+                            () => {
+                                searchedList.universes = context.data.universes.filter(u => hangulSeperate(u.name).includes(hangulSeperate(context.searchString)))
+                                return searchedList.universes.map(universe => ({universe})).slice(0, upperLength);
+                            }
+                        )
+                    )
+                ),
             )
         )
-    )
-}
-function ContentLine(info:{content:Content}){
-    return (
-        div({
-            className: "hover-ccc",
-            inlineStyle: {
-                padding: "5px"
-            },
-            onclick: () => {
-                context.searching = false;
-                context.selection.universe = context.data.systemUniverse;
-                context.selection.nebula = context.data.systemUniverse.dayNebula;
-                context.selection.content = info.content;
-            }
-        })(() => info.content.title)
-    )
-}
-function ContentsSearcher(){
-    const attr:Attribute<"div"> = {
-        inlineStyle: {
-            width: "25%",
-            maxWidth: "250px",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column"
-        }
-    }
-    const titleAttr:Attribute<"div"> = {
-        inlineStyle: {
-            padding: "10px",
-            background: "darksalmon",
-            borderRadius: "10px",
-            filter: "drop-shadow(2px 2px 4px #aaa)",
-            marginBottom: "20px"
-        }
-    }
-    const bodyAttr:Attribute<"div"> = {
-        inlineStyle: {
-            overflowY: "auto",
-            flexGrow: "1",
-            background: "white",
-            borderRadius: "10px"
-        }
-    }
-    return (
-        div(attr)(
-            div(titleAttr)("컨텐츠 검색"),
-            div(bodyAttr)(Repeat(ContentLine, () => (
-                context.data.contents
-                    .filter(c => hangulSeperate(c.title).includes(hangulSeperate(context.searchString)))
-                    .map(content => ({content}))
-            )))
-        )
-    )
-}
-function NebulasSearcher(){
-    const attr:Attribute<"div"> = {
-        inlineStyle: {
-            width: "25%",
-            maxWidth: "250px",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column"
-        }
-    }
-    const titleAttr:Attribute<"div"> = {
-        inlineStyle: {
-            padding: "10px",
-            background: "darksalmon",
-            borderRadius: "10px",
-            filter: "drop-shadow(2px 2px 4px #aaa)",
-            marginBottom: "20px"
-        }
-    }
-    const bodyAttr:Attribute<"div"> = {
-        inlineStyle: {
-            overflowY: "auto",
-            flexGrow: "1",
-            background: "white",
-            borderRadius: "10px"
-        }
-    }
-    return (
-        div(attr)(
-            div(titleAttr)("네뷸라 검색"),
-            div(bodyAttr)(Repeat(NebulaLine, () => {
-                return context.data.nebulas
-                    .filter(n => hangulSeperate(n.name).includes(hangulSeperate(context.searchString)))
-                    .map(nebula => ({nebula}))
-            }))
-        )
-    )
-}
-function NebulaLine(info:{nebula:Nebula}){
-    return (
-        div({
-            className: "hover-ccc",
-            inlineStyle: {
-                padding: "5px"
-            },
-            onclick: () => {
-                context.searching = false;
-                context.selection.universe = context.data.systemUniverse;
-                context.selection.nebula = info.nebula;
-                context.selection.content = undefined;
-            }
-        })(() => info.nebula.name)
-    )
-}
-function UniversesSearcher(){
-    const attr:Attribute<"div"> = {
-        inlineStyle: {
-            width: "25%",
-            maxWidth: "250px",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column"
-        }
-    }
-    const titleAttr:Attribute<"div"> = {
-        inlineStyle: {
-            padding: "10px",
-            background: "darksalmon",
-            borderRadius: "10px",
-            filter: "drop-shadow(2px 2px 4px #aaa)",
-            marginBottom: "20px"
-        }
-    }
-    const bodyAttr:Attribute<"div"> = {
-        inlineStyle: {
-            overflowY: "auto",
-            flexGrow: "1",
-            background: "white",
-            borderRadius: "10px"
-        }
-    }
-    return (
-        div(attr)(
-            div(titleAttr)("유니버스 검색"),
-            div(bodyAttr)(Repeat(UniverseLine, () => {
-                return context.data.universes
-                    .filter(u => hangulSeperate(u.name).includes(hangulSeperate(context.searchString)))
-                    .map(universe => ({universe}))
-            }))
-        )
-    )
-}
-function UniverseLine(info:{universe:Universe}){
-    return (
-        div({
-            className: "hover-ccc",
-            inlineStyle: {
-                padding: "5px"
-            },
-            onclick: () => {
-                context.searching = false;
-                context.selection.universe = info.universe;
-                context.selection.nebula = undefined;
-                context.selection.content = undefined;
-            }
-        })(() => info.universe.name)
     )
 }

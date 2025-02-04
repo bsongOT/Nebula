@@ -20,9 +20,9 @@ export function Title(info:{string:string}){
             size: 1,
             onblur: () => context.isTextFocused = false,
             onfocus: () => context.isTextFocused = true,
-            oninput: e => {
+            oninput: function() {
                 context.isTextFocused = true;
-                info.string = (<HTMLInputElement>e.target).value;
+                info.string = (<HTMLInputElement>this).value;
             },
         })()
     )

@@ -24,7 +24,7 @@ function defaultLifetimeNebula(){
     }
 }
 
-export class DataTransporter {
+class DataTransporter {
     public static loadWildDataCollection(keyword:CollectionLoadKey){
         const str = $(keyword);
         const json = str === null || str.trim() === "" ? [] : JSON.parse(str);
@@ -49,35 +49,11 @@ export class DataTransporter {
         const nebulas = data.nebulas.map(n => Packer.nebula(n));
         const universes = data.universes.map(u => Packer.universe(u));
         const relations = data.relations.map(r => Packer.relation(r));
-        
-        const dayNebula = {
-            add: data.systemNebulas.day.add.map(v => ({
-                content: v.content.id,
-                day: v.day.getTime()
-            })),
-            modify: data.systemNebulas.day.modify.map(v => ({
-                content: v.content.id,
-                day: v.day.getTime()
-            })),
-            remove: data.systemNebulas.day.remove.map(v => ({
-                content: v.content.id,
-                day: v.day.getTime()
-            }))
-        } satisfies Record<keyof typeof data.systemNebulas.day, any>
-
-        const lifetimeNebula = {
-            news: data.systemNebulas.lifetime.news.map(c => c.id),
-            modifieds: data.systemNebulas.lifetime.news.map(c => c.id),
-            livings: data.systemNebulas.lifetime.livings.map(c => c.id),
-            deads: data.systemNebulas.lifetime.deads
-        } satisfies Record<keyof typeof data.systemNebulas.lifetime, any>
 
         $$("all-dusts", JSON.stringify(dusts, null, 1))
         $$("all-contents", JSON.stringify(contents, null, 1))
         $$("all-nebulas", JSON.stringify(nebulas, null, 1))
         $$("all-universes", JSON.stringify(universes, null, 1))
         $$("all-relations", JSON.stringify(relations, null, 1))
-        $$("day-nebula", JSON.stringify(dayNebula, null, 1))
-        $$("lifetime-nebula", JSON.stringify(lifetimeNebula, null, 1))
     }
 }

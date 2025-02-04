@@ -7,15 +7,15 @@ import { Content } from "../../../backend/data/Data";
 import { Dust } from "../../../backend/data/components/Dust";
 
 export function RelationDustSet(){
-    const has = <T>(tree:Tree<T>, data:T) => tree.nodes.find(n => n.data === data);
+    const has = <T>(tree:Tree<T>, data:T) => tree.traverse().find(i => i.node.data === data);
     return (
         ul({inlineStyle: {padding: "0", margin: "0"}})(
             Repeat(RelationDustSingle,
             () => {
                 if (!context.selection.content) return [];
 
-                const rels1 = context.data.relations.filter(r => !!has(r.mainTree.tree, context.selection.content!));
-                const rels2 = context.data.relations.filter(r => !!has(r.secondTree.tree, context.selection.content!));
+                const rels1 = context.data.relations.filter(r => !!has(r.mainTree.tree, context.selection.content));
+                const rels2 = context.data.relations.filter(r => !!has(r.secondTree.tree, context.selection.content));
                 return [
                     ...rels1.map(r => ({
                         relation: r,
@@ -75,8 +75,8 @@ function RelationDust(info:{relation:Relation, main:Content, second:Content}){
                         outline: "none",
                         border: "none"
                     },
-                    oninput: e => {
-                        const text = <HTMLInputElement>e.target;
+                    oninput: function(e) {
+                        const text = this as HTMLInputElement;
                         const cell = info.relation.table.find(i => i.main === info.main && i.second === info.second);
                         const realCell = cell ?? {
                             main: info.main,

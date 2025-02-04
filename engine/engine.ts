@@ -14,12 +14,15 @@ export function Repeat<I extends {}>(component:(info:I) => HTMLElement, dataProv
 
         if (arr.length > datas.length){
             infos.splice(datas.length, diff);
-            arr.splice(datas.length, diff);
+            arr.splice(datas.length, diff).forEach(c => {
+                c.dataset.isDisposable = "";
+                [...c.querySelectorAll("*")].forEach(de => de.dataset.isDisposable = "")
+            });
         }
         else if (arr.length < datas.length){
             for (let i = arr.length; i < datas.length; i++) {
                 infos.push(datas[i]);
-                arr.push(component(infos[i]))
+                arr.push(component(infos[i]));
             }
         }
         for (let i = 0; i < infos.length; i++){
@@ -55,12 +58,17 @@ class Updater {
     private loop: NodeJS.Timeout | undefined;
     register(func:()=>void){
         this.list.push(func)
-        if (this.loop) clearInterval(this.loop)
-        this.loop = setInterval(
-            () => {
-                this.list.forEach(l => l())
-            }
-        , 100)
+        if (this.loop) return;
+        this.loop = setInterval(() => {
+            const list = [...this.list];
+            for (const l of list) l()
+            console.log(`현재 돌고 있는 루프의 개수는 ${this.list.length}`)
+        }, 100)
+    }
+    unregister(func:()=>void){
+        const index = this.list.indexOf(func);
+        if (index < 0) return;
+        this.list.splice(index, 1);
     }
 }
 

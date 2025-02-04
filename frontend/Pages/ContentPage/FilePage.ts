@@ -24,6 +24,7 @@ export function FilePage(){
         },
         onclick: () => {
             context.openedFile = "";
+            context.screenSplit = false;
         }
     }
 
@@ -35,6 +36,7 @@ export function FilePage(){
     iframe.onload = () => {
         if (context.iframeOnload === "") return;
         (iframe.contentWindow as any)[context.iframeOnload]?.()
+        context.iframeOnload = ""
     }
 
     engine.updater.register(() => {

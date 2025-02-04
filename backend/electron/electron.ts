@@ -33,11 +33,24 @@ const createWindow = async () => {
         store.set('workspace-path', path);
         return true;
     })
-    ipcMain.handle('read', () => {
-
+    ipcMain.handle('read', (_, relativePath) => {
+        const targetPath = path.join(store.get("workspace-path"), relativePath);
+        if (fs.existsSync(targetPath)) return fs.readFileSync(targetPath, "utf8").toString();
+        return "";
     })
-    ipcMain.handle('write', () => {
-
+    ipcMain.handle('write', (_, relativePath, str) => {
+        const workspacePath = store.get("workspace-path");
+        const targetPath = path.join(workspacePath, relativePath);
+        const relPath = targetPath.slice(workspacePath.length + 1);
+        const pathRoad = relPath.split("/");
+        let folderPath = workspacePath;
+        for (let i = 0; i < pathRoad.length - 1; i++){
+            folderPath += `/${pathRoad[i]}`;
+            if (!fs.existsSync(folderPath)){
+                fs.mkdirSync(folderPath)
+            }
+        }
+        fs.writeFileSync(targetPath, str, {flag: "w"});
     })
     ipcMain.handle("exists", (_, relativePath) => {
         return fs.existsSync(path.join(store.get("workspace-path"), relativePath))
@@ -45,10 +58,7 @@ const createWindow = async () => {
     ipcMain.handle("open-dialog-file", () => {
         const path = dialog.showOpenDialogSync(window, {
             filters: [
-                { name: "Images", extensions: ["jpg", "png", "gif"] },
-                { name: "Videos", extensions: ["mp4", "avi"] },
-                { name: "Audios", extensions: ["mp3", "wav"] },
-                { name: "HTML", extensions: ["html"] }
+                { name: "Assets", extensions: ["jpg", "png", "gif", "mp4", "avi", "mp3", "wav", "html"] },
             ],
             properties: ["openFile"]
         })

@@ -1,16 +1,17 @@
 import { TreeNode } from "@/data-structure/tree";
 import { U } from "@/engine";
 import { div, btn } from "@/funcObject";
-import { Nebula } from "../../../backend/data/Data";
+import { Content, Nebula } from "../../../backend/data/Data";
 import context from "../../context";
-import { splitIntoPieces } from "../../utils/utils";
+import { receiveMessage, splitIntoPieces } from "../../utils/utils";
+import { MentionSelector } from "./MentionSelector";
 
 export function NebulaInfoArea(){
     function getConnectedNebulas(){
         if (!context.selection.content) return [];
         return [
             context.data.systemUniverse.nebulaLocations[0].nebula,
-            ...context.data.nebulas.filter(n => n.tree.nodes.some(nd => nd.data === context.selection.content))
+            ...context.data.nebulas.filter(n => n.tree.traverse().some(i => i.node.data === context.selection.content))
         ]
     }
     function getUniverseFrom(nebula:Nebula){
@@ -44,24 +45,24 @@ export function NebulaInfoArea(){
                     context.selection.universe = getUniverseFrom(context.selection.nebula) ?? context.data.systemUniverse;
                 }})(">"),
             ),
-            btn({onclick: () => {
+            btn({onclick: async () => {
                 if (!context.selection.content) return;
+                const nebulaName = await receiveMessage("새 네뷸라의 이름을 입력해주세요.");
+                if (nebulaName === "") return;
                 context.selection.universe = context.data.systemUniverse;
-                context.selection.nebula = context.data.addNebula(new Nebula({name: "제목없음"}))
+                context.selection.nebula = context.data.addNebula(new Nebula({name: nebulaName}))
                 context.selection.nebula!.tree.insert(new TreeNode(context.selection.content))
             }})("현재 컨텐츠로 네뷸라 시작하기"),
             btn({
                 onclick: async () => {
                     const content = context.selection.content;
                     if (!content) return;
-                    const contents = context.data.contents.all().sort((a, b) => a.title.length > b.title.length ? -1 : 1);
-                    // await new Promise<Content[]>(resolve => {
-                    //     document.body.append(MentionSelector(resolve));
-                    // })
+                    const contents = (await new Promise<Content[]>(resolve => document.body.append(MentionSelector(resolve)))).sort((a, b) => a.title.length - b.title.length);
                     for (const dust of content.dusts.traverse().map(i => i.node.data)){
-                        for (const content of contents){
-                            dust.claim = splitIntoPieces(dust.claim).map(p => {
-                                if (p.kind === "text") return p.text.replaceAll(content.title, `[[${content.title}]]`);
+                        const pieces = splitIntoPieces(dust.claim);
+                        for (const c of contents){
+                            dust.claim = pieces.map(p => {
+                                if (p.kind === "text") return p.text.replaceAll(c.title, `[[${c.title}]]`);
                                 else return p.text
                             }).join("")
                         }

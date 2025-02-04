@@ -10,10 +10,13 @@ export class SystemUniverse extends Universe {
     public readonly importanceNebula;
     public readonly mentionNebula;
 
-    constructor(private data: Data) {
+    private data;
+
+    constructor(data: Data, loadedData:{dayNebula:Nebula}) {
         super({ name: "시스템" });
         
-        this.dayNebula = this.getDayNebula(1);
+        this.data = data;
+        this.dayNebula = loadedData.dayNebula;
         this.isolatedNebula = this.getIsolatedNebula();
         this.importanceNebula = this.getImportanceNebula();
         this.mentionNebula = this.getMentionNebula();
@@ -32,104 +35,92 @@ export class SystemUniverse extends Universe {
             start: H(9, 0, 5)
         })
     }
+    
     private getIsolatedNebula() {
         const neb = new Nebula({ id: -1, name: "고립" })
-        const loadedData = this.data.systemNebulas.isolated;
-        for (const c of loadedData) neb.tree.insert(new TreeNode(c))
-
-        return neb;
-    }
-    private getDayNebula(period: number) {
-        const neb = new Nebula({ id: -2, name: "일지" });
-        const allDay = [
-            ...this.data.systemNebulas.day.add.map(d => d.day.getTime()),
-            ...this.data.systemNebulas.day.modify.map(d => d.day.getTime()),
-            ...this.data.systemNebulas.day.remove.map(d => d.day.getTime())
-        ];
-        if (allDay.length <= 0) return neb;
-
-        const dd = 1000 * 60 * 60 * 24;
-        const min = Math.min(...allDay);
-        const max = Math.max(...allDay);
-        const count = Math.ceil((max - min) / (dd * period)) + 1;
-        const loadedData = this.data.systemNebulas.day;
-
-        const minDay = new Date(min);
-
-        let yearNode = neb.tree.insert(new TreeNode(new Content({ title: minDay.getFullYear() + "년" })))
-        let monthNode = neb.tree.insert(new TreeNode(new Content({ title: minDay.getMonth() + 1 + "월" })), yearNode);
-
-        for (let i = 0; i < count; i++) {
-            const from = min + i * period * dd;
-            const to = min + (i + 1) * period * dd;
-            const day = new Date(from);
-            const title = day.getDate() + "일";
-
-            const addedsList = loadedData.add.filter(i => from <= i.day.getTime() && i.day.getTime() < to);
-            const modifiedsList = loadedData.modify.filter(i => from <= i.day.getTime() && i.day.getTime() < to);
-            const removedsList = loadedData.remove.filter(i => from <= i.day.getTime() && i.day.getTime() < to);
-
-            if (addedsList.length + modifiedsList.length + removedsList.length <= 0) continue;
-            if (yearNode.data.title !== day.getFullYear() + "년") {
-                yearNode = neb.tree.insert(new TreeNode(new Content({ title: day.getFullYear() + "년" })))
-            }
-            if (monthNode.data.title !== day.getMonth() + 1 + "월") {
-                monthNode = neb.tree.insert(new TreeNode(new Content({ title: day.getMonth() + 1 + "월" })), yearNode);
-            }
-
-            const node = neb.tree.insert(new TreeNode(new Content({ title })), monthNode);
-
-            if (addedsList.length > 0) {
-                const add = neb.tree.insert(new TreeNode(new Content({ title: "추가" })), node);
-                for (const d of addedsList) neb.tree.insert(new TreeNode(d.content), add)
-            }
-            if (modifiedsList.length > 0) {
-                const modify = neb.tree.insert(new TreeNode(new Content({ title: "수정" })), node);
-                for (const d of modifiedsList) neb.tree.insert(new TreeNode(d.content), modify)
-            }
-            if (removedsList.length > 0) {
-                const remove = neb.tree.insert(new TreeNode(new Content({ title: "삭제" })), node);
-                for (const d of removedsList) neb.tree.insert(new TreeNode(d.content), remove)
-            }
+        const nebulas = this.data.nebulas.all();
+        const contents = this.data.contents;
+        const isolatedContents = (
+            contents.filter(
+                c => nebulas.length === 0 || nebulas.every(
+                    n => !n.tree.traverse().map(i => i.node.data).includes(c)
+                )
+            )
+        )
+        for (const c of isolatedContents) {
+            neb.tree.insert(new TreeNode(c))
         }
 
         return neb;
     }
     private getImportanceNebula() {
         const neb = new Nebula({ id: -3, name: "중요도" });
-        const loadedData = this.data.systemNebulas.importance;
+        const contents = this.data.contents;
+        const nebulas = this.data.nebulas;
+        const nebulaCountList = (
+            contents.map(c => ({
+                count: nebulas.filter(n => n.tree.traverse().map(i => i.node.data).includes(c)).length,
+                content: c
+            }))
+        )
+        const parentCountList = (
+            contents.map(c => ({
+                count: nebulas.filter(
+                    neb => neb.tree.traverse().map(i => i.node).some(
+                        n => n.children.some(ch => ch.data === c)
+                    )
+                ).length,
+                content: c
+            }))
+        )
+        const childCountList = (
+            contents.map(c => ({
+                count: nebulas.filter(
+                    n => n.tree.traverse().map(i => i.node).some(
+                        n => n.parent?.data === c
+                    )
+                ).length,
+                content: c
+            }))
+        )
+        const dustCountList = (
+            contents.map(c => ({
+                count: c.dusts.length,
+                content: c
+            }))
+        )
 
         const nc = neb.tree.insert(new TreeNode(new Content({ title: "소속 네뷸라 수" })));
         const pc = neb.tree.insert(new TreeNode(new Content({ title: "부모 수" })));
         const cc = neb.tree.insert(new TreeNode(new Content({ title: "자식 수" })));
         const dc = neb.tree.insert(new TreeNode(new Content({ title: "더스트 수" })));
 
-        const ncNums = [...new Set(loadedData.nebula.map(i => i.count))].sort()
-        const pcNums = [...new Set(loadedData.parent.map(i => i.count))].sort()
-        const ccNums = [...new Set(loadedData.child.map(i => i.count))].sort()
-        const dcNums = [...new Set(loadedData.dust.map(i => i.count))].sort()
+        const ncNums = [...new Set(nebulaCountList.map(i => i.count))].sort()
+        const pcNums = [...new Set(parentCountList.map(i => i.count))].sort()
+        const ccNums = [...new Set(childCountList.map(i => i.count))].sort()
+        const dcNums = [...new Set(dustCountList.map(i => i.count))].sort()
 
         for (const l of ncNums) {
             const countPicket = neb.tree.insert(new TreeNode(new Content({ title: l.toString() })), nc);
-            for (const content of loadedData.nebula.filter(i => i.count === l).map(i => i.content)) {
+            for (const content of nebulaCountList.filter(i => i.count === l).map(i => i.content)) {
                 neb.tree.insert(new TreeNode(content), countPicket)
             }
         }
         for (const l of pcNums) {
             const countPicket = neb.tree.insert(new TreeNode(new Content({ title: l.toString() })), pc);
-            for (const content of loadedData.parent.filter(i => i.count === l).map(i => i.content)) {
+            for (const content of parentCountList.filter(i => i.count === l).map(i => i.content)) {
                 neb.tree.insert(new TreeNode(content), countPicket)
             }
         }
         for (const l of ccNums) {
             const countPicket = neb.tree.insert(new TreeNode(new Content({ title: l.toString() })), cc);
-            for (const content of loadedData.child.filter(i => i.count === l).map(i => i.content)) {
+            for (const content of childCountList.filter(i => i.count === l).map(i => i.content)) {
                 neb.tree.insert(new TreeNode(content), countPicket)
             }
         }
         for (const l of dcNums) {
             const countPicket = neb.tree.insert(new TreeNode(new Content({ title: l.toString() })), dc);
-            for (const content of loadedData.dust.filter(i => i.count === l).map(i => i.content)) {
+            for (const content of dustCountList.filter(i => i.count === l).map(i => i.content)) {
                 neb.tree.insert(new TreeNode(content), countPicket)
             }
         }

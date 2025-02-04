@@ -8,8 +8,8 @@ export type TreeNodeLike<T> = {
 }
 
 export class Tree<T>{
-  public nodes:TreeNode<T>[];
-  public root:TreeNode<T>;
+  private nodes:TreeNode<T>[];
+  public readonly root:TreeNode<T>;
 
   get length(){
     return this.nodes.length - 1;
