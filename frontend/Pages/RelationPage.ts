@@ -13,9 +13,9 @@ export function RelationPage(){
           div()(),
           div({inlineStyle: {display: "flex"}})(Repeat(
             i => div({
-              className: U(() => context.selection.content === i.node.data ? "selected" : ""),
+              className: U(() => context.selection.content === i.node ? "selected" : ""),
               inlineStyle: {cursor: "s-resize", width: "20px", writingMode: "vertical-lr", textOrientation: "sideways", scale: "-1"},
-              onclick: () => context.selection.content = i.node.data})(() => i.node.data.title),
+              onclick: () => context.selection.content = i.node})(() => i.node.data.title),
             () => {
               if (!context.selection.relation) return [];
               return context.selection.relation.mainTree.tree.leafs.map(n => ({node: n}))
@@ -23,8 +23,8 @@ export function RelationPage(){
           )),
           div({inlineStyle: {display: "flex", flexDirection: "column"}})(Repeat(
             i => div({
-              className: U(() => context.selection.content === i.node.data ? "selected" : ""),
-              inlineStyle: {cursor: "e-resize", height: "20px"}, onclick: () => context.selection.content = i.node.data})(() => i.node.data.title),
+              className: U(() => context.selection.content === i.node ? "selected" : ""),
+              inlineStyle: {cursor: "e-resize", height: "20px"}, onclick: () => context.selection.content = i.node})(() => i.node.data.title),
             () => {
               if (!context.selection.relation) return [];
               return context.selection.relation.secondTree.tree.leafs.map(n => ({node: n}))
@@ -50,8 +50,8 @@ export function RelationPage(){
                   const main = context.selection.relation.mainTree.tree.leafs;
                   return (
                     main.map(m => ({
-                      main: m.data,
-                      second: i.node.data,
+                      main: m,
+                      second: i.node,
                       dust: context.selection.relation!.table.find(cell => cell.main === m.data && cell.second === i.node.data)
                     }))
                   );

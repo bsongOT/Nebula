@@ -2,14 +2,13 @@ export * from "./components/Content"
 export * from "./components/Nebula"
 
 import {Content} from "./components/Content"
-import { DataCollection } from "./DataCollection"
 import { Nebula } from "./components/Nebula"
-import { Unpacker } from "./DataParser"
 import { engine } from "@/engine"
 import { SystemUniverse } from "./components/SystemUniverse"
 import { Dust } from "./components/Dust"
 import { TreeNode } from "@/data-structure/tree"
 import { DataLoader, DataSaver } from "./DataLoader"
+import { Universe } from "./components/Universe"
 
 export type DayNebula = {
   add: {content:Content, day:Date}[],
@@ -68,7 +67,7 @@ export class Notify {
 
     return this.data.nebulas.filter(
       n => univs.every(
-        u => !u.nebulaLocations.find(nl => nl.nebula === n)
+        u => !u.nebulas.includes(n)
       )
     )
   }
@@ -103,6 +102,7 @@ export class Data {
   public readonly universes;
 
   public readonly systemUniverse;
+  public readonly isolatedUniverse;
 
   public readonly routines;
   public readonly notifications;
@@ -124,12 +124,12 @@ export class Data {
       cycle:number
     }>()
     this.systemUniverse = new SystemUniverse(this, loadedData);
+    this.isolatedUniverse = new Universe({id: -1, name: "무소속 네뷸라"});
     this.notifications = new Notify(this);
     this.fileAliases = loadedData.fileAliases;
 
-    for (const c of this.contents.all()){
-      window.electron.write(`contents/${c.title}.md`, c.dusts.traverse().map(i => "\t".repeat(i.depth) + "- " + i.node.data.claim).join("\n"))
-    }
+    DataSaver.saveContentsExport(this.contents);
+    DataSaver.saveNebulasExport(this.nebulas);
 
     let saveCompleted = true;
     engine.updater.register(() => {
@@ -137,6 +137,12 @@ export class Data {
       saveCompleted = false;
       DataSaver.save(this).then(() => saveCompleted = true);
     });
+    engine.updater.register(() => {
+      const universes = this.universes.all();
+      this.isolatedUniverse.nebulas = (
+        this.nebulas.filter(n => universes.every(u => !u.nebulas.includes(n)))
+      )
+    })
   }
 
   public addContent(content:Content){
@@ -188,9 +194,9 @@ export class Data {
   public removeNebula(nebula:Nebula){
     this.nebulas.remove(nebula.id);
     for (const u of this.universes.all()){
-      const index = u.nebulaLocations.findIndex(ni => ni.nebula === nebula)
+      const index = u.nebulas.indexOf(nebula)
       if (index < 0) continue;
-      u.nebulaLocations.splice(index, 1);
+      u.nebulas.splice(index, 1);
     }
   }
 }

@@ -1,20 +1,30 @@
-import { div, li, span, textarea, ul } from "@/funcObject"
+import { Attribute, div, li, span, textarea, ul } from "@/funcObject"
 import context from "../../context"
 import { Content } from "../../../backend/data/Data"
 import { engine, Repeat, U } from "@/engine"
 import { Dust } from "../../../backend/data/components/Dust"
 import { Tree, TreeNode } from "@/data-structure/tree"
 import { Title } from "../../Components/Title"
-import { Bookmarks } from "./Bookmarks"
 import { RelationDustSet } from "./RelationDustSet"
 import { splitIntoPieces } from "../../utils/utils"
 import { NebulaInfoArea } from "./NebulaInfoArea"
 import { FileAliasPage } from "./FileAliasPage"
+import { mentionContextMenu } from "../../Components/MentionContextMenu"
+import { LucideIcon } from "../../Components/utils/Icon"
+import { Dot, Ellipsis, Scale } from "lucide"
+import { ContentContextMenu } from "./ContentContextMenu"
 
 function DustBlock(index:number){
     const block:HTMLLIElement = (
         li({
-            inlineStyle: {cursor: "text", userSelect: "text", transition: "all 0.2s, background-color 0s", position: "absolute", width: "-webkit-fill-available"},
+            inlineStyle: {
+                cursor: "text", 
+                userSelect: "text", 
+                transition: "all 0.2s, background-color 0s", 
+                position: "absolute", 
+                width: "-webkit-fill-available",
+                wordBreak: "break-all"
+            },
             onclick: () => {
                 const range = window.getSelection()?.getRangeAt(0);
                 if (!range) return;
@@ -34,9 +44,9 @@ function DustBlock(index:number){
                 text.selectionEnd = text.selectionStart;
             }
         })(
-            div({inlineStyle: {cursor: "text", userSelect: "text", minHeight: "1rem", display: "inline-block"}})(
+            div({inlineStyle: {cursor: "text", userSelect: "text", minHeight: "1rem", display: "inline-block", verticalAlign: "top"}})(
                 Repeat(
-                    (i:{kind:"text"|"ref"|"file", text:string}) => {
+                    (i:{kind:"text"|"ref"|"file"|"mention"|"parallel", text:string}) => {
                         let isValidFile = true;
                         engine.updater.register(() => {
                             if (i.kind !== "file") return;
@@ -45,15 +55,28 @@ function DustBlock(index:number){
                             else window.electron.exists(context.data.fileAliases[fileName]).then(b => isValidFile = b);
                         })
                         return span({
-                            className: U(() => i.kind !== "text" ? "hover-eee" : ""),
-                            inlineStyle: U(() => ({
+                            className: U(() => ({
+                                text: "",
+                                ref: "hover-eee",
+                                file: "hover-eee piece-file",
+                                mention: "hover-eee",
+                                parallel: "hover-eee"
+                            })[i.kind]),
+                            inlineStyle: U(piece => ({
                                 color: {
                                     text: "",
                                     ref: "skyblue",
-                                    file: "orange"
+                                    file: "orange",
+                                    mention: "",
+                                    parallel: ""
                                 }[i.kind],
-                                background: i.kind === "file" && !isValidFile && !i.text.endsWith("()}}") ? "red" : "",
-                                cursor: i.kind === "text" ? "" : "default"
+                                background: 
+                                    i.kind === "file" && !isValidFile && !i.text.endsWith("()}}") ? "red" : 
+                                    context.currentPieceElement === piece ? "#eee" : "",
+                                cursor: i.kind === "text" ? "" : "default",
+                                textDecoration: 
+                                    i.kind === "mention" ? "skyblue underline 4px" : 
+                                    i.kind === "parallel" ? "orange underline 4px" : ""
                             })),
                             innerHTML: U(t => {
                                 if (t.innerText !== i.text.replaceAll(" ", " ")) {
@@ -61,16 +84,25 @@ function DustBlock(index:number){
                                 }
                                 return t.innerHTML.replaceAll(" ", "&nbsp;")
                             }),
-                            onclick: async e => {
+                            onclick: async function(e) {
                                 if (i.kind === "text") return;
                                 e.stopPropagation();
+                                if (i.kind === "mention") {
+                                    const pieceElement = this as HTMLElement;
+                                    document.body.append(mentionContextMenu)
+                                    const rect = pieceElement.getBoundingClientRect();
+                                    mentionContextMenu.style.top = rect.top + rect.height + "px";
+                                    mentionContextMenu.style.left = rect.left + "px";
+                                    mentionContextMenu.dataset.contentTitle = i.text;
+                                    return;
+                                }
                                 if (i.kind === "ref") {
                                     const content = context.data.contents.find(c => `[[${c.title}]]` === i.text) ?? context.data.addContent(new Content({title: i.text.slice(2, -2)}));
                                     if (e.ctrlKey || e.metaKey){
                                         context.secondSelection = {
                                             universe: context.data.systemUniverse,
                                             nebula: context.data.systemUniverse.dayNebula,
-                                            content: content
+                                            content: context.data.systemUniverse.dayNebula.tree.traverse().find(info => info.node.data === content)?.node
                                         }
                                         context.tabs.push(context.secondSelection);
                                         context.screenSplit = true;
@@ -80,18 +112,19 @@ function DustBlock(index:number){
                                         context.selection.universe = context.data.systemUniverse;
                                         context.selection.nebula = context.data.systemUniverse.dayNebula;
                                     }
-                                    context.selection.content = content;
+                                    context.selection.content = context.selection.nebula.tree.traverse().find(info => info.node.data === content)?.node;
                                 }
                                 if (i.kind === "file"){
                                     if (e.ctrlKey || e.metaKey) {
                                         document.body.append(FileAliasPage())
                                         return;
                                     }
+                                    context.currentPieceElement = this as HTMLElement;
                                     const content = context.selection.content;
                                     if (!content) return;
                                     if (i.text.endsWith("()}}")){
                                         const blockIndex = Number(block.dataset.index);
-                                        const dustTreeArray = content.dusts.traverse();
+                                        const dustTreeArray = content.data.dusts.traverse();
                                         const parentDustInfo = dustTreeArray.slice(0, blockIndex).findLast(i => i.depth + 1 === dustTreeArray[blockIndex].depth);
                                         const fileName = splitIntoPieces(parentDustInfo?.node.data.claim ?? "").find(p => p.kind === "file" && (p.text.endsWith(".html}}") || context.data.fileAliases[p.text.slice(2, -2)]?.endsWith(".html")))?.text.slice(2, -2) ?? "";
                                         const originalFileName = context.data.fileAliases[fileName] ?? fileName;
@@ -118,9 +151,50 @@ function DustBlock(index:number){
                             }
                         })()
                     },
-                    () => splitIntoPieces(block.dataset.claim ?? "")
+                    () => {
+                        if ((block.dataset.claim ?? "").length > 5){
+                            const claim = block.dataset.claim!;
+                            const similar = context.data.dusts.filter(d => d.claim.startsWith(claim))
+                            if (similar.length >= 2){
+                                return [{
+                                    kind: "parallel" as const,
+                                    text: claim
+                                }]
+                            }
+                        }
+                        return splitIntoPieces(block.dataset.claim ?? "").map(i => {
+                            if (i.kind !== "text") return i;
+                            const contents = context.data.contents.all().sort((a, b) => a.title.length - b.title.length);
+                            let refedText = i.text;
+                            for (const c of contents){
+                                const pieces = splitIntoPieces(refedText);
+                                refedText = pieces.map(p => {
+                                    if (p.kind === "text") return p.text.replaceAll(c.title, `[[${c.title}]]`);
+                                    else return p.text
+                                }).join("")
+                            }
+                            return splitIntoPieces(refedText).map(j => j.kind !== "ref" ? j : ({
+                                kind: "mention" as "text" | "ref" | "file" | "mention",
+                                text: j.text.slice(2, -2)
+                            }));
+                        }).flat()
+                    }
                 )
-            )
+            ),
+            div({
+                inlineStyle: U(stick => {
+                    stick.style.height = "0";
+                    return {
+                        display: (<HTMLElement>stick.parentElement)?.dataset.gitUpdated === "" ? "" : "none",
+                        translate: `calc(-25px - ${(<HTMLElement>stick.parentElement)?.style.marginLeft ?? "0px"})`,
+                        background: "green",
+                        width: "4px",
+                        height: ((<HTMLElement>stick.parentElement)?.scrollHeight ?? "0") + "px",
+                        position: "absolute",
+                        top: "0"
+                    }
+                })
+            })()
         )
     )
     block.dataset.index = index + '';
@@ -136,6 +210,76 @@ export function ContentEditor(){
     let newRefContents = new Array<string>();
     let cursorWaitingTime = 2;
 
+    let gitCompleted = true;
+
+    engine.updater.register(() => {
+        if (!gitCompleted) return;
+        if (!context.selection.content) return;
+
+        const dustBlocks = <HTMLElement[]>[...contentBody.children].sort((a, b) => Number((<HTMLElement>a).dataset.index) - Number((<HTMLElement>b).dataset.index));
+ 
+        if (dustBlocks.length !== context.selection.content.data.dusts.length) return;
+
+        gitCompleted = false;
+        window.electron.write(`./contents/${context.selection.content.data.title}.md`, context.selection.content.data.dusts.traverse().map(i => "\t".repeat(i.depth) + "- " + i.node.data.claim).join("\n"))
+        .then(() => {
+        window.electron.getGitChanges(context.selection.content!.data.title).then(arr => {
+            console.log(arr)
+            dustBlocks.forEach(b => delete b.dataset.gitUpdated)
+            for (const index of arr){
+                dustBlocks[index - 1].dataset.gitUpdated = "";
+            }
+            gitCompleted = true;
+        })})
+    })
+
+    function ContentDivisionLines(){
+        const wrapperAttr:Attribute<"div"> = {
+            inlineStyle: U(() => ({
+                position: "relative",
+                top: `calc(-${contentBody.scrollHeight}px - 15px + 0.5em)`,
+                left: "calc(1em - 2.5px)",
+                zIndex: "-1"
+            }))
+        }
+        return (
+            div(wrapperAttr)(
+                Repeat(i => {
+                    return div({
+                        inlineStyle: U(() => ({
+                            position: "absolute",
+                            top: i.from,
+                            height: `calc(${i.to} - ${i.from} - 1em)`,
+                            width: "0",
+                            borderRight: "1px solid #ccc",
+                            left: `${2 * i.depth}em`
+                        }))
+                    })()
+                }, () => {
+                    if (!context.selection.content) return [];
+                    const dustBlocks = <HTMLElement[]>[...contentBody.children].sort((a, b) => Number((<HTMLElement>a).dataset.index) - Number((<HTMLElement>b).dataset.index));
+                    if (dustBlocks.length !== context.selection.content.data.dusts.length) return [];
+                    return (
+                        context.selection.content.data
+                            .dusts.traverse()
+                            .map((ii, index, arr) => {
+                                return {
+                                    from: index,
+                                    to: arr.findIndex((ii2, index2) => ii2.depth <= ii.depth && index2 > index),
+                                    depth: ii.depth
+                                }
+                            })
+                            .filter(ft => ft.from + 1 < ft.to || ft.to < 0)
+                            .map(ft => ({
+                                from: dustBlocks[ft.from].style.top,
+                                to: ft.to < 0 ? (Number(dustBlocks[dustBlocks.length - 1].style.top.slice(0, -2)) + 20 + "px") : dustBlocks[ft.to].style.top,
+                                depth: ft.depth
+                            }))
+                    )
+                })
+            )
+        )
+    }
     function adjustDustBlocks(count:number){
         const dustBlocks = [...contentBody.children].sort((a, b) => Number((<HTMLElement>a).dataset.index) - Number((<HTMLElement>b).dataset.index));
         for (let i = dustBlocks.length - 1; i >= count; i--){
@@ -201,14 +345,14 @@ export function ContentEditor(){
         className: U(() => cursorWaitingTime >= 2 ? "blink" : "")
     })();
     const cursorStartHighlightBegin = span({inlineStyle: {color: "#00000000"}})();
-    const cursorStartHighlightEnd = span({inlineStyle: {color: "#00000000", background: "lightblue"}})();
+    const cursorStartHighlightEnd = span({inlineStyle: {color: "#00000000", background: "var(--text-selection-color)"}})();
     const cursorStartHighlight = (
         div({inlineStyle: {position: "absolute", top: "0", left: "0", zIndex: "-1"}})(
             cursorStartHighlightBegin,
             cursorStartHighlightEnd
         )
     )
-    const cursorEndHighlightBegin = span({inlineStyle: {color: "#00000000", background: "lightblue"}})();
+    const cursorEndHighlightBegin = span({inlineStyle: {color: "#00000000", background: "var(--text-selection-color)"}})();
     const cursorEndHighlightEnd = span({inlineStyle: {color: "#00000000"}})();
     const cursorEndHighlight = (
         div({inlineStyle: {position: "absolute", top: "0", left: "0", zIndex: "-1"}})(
@@ -224,19 +368,25 @@ export function ContentEditor(){
 
     return (
         div({ class: "page" })(
+            div({inlineStyle: {position: "absolute", top: "20px", right: "20px", display: "flex", gap: "15px"}})(
+                div()(LucideIcon(Scale, 24)),
+                div()(LucideIcon(Ellipsis, 24))
+            ),
+            ContentContextMenu(),
+            div({inlineStyle: {marginLeft: "5px", color: "#999"}})(() => `${context.selection.universe?.name ?? ""} / ${context.selection.nebula?.name ?? ""}`),
             div({ className: U(() => `content-editor ${context.selection.content ? "" : "hidden"}`.trim())})(
-                Bookmarks(),
                 Title({
                     get string(){
-                        return context.selection.content?.title ?? ""
+                        return context.selection.content?.data.title ?? ""
                     },
                     set string(v:string){
                         if (!context.selection.content) return;
-                        context.selection.content.title = v;
+                        context.selection.content.data.title = v;
                     }
                 }),
                 NebulaInfoArea(),
                 contentBody = ContentBody(),
+                ContentDivisionLines(),
                 textarea({
                     class: "content-text",
                     inlineStyle: {
@@ -294,7 +444,7 @@ export function ContentEditor(){
                             text.selectionEnd = text.selectionStart;
                         }
 
-                        const content = context.selection.content;
+                        const content = context.selection.content?.data;
                         if (!content) return;
                         context.data.registerModifiedContent(content);
                     },
@@ -424,21 +574,21 @@ export function ContentEditor(){
                                     text.selectionEnd = cursor - 1;
                                     return;
                                 }
+                                if (!line) return;
+                                if (line.slice(line.indexOf("]") + 1, line.length).split("").some(c => c !== "\t")) return;
+    
+                                [...contentBody.children].find(el => (<HTMLElement>el).dataset.index === lineNumber + "")?.remove();
+                                for (const block of contentBody.children){
+                                    const index = Number((block as HTMLElement).dataset.index);
+                                    if (index < lineNumber) continue;
+    
+                                    (block as HTMLElement).dataset.index = index - 1 + "";
+                                }
+    
+                                text.value = before.slice(0, before.length - line.length) + after;
+                                text.selectionStart = cursor - line.length;
+                                text.selectionEnd = text.selectionStart;
                             }
-                            if (!line) return;
-                            if (line.slice(line.indexOf("]") + 1, line.length).split("").some(c => c !== "\t")) return;
-
-                            [...contentBody.children].find(el => (<HTMLElement>el).dataset.index === lineNumber + "")?.remove();
-                            for (const block of contentBody.children){
-                                const index = Number((block as HTMLElement).dataset.index);
-                                if (index < lineNumber) continue;
-
-                                (block as HTMLElement).dataset.index = index - 1 + "";
-                            }
-
-                            text.value = before.slice(0, before.length - line.length) + after;
-                            text.selectionStart = cursor - line.length;
-                            text.selectionEnd = text.selectionStart;
                         }
                         else if (e.code === "BracketLeft" || (e.code === "Digit9" && e.shiftKey)){
                             const cursor = text.selectionStart;
@@ -463,13 +613,13 @@ export function ContentEditor(){
                             prevContent = context.selection.content;
 
                             if (prevContent){
-                                newRefContents = prevContent.dusts.traverse().map(i => splitIntoPieces(i.node.data.claim).filter(p => p.kind === "ref").map(p => p.text.slice(2, p.text.length - 2))).flat()
-                                text.value = prevContent.dusts.traverse()
+                                newRefContents = prevContent.data.dusts.traverse().map(i => splitIntoPieces(i.node.data.claim).filter(p => p.kind === "ref").map(p => p.text.slice(2, p.text.length - 2))).flat()
+                                text.value = prevContent.data.dusts.traverse()
                                     .map(i => `[${i.node.data.id}]${"\t".repeat(i.depth)}${i.node.data.claim}`)
                                     .join("\n")
                             }
                         }
-                        const content = context.selection.content;
+                        const content = context.selection.content?.data;
                         if (!content) return text.value;
                         if (!textFocused){
                             text.value = content.dusts.traverse()
@@ -522,7 +672,7 @@ export function ContentEditor(){
                             block.style.top = `${currentHeight}px`                            
                             block.style.marginLeft = `${lineInfos[i].depth * 2}rem`;
                             (<HTMLElement>block.children[0]).style.backgroundColor = "";
-                            currentHeight += Math.floor(block.scrollHeight);
+                            currentHeight += Math.floor(block.scrollHeight) + 10;
                         }
                         contentBody.style.height = currentHeight + "px"
 
@@ -578,7 +728,7 @@ export function ContentEditor(){
                                     cursorEndHighlightBegin.innerText = textLines[cursorEndPosition.line].slice(0, cursorEndPosition.index + 1).slice(textLines[cursorEndPosition.line].indexOf("]") + 1).trimStart().replaceAll(" ", "\u00A0");
                                     cursorEndHighlightEnd.innerText = textLines[cursorEndPosition.line].slice(cursorEndPosition.index + 1).replaceAll(" ", "\u00A0")
                                     for (let i = cursorPosition.line + 1; i < cursorEndPosition.line; i++){
-                                       (<HTMLElement>(<HTMLElement>dustBlocks[i]).children[0]).style.backgroundColor = "lightblue";
+                                       (<HTMLElement>(<HTMLElement>dustBlocks[i]).children[0]).style.backgroundColor = "var(--text-selection-color)";
                                     }
                                 }
                             }

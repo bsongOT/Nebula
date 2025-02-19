@@ -8,6 +8,7 @@ import { HexGrid } from "@/data-structure/hexgrid";
 import { div, inputText, btn, Attribute, ul, li } from "@/funcObject";
 import { Title } from "../../Components/Title";
 import { r3 } from "@/utils/math/consts";
+import { NebulaPageNavigator } from "./NebulaPageNavigator";
 
 export function NebulaPage(info:{nebula?:Nebula, pageAddition?: number}){
     const attr:Attribute<"div"> = {
@@ -45,6 +46,7 @@ export function NebulaPage(info:{nebula?:Nebula, pageAddition?: number}){
     return (
         div(attr)(
             div(mainPageAttr)(
+                NebulaPageNavigator(),
                 nebulaTitle,
                 div({
                     inlineStyle: U(() => ({
@@ -123,7 +125,7 @@ class ContentPoint {
     private getColor(){
         if (this.node.data.id < 0) return "white"
         if (context.drageeStar === this.node) return "green";
-        if (context.selection.content === this.node.data) return "red";
+        if (context.selection.content === this.node) return "red";
         if (context.scrollVisibleContentNodes.has(this.node)) return "black";
         return "#bbb";
     }
@@ -235,6 +237,7 @@ export function NebulaModel(info:{nebula?:Nebula}){
     const ctx = cv.getContext("2d")!;
     const boardSize = 30;
 
+    cv.style.display = "block";
     cv.style.width = "100%";
     cv.style.height = "100%";
     engine.updater.register(update)
@@ -264,7 +267,7 @@ export function NebulaModel(info:{nebula?:Nebula}){
             const neb = nebs[nebs.indexOf(info.nebula) + 1];
             if (!neb) return;
             context.selection.universe = context.data.universes.find(
-                u => u.nebulaLocations.find(nl => nl.nebula === neb) !== undefined
+                u => u.nebulas.includes(neb)
             )
             info.nebula = neb;
         }
@@ -272,7 +275,7 @@ export function NebulaModel(info:{nebula?:Nebula}){
             const neb = nebs[nebs.indexOf(info.nebula) - 1];
             if (!neb) return;
             context.selection.universe = context.data.universes.find(
-                u => u.nebulaLocations.find(nl => nl.nebula === neb) !== undefined
+                u => u.nebulas.includes(neb)
             )
             info.nebula = neb;
         }
@@ -284,6 +287,7 @@ export function NebulaModel(info:{nebula?:Nebula}){
     function update(){
         if (!info.nebula) return;
         cv.width = cv.scrollWidth;
+        cv.height = 0;
         cv.height = cv.scrollHeight;
 
         const grid = new HexGrid(H(1,1,1).scale(boardSize))

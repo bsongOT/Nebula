@@ -29,7 +29,7 @@ export function NestingList(){
     document.addEventListener("keyup", e => {
         if (!context.selection.nebula) return;
         if (context.selection.nebula.id < 0) return;
-        const selectedNode = context.selection.nebula.tree.traverse().find(i => i.node.data === context.selection.content)?.node;
+        const selectedNode = context.selection.content
         if (!selectedNode) return;
         if (!context.isSideActive) return;
         const tree = context.selection.nebula.tree;
@@ -65,7 +65,7 @@ export function NestingList(){
         }
     })
     return (
-        div({ inlineStyle: { width: "300px" } })(
+        div({ inlineStyle: { width: "250px" } })(
             ul(attr)(Repeat(ContentItem,
                 () => {
                     if (!context.selection.nebula) return []
@@ -85,9 +85,8 @@ function ContentItem(i:{depth: number, node: TreeNode<Content>}){
     }
     function background(isFixed:boolean){
         if (!context.selection.nebula) return "";
-        const selectedNode = context.selection.nebula.tree.traverse().find(i => i.node.data === context.selection.content)?.node;
 
-        if (selectedNode === i.node) {
+        if (context.selection.content === i.node) {
             if (context.isSideActive) return "skyblue";
             else return "#ccc";
         }
@@ -102,7 +101,7 @@ function ContentItem(i:{depth: number, node: TreeNode<Content>}){
             const isFixed = item.dataset.scrollArea === "false" && isDescendantInScrollArea(i.node);
 
             return {
-                paddingLeft: `${i.depth * 10}px`,
+                padding: `2px 0 2px ${10 + i.depth * 15}px`,
                 listStyle: "none",
                 background: background(isFixed),
                 position: isFixed ? "sticky" : "",
@@ -116,12 +115,12 @@ function ContentItem(i:{depth: number, node: TreeNode<Content>}){
                 context.secondSelection = {
                     universe: context.selection.universe,
                     nebula: context.selection.nebula,
-                    content: i.node.data
+                    content: i.node
                 }
                 context.tabs.push(context.secondSelection);
                 context.screenSplit = true;
             }
-            else context.selection.content = i.node.data;
+            else context.selection.content = i.node;
         }
     }
     return (

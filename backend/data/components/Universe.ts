@@ -5,13 +5,13 @@ import { Relation } from "./Relation";
 
 export class Universe implements DataComponent{
   name: string;
-  nebulaLocations:NebulaLocation[];
+  nebulas:Nebula[];
   relations:Relation[];
   id: number;
   
   constructor(info?: Partial<Universe>){
     this.name = info?.name ?? "Unnamed";
-    this.nebulaLocations = info?.nebulaLocations ?? []
+    this.nebulas = info?.nebulas ?? []
     this.relations = info?.relations ?? []
     this.id = info?.id ?? -1;
   }

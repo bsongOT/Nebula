@@ -1,13 +1,17 @@
 import { engine } from "@/engine";
 import { Attribute, button, div } from "@/funcObject"
 import context from "../../context";
+import { LucideIcon } from "../../Components/utils/Icon";
+import { ChevronLeft, ChevronRight } from "lucide";
 
 export function FilePage(){
     const attr:Attribute<"div"> = {
         className: "page",
         inlineStyle: {
             position: "relative",
-            paddingTop: "50px"
+            paddingTop: "50px",
+            display: "flex",
+            alignItems: "center"
         }
     }
     const closeButtonAttr:Attribute<"button"> = {
@@ -27,11 +31,48 @@ export function FilePage(){
             context.screenSplit = false;
         }
     }
+    const prevButtonAttr:Attribute<"div"> = {
+        className: "hover-eee",
+        inlineStyle: {
+            border: "none",
+            height: "30px",
+            borderRadius: "50%"
+        },
+        onclick: () => {
+            if (context.openedFile !== "" && context.currentPieceElement){
+                const arr = [...document.querySelectorAll<HTMLElement>(".piece-file")];
+                if (arr.length <= 1) return;
+                context.currentPieceElement = arr.at(arr.indexOf(context.currentPieceElement) - 1);
+                context.currentPieceElement?.click()
+            }
+        }
+    }
+    const nextButtonAttr:Attribute<"div"> = {
+        className: "hover-eee",
+        inlineStyle: {
+            border: "none",
+            height: "30px",
+            borderRadius: "50%"
+        },
+        onclick: () => {
+            if (context.openedFile !== "" && context.currentPieceElement){
+                const arr = [...document.querySelectorAll<HTMLElement>(".piece-file")];
+                if (arr.length <= 1) return;
+                context.currentPieceElement = arr.at((arr.indexOf(context.currentPieceElement) + 1) % arr.length);
+                context.currentPieceElement?.click()
+            }
+        }
+    }
 
     const img = document.createElement("img");
     const video = document.createElement("video");
     const audio = document.createElement("audio");
     const iframe = document.createElement("iframe");
+
+    iframe.style.border = "none"
+    iframe.style.maxWidth = "100%"
+    video.style.maxWidth = "100%"
+    img.style.maxWidth = "100%"
 
     iframe.onload = () => {
         if (context.iframeOnload === "") return;
@@ -66,10 +107,14 @@ export function FilePage(){
     return (
         div(attr)(
             button(closeButtonAttr)("X"),
-            img,
-            video,
-            audio,
-            iframe
+            div(prevButtonAttr)(LucideIcon(ChevronLeft, 30)),
+            div({inlineStyle: {flexGrow: "1", display: "flex", justifyContent: "center", alignItems: "center"}})(
+                img,
+                video,
+                audio,
+                iframe
+            ),
+            div(nextButtonAttr)(LucideIcon(ChevronRight, 30))
         )
     )
 }

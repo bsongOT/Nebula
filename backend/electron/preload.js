@@ -1,19 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ElectronAPI = void 0;
-var electron_1 = require("electron");
-var ElectronAPI = /** @class */ (function () {
-    function ElectronAPI() {
-        this.workspaceExists = function () { return electron_1.ipcRenderer.invoke('workspace-exists'); };
-        this.setWorkspace = function (path) { return electron_1.ipcRenderer.invoke('set-workspace', path); };
-        this.getWorkspace = function () { return electron_1.ipcRenderer.invoke("get-workspace"); };
-        this.selectWorkspace = function () { return electron_1.ipcRenderer.invoke('select-workspace'); };
-        this.read = function (path) { return electron_1.ipcRenderer.invoke('read', path); };
-        this.write = function (path, text) { return electron_1.ipcRenderer.invoke('write', path, text); };
-        this.exists = function (relativePath) { return electron_1.ipcRenderer.invoke("exists", relativePath); };
-        this.openDialogFile = function () { return electron_1.ipcRenderer.invoke("open-dialog-file"); };
+const electron_1 = require("electron");
+class ElectronAPI {
+    constructor() {
+        this.workspaceExists = () => electron_1.ipcRenderer.invoke('workspace-exists');
+        this.setWorkspace = (path) => electron_1.ipcRenderer.invoke('set-workspace', path);
+        this.getWorkspace = () => electron_1.ipcRenderer.invoke("get-workspace");
+        this.selectWorkspace = () => electron_1.ipcRenderer.invoke('select-workspace');
+        this.read = (path) => electron_1.ipcRenderer.invoke('read', path);
+        this.write = (path, text) => electron_1.ipcRenderer.invoke('write', path, text);
+        this.exists = (relativePath) => electron_1.ipcRenderer.invoke("exists", relativePath);
+        this.openDialogFile = () => electron_1.ipcRenderer.invoke("open-dialog-file");
+        this.getGitChanges = (contentName) => electron_1.ipcRenderer.invoke("get-git-changes", contentName);
+        this.gitListFiles = () => electron_1.ipcRenderer.invoke("git-list-files");
+        this.gitCommit = () => electron_1.ipcRenderer.invoke("git-commit");
+        this.gitStatus = () => electron_1.ipcRenderer.invoke("git-status");
+        this.getDirectory = (path) => electron_1.ipcRenderer.invoke("get-directory", path);
+        this.removeFile = (path) => electron_1.ipcRenderer.invoke("remove-file", path);
     }
-    return ElectronAPI;
-}());
+}
 exports.ElectronAPI = ElectronAPI;
 electron_1.contextBridge.exposeInMainWorld('electron', new ElectronAPI());

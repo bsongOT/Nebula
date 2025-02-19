@@ -20,20 +20,13 @@ export class SystemUniverse extends Universe {
         this.isolatedNebula = this.getIsolatedNebula();
         this.importanceNebula = this.getImportanceNebula();
         this.mentionNebula = this.getMentionNebula();
-
-        this.nebulaLocations.push({
-            nebula: this.dayNebula,
-            start: H(14, 0, 0)
-            }, {
-            nebula: this.isolatedNebula,
-            start: H(12, 0, 2)
-            }, {
-            nebula: this.importanceNebula,
-            start: H(11, 0, 3)
-            }, {
-            nebula: this.mentionNebula,
-            start: H(9, 0, 5)
-        })
+        
+        this.nebulas.push(
+            this.dayNebula,
+            this.isolatedNebula,
+            this.importanceNebula,
+            this.mentionNebula
+        )
     }
     
     private getIsolatedNebula() {

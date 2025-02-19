@@ -7,7 +7,7 @@ export type Selection = {
     universe?: Universe,
     relation?: Relation,
     nebula?: Nebula,
-    content?: Content,
+    content?: TreeNode<Content>,
 }
 const context = {
     data: await Data.create(),
@@ -15,17 +15,17 @@ const context = {
     selection: {} as Selection,
     secondSelection: undefined as Selection | undefined,
     screenSplit: false,
-    selectedNebulas: new Set<Nebula>(),
-    contentPage: {
-        viewMode: "edit" as "edit" | "kanban"
-    },
+    contentPageViewMode: "edit" as "edit" | "kanban",
     openedFile: "",
     iframeOnload: "",
     currentNebulaPageNumber: 0,
+
     searching: false,
     searchString: "",
     searchIndex: 0,
-    popupPage: "" as "" | "notice" | "clipboard" | "query" | "random",
+    
+    popupPage: "" as "" | "notice" | "clipboard" | "query" | "random" | "git",
+    currentPieceElement: undefined as HTMLElement | undefined,
     isSideActive: false,
     isOpenedPageNavigator: false,
     isRecordingContent: false,

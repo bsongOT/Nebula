@@ -1,4 +1,4 @@
-import { Tree } from "@/data-structure/tree";
+import { Tree, TreeNode } from "@/data-structure/tree";
 import { Repeat, U } from "@/engine";
 import { div, inputText, li, span, ul } from "@/funcObject";
 import context from "../../context";
@@ -7,24 +7,24 @@ import { Content } from "../../../backend/data/Data";
 import { Dust } from "../../../backend/data/components/Dust";
 
 export function RelationDustSet(){
-    const has = <T>(tree:Tree<T>, data:T) => tree.traverse().find(i => i.node.data === data);
+    const has = <T>(tree:Tree<T>, node:TreeNode<T>) => tree.traverse().some(i => i.node.data === node);
     return (
         ul({inlineStyle: {padding: "0", margin: "0"}})(
             Repeat(RelationDustSingle,
             () => {
                 if (!context.selection.content) return [];
 
-                const rels1 = context.data.relations.filter(r => !!has(r.mainTree.tree, context.selection.content));
-                const rels2 = context.data.relations.filter(r => !!has(r.secondTree.tree, context.selection.content));
+                const rels1 = context.data.relations.filter(r => has(r.mainTree.tree, context.selection.content!));
+                const rels2 = context.data.relations.filter(r => has(r.secondTree.tree, context.selection.content!));
                 return [
                     ...rels1.map(r => ({
                         relation: r,
-                        opponent: r.secondTree.tree.leafs.map(n => n.data),
+                        opponent: r.secondTree.tree.leafs,
                         from: "main" as "main" | "second"
                     })),
                     ...rels2.map(r => ({
                         relation: r,
-                        opponent: r.mainTree.tree.leafs.map(n => n.data),
+                        opponent: r.mainTree.tree.leafs,
                         from: "second" as "main" | "second"
                     }))
                 ]
@@ -32,7 +32,7 @@ export function RelationDustSet(){
         ))
     )
 }
-function RelationDustSingle(info:{relation:Relation, opponent:Content[], from:"main"|"second"}){
+function RelationDustSingle(info:{relation:Relation, opponent:TreeNode<Content>[], from:"main"|"second"}){
     return (
         li({inlineStyle: {listStyle: "none"}})([
             div({inlineStyle: {display: "flex", alignItems: "center", marginLeft: "10px"}})([
@@ -48,7 +48,7 @@ function RelationDustSingle(info:{relation:Relation, opponent:Content[], from:"m
         ])
     )
 }
-function RelationDust(info:{relation:Relation, main:Content, second:Content}){
+function RelationDust(info:{relation:Relation, main:TreeNode<Content>, second:TreeNode<Content>}){
     let isInputting = false;
     return (
         ul({inlineStyle: {listStyle: "disc"}})([
@@ -59,13 +59,13 @@ function RelationDust(info:{relation:Relation, main:Content, second:Content}){
                         context.selection.nebula = context.selection.content === info.main ? info.relation.secondTree : info.relation.mainTree;
                         context.selection.content = context.selection.content === info.main ? info.second : info.main
                     }
-                })(() => context.selection.content === info.main ? info.second.title : info.main.title)
+                })(() => context.selection.content === info.main ? info.second.data.title : info.main.data.title)
             ]),
             li({inlineStyle: {marginLeft: "20px"}})([
                 inputText({
                     value: U(text => {
                         if (isInputting) return text.value;
-                        const cell = info.relation.table.find(i => i.main === info.main && i.second === info.second)?.state;
+                        const cell = info.relation.table.find(i => i.main === info.main.data && i.second === info.second.data)?.state;
                         if (!cell) return '';
                         if (typeof cell === 'number') return "";
                         return cell.claim;
@@ -77,10 +77,10 @@ function RelationDust(info:{relation:Relation, main:Content, second:Content}){
                     },
                     oninput: function(e) {
                         const text = this as HTMLInputElement;
-                        const cell = info.relation.table.find(i => i.main === info.main && i.second === info.second);
+                        const cell = info.relation.table.find(i => i.main === info.main.data && i.second === info.second.data);
                         const realCell = cell ?? {
-                            main: info.main,
-                            second: info.second,
+                            main: info.main.data,
+                            second: info.second.data,
                             state: new Dust({claim: text.value})
                         }
                         if (!cell) info.relation.table.push(realCell);

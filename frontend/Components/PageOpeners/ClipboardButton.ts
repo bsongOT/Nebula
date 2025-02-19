@@ -36,8 +36,8 @@ export function ClipboardButton() {
                 onclick: e => {
                     if (e.ctrlKey || e.metaKey){
                         if (context.selection.content) {
-                            if (context.clipboardLists.content.includes(context.selection.content)) return;
-                            return context.clipboardLists.content.push(context.selection.content);
+                            if (context.clipboardLists.content.includes(context.selection.content.data)) return;
+                            return context.clipboardLists.content.push(context.selection.content.data);
                         }
                         if (context.selection.nebula) {
                             if (context.clipboardLists.nebula.includes(context.selection.nebula)) return;

@@ -45,14 +45,7 @@ type PackedRelation = {
 type PackedUniverse = {
     id:number, 
     name:string, 
-    nebulaLocations:{
-        nebula: number,
-        start: {
-            x: number,
-            y: number,
-            z: number
-        }
-    }[],
+    nebulas:number[],
     relations:number[]
 }
 type PackedDayNebula = {
@@ -73,6 +66,38 @@ export class DataSaver {
         await this.saveUniverses(data.universes);
         await this.saveDayNebula(data.systemUniverse.dayNebula);
         await this.saveFileAliases(data.fileAliases);
+    }
+    public static async saveContentsExport(contents:DataCollection<Content>){
+        const fileNames = await window.electron.getDirectory("./contents");
+        const contentsArr = contents.all();
+
+        if (fileNames === undefined) return;
+        for (const fileName of fileNames.filter(fn => contentsArr.every(c => `${c.title}.md` !== fn))){
+            window.electron.removeFile(`./contents/${fileName}`);
+        }
+        for (const content of contentsArr){
+            window.electron.write(`./contents/${content.title}.md`, (
+                content.dusts.traverse()
+                    .map(d => "\t".repeat(d.depth) + "- " + d.node.data.claim)
+                    .join("\n")
+            ))
+        }
+    }
+    public static async saveNebulasExport(nebulas:DataCollection<Nebula>){
+        const fileNames = await window.electron.getDirectory("./nebulas");
+        const nebulaArrs = nebulas.all();
+
+        if (fileNames === undefined) return;
+        for (const fileName of fileNames.filter(fn => nebulaArrs.every(n => `${n.name}.md` !== fn))){
+            window.electron.removeFile(`./nebulas/${fileName}`);
+        }
+        for (const nebula of nebulaArrs){
+            window.electron.write(`./nebulas/${nebula.name}.md`, (
+                nebula.tree.traverse()
+                    .map(i => "\t".repeat(i.depth) + "- [[" + i.node.data.title + "]]")
+                    .join("\n")
+            ))
+        }
     }
     private static async saveDusts(dusts:DataCollection<Dust>){
         const electron = window.electron;
@@ -119,10 +144,7 @@ export class DataSaver {
         const array:PackedUniverse[] = universes.map(u => ({
             id: u.id,
             name: u.name,
-            nebulaLocations: u.nebulaLocations.map(nl =>({
-                nebula: nl.nebula.id,
-                start: nl.start
-            })),
+            nebulas: u.nebulas.map(n => n.id),
             relations: u.relations.map(r => r.id)
         }))
         await electron.write("./nebula/universes.json", JSON.stringify(array, null, 1))
@@ -179,10 +201,7 @@ export class DataLoader {
             }))
         }
         for (const universe of universes.all()){
-            universe.nebulaLocations = universe.nebulaLocations.map(nl => ({
-                nebula: nebulas.get(nl.nebula.id) ?? nl.nebula,
-                start: nl.start
-            }))
+            universe.nebulas = universe.nebulas.map(n => nebulas.get(n.id) ?? n);
             universe.relations = universe.relations.map(r => relations.get(r.id) ?? r)
         }
         dayNebula.tree = dayNebula.tree.map(c => c.id < 0 ? c : (contents.get(c.id) ?? c));
@@ -272,10 +291,7 @@ export class DataLoader {
         return new DataCollection(array.map(u => new Universe({
             id: u.id,
             name: u.name,
-            nebulaLocations: u.nebulaLocations.map(nl => ({
-                nebula: new Nebula({id: nl.nebula}),
-                start: H(nl.start.x, nl.start.y, nl.start.z)
-            })),
+            nebulas: u.nebulas.map(n => new Nebula({id: n})),
             relations: u.relations.map(r => new Relation({id: r, mainTree: new Nebula(), secondTree: new Nebula()}))
         } satisfies Universe)))
     }

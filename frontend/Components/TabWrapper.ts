@@ -32,7 +32,7 @@ function Tab(info: Selection) {
                 }
             }
         })([
-            div()(() => info.content?.title ?? info.nebula?.name ?? info.universe?.name ?? "Home"),
+            div()(() => info.content?.data.title ?? info.nebula?.name ?? info.universe?.name ?? "Home"),
             span({
                 inlineStyle: {
                     marginLeft: "5px"

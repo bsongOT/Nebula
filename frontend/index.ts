@@ -7,21 +7,26 @@ import context from "./context";
 import { TabWrapper } from "./Components/TabWrapper";
 import { SearchPage } from "./Pages/SearchPage";
 import { NoticePage } from "./Pages/NoticePage";
-import { UniversePage } from "./Pages/UniversePage";
 import { NoSelectionPage } from "./Pages/NoSelectionPage";
 import { NotificationButton } from "./Components/PageOpeners/NotificationButton";
 import { RelationPage } from "./Pages/RelationPage";
 import { ClipboardButton } from "./Components/PageOpeners/ClipboardButton";
 import { Carousel } from "./Components/SideMenus/Carousel";
-import { Breadcrumb } from "./Components/SideMenus/Breadcrumb";
-import { NebulaPageNavigator } from "./Pages/NebulaPage/NebulaPageNavigator";
 import { SearchBar } from "./Components/SearchBar";
 import { RandomButton } from "./Components/PageOpeners/RandomButton";
 import { SettingButton } from "./Components/PageOpeners/SettingButton";
 import { QueryButton } from "./Components/PageOpeners/QueryButton";
 import { FilePage } from "./Pages/ContentPage/FilePage";
 import { ClipboardPage } from "./Pages/ClipboardPage";
+import { ChevronRight, createIcons, icons } from "lucide";
+import { mentionContextMenu } from "./Components/MentionContextMenu";
+import { SearchButton } from "./Components/PageOpeners/SearchButton";
+import { GitButton } from "./Components/PageOpeners/GitButton";
+import { GitPage } from "./Pages/GitPage";
 
+document.addEventListener("click", () => {
+  mentionContextMenu.remove();
+})
 document.addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.code === 'Slash'){
     context.screenSplit = !context.screenSplit;
@@ -52,6 +57,8 @@ document.addEventListener("click", e => {
   context.isSideActive = document.querySelector(".left-side")?.contains(elt) ?? false;
 })
 
+context.selection.universe = context.data.systemUniverse;
+context.selection.nebula = context.data.systemUniverse.dayNebula;
 context.tabs.push(context.selection);
 
 async function loadWorkspace(){
@@ -65,84 +72,53 @@ async function loadWorkspace(){
 loadWorkspace()
 
 body(
-  div({ class: "top-menu" })(
-    SearchBar()
-  ),
-  div({ class: "top-fixed-menu" })(
-    RandomButton(),
-    QueryButton(),
-    ClipboardButton(),
-    NotificationButton(),
-    SettingButton()
-  ),
   div({ class: "tap-panel" })(
     TabWrapper(),
   ),
+  div({ class: "side-button-container" })(
+    SearchButton(),
+    NotificationButton(),
+    ClipboardButton(),
+    QueryButton(),
+    RandomButton(),
+    GitButton(),
+    SettingButton()
+  ),
   div({ class: "left-side" })(
-    Breadcrumb(),
     Carousel()
   ),
   div({ class: 'main-view' })(
     (() => {
       const arr = new Array<HTMLElement>();
-      const nebulaPageNavigator = NebulaPageNavigator();
       const filePage = FilePage();
       const contentPage = ContentEditor();
       const nebulaPage = NebulaPage({get nebula(){return context.selection.nebula}});
       const relationPage = RelationPage();
-      const universePage = UniversePage();
       const noSelectionPage = NoSelectionPage();
 
       const secondContentPage = ContentEditor();
-      const secondNebulaPage = NebulaPage({get nebula(){return context.secondSelection?.nebula ?? context.selection?.nebula}, pageAddition: 1})
-      const secondRelationPage = RelationPage();
-      const secondUniversePage = UniversePage();
-      const secondNoSelectionPage = div({class: "page"})();
 
       engine.updater.register(() => {
         arr.splice(0, arr.length);
-        if (context.selection.nebula) arr.push(nebulaPageNavigator);
         if (context.screenSplit){
-          arr.push(noSelectionPage, universePage);
+          arr.push(nebulaPage, contentPage);
           if (context.secondSelection){
-            if (context.selection.content) arr[1] = contentPage;
-            else if (context.selection.nebula) arr[1] = nebulaPage;
-            else if (context.selection.relation) arr[1] = relationPage;
-            else if (context.selection.universe) arr[1] = universePage;
-            else arr[1] = noSelectionPage;
+            if (context.selection.content) arr[0] = contentPage;
+            else if (context.selection.nebula) arr[0] = nebulaPage;
+            else if (context.selection.relation) arr[0] = relationPage;
+            else arr[0] = noSelectionPage;
 
-            if (context.secondSelection.content) arr[2] = secondContentPage;
-            else if (context.secondSelection.nebula) arr[2] = secondNebulaPage;
-            else if (context.secondSelection.relation) arr[2] = secondRelationPage;
-            else if (context.secondSelection.universe) arr[2] = secondUniversePage;
-            else arr[2] = secondNoSelectionPage;
+            if (context.secondSelection.content) arr[1] = secondContentPage;
           }
           else {
             if (context.selection.content) {
               if (context.openedFile === ""){
-                arr[1] = nebulaPage;
-                arr[2] = contentPage;
+                arr[0] = contentPage
               }
               else {
-                arr[1] = contentPage;
-                arr[2] = filePage;
+                arr[0] = contentPage;
+                arr[1] = filePage;
               }
-            }
-            else if (context.selection.nebula) {
-              arr[1] = relationPage;
-              arr[2] = nebulaPage;
-            }
-            else if (context.selection.relation) {
-              arr[1] = universePage;
-              arr[2] = relationPage;
-            }
-            else if (context.selection.universe) {
-              arr[1] = noSelectionPage;
-              arr[2] = universePage;
-            }
-            else {
-              arr[1] = secondNoSelectionPage;
-              arr[2] = noSelectionPage;
             }
           }
         }
@@ -150,7 +126,6 @@ body(
           if (context.selection.content) return arr.push(contentPage);
           if (context.selection.nebula) return arr.push(nebulaPage);
           if (context.selection.relation) return arr.push(relationPage);
-          if (context.selection.universe) return arr.push(universePage);
           return arr.push(noSelectionPage)
         }
       })
@@ -159,5 +134,6 @@ body(
   ),
   SearchPage(),
   NoticePage(),
-  ClipboardPage()
+  ClipboardPage(),
+  GitPage()
 );

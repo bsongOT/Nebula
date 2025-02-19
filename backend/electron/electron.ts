@@ -1,22 +1,79 @@
-import { protocol, net, ipcMain, dialog } from "electron";
+import { protocol, net, ipcMain, dialog, nativeImage } from "electron";
 import { app, BrowserWindow } from "electron/main";
 import * as fs from 'fs';
 import * as path from "path";
-import * as S from "electron-store";
+import Store from "electron-store";
+import { simpleGit } from "simple-git";
 
 app.commandLine.appendSwitch('disable-site-isolation-trials')
-
 const createWindow = async () => {
-    const store = new (S as any)() as S<Record<string, string>>;
+    const store = new Store<Record<string, string>>();
     const window = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1300,
+        height: 770,
+        titleBarStyle: "hidden",
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             webSecurity: false
-        }
+        },
+        icon: path.join(__dirname, "../../logo.icns")
     });
+    const git = simpleGit(store.get("workspace-path"));
+    git.addConfig("core.quotepath", "false")
     
+    if (!fs.existsSync(`${store.get("workspace-path")}/.git`)){
+        await git.init();
+    }
+    if (!fs.existsSync(`${store.get("workspace-path")}/.gitignore`)){
+        fs.writeFileSync(store.get("workspace-path") + "/.gitignore", ".DS_Store", {flag: "w"});
+    }
+
+    ipcMain.handle('get-git-changes', async (_, contentName) => {
+        const diffs = await git.diff(['--unified=0']);
+        const lines = diffs.split("\n");
+        const targetStart = lines.findIndex(l => l.startsWith('diff --git') && l.endsWith(`${contentName}.md`));
+        if (targetStart < 0) return [];
+        const targetEndExpect = lines.findIndex((l, i) => l.startsWith('diff --git') && i > targetStart);
+        const targetEnd = targetEndExpect >= 0 ? targetEndExpect : lines.length;
+
+        return (
+            lines
+                .slice(targetStart, targetEnd)
+                .filter(l => l.startsWith("@@"))
+                .map(
+                    l => {
+                        const part = l.split(' ').find(p => p.startsWith("+"))
+                        if (part === undefined) return []
+                        const numbers = part.slice(1).split(",");
+                        const startLine = Number(numbers[0]);
+                        const numLines = numbers.length > 1 ? Number(numbers[1]) : 1;
+
+                        return Array.from({length: numLines}).fill(0).map((_, i) => startLine + i);
+                    }
+                ).flat()
+        )
+    })
+    ipcMain.handle('get-directory', async (_, relativePath) => {
+        return fs.readdirSync(path.join(store.get("workspace-path"), relativePath));
+    })
+    ipcMain.handle('remove-file', async (_, relativePath) => {
+        fs.rmSync(path.join(store.get("workspace-path"), relativePath))
+    })
+    ipcMain.handle('git-list-files', async () => {
+        return await git.raw(['ls-files'])
+    })
+    ipcMain.handle('git-status', async () => {
+        const status = await git.status()
+        return {
+            untracked: status.not_added,
+            modified: status.modified,
+            deleted: status.deleted
+        };
+    })
+    ipcMain.handle('git-commit', async () => {
+        await git.add(".");
+        await git.commit("-");
+    })
     ipcMain.handle('workspace-exists', () => {
         return fs.existsSync(store.get("workspace-path"));
     })

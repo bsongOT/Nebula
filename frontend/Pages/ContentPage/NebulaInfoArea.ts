@@ -4,18 +4,17 @@ import { div, btn } from "@/funcObject";
 import { Content, Nebula } from "../../../backend/data/Data";
 import context from "../../context";
 import { receiveMessage, splitIntoPieces } from "../../utils/utils";
-import { MentionSelector } from "./MentionSelector";
 
 export function NebulaInfoArea(){
     function getConnectedNebulas(){
         if (!context.selection.content) return [];
         return [
-            context.data.systemUniverse.nebulaLocations[0].nebula,
-            ...context.data.nebulas.filter(n => n.tree.traverse().some(i => i.node.data === context.selection.content))
+            context.data.systemUniverse.dayNebula,
+            ...context.data.nebulas.filter(n => n.tree.traverse().some(i => i.node.data === context.selection.content?.data))
         ]
     }
     function getUniverseFrom(nebula:Nebula){
-        const univ = context.data.universes.find(u => !!u.nebulaLocations.find(nl => nl.nebula === context.selection.nebula));
+        const univ = context.data.universes.find(u => u.nebulas.includes(nebula));
         if (univ) return univ;
         if (nebula.id < 0) return context.data.systemUniverse;
         return;
@@ -26,7 +25,7 @@ export function NebulaInfoArea(){
                 div({className: "circle-button hover-skyblue", inlineStyle: {marginRight: "15px", color: "coral"}, onclick: () => {
                     const connectedNebulas = getConnectedNebulas();
                     context.selection.nebula = connectedNebulas[connectedNebulas.indexOf(context.selection.nebula!) - 1] ?? context.selection.nebula;
-                    context.selection.universe = getUniverseFrom(context.selection.nebula) ?? context.data.systemUniverse;
+                    context.selection.universe = getUniverseFrom(context.selection.nebula) ?? context.data.isolatedUniverse;
                 }})("<"),
                 div({inlineStyle: U(() => ({
                     display: "flex",
@@ -42,33 +41,9 @@ export function NebulaInfoArea(){
                 div({className: "circle-button hover-skyblue", inlineStyle: {marginLeft: "15px", color: "coral"}, onclick: () => {
                     const connectedNebulas = getConnectedNebulas();
                     context.selection.nebula = connectedNebulas[connectedNebulas.indexOf(context.selection.nebula!) + 1] ?? context.selection.nebula;
-                    context.selection.universe = getUniverseFrom(context.selection.nebula) ?? context.data.systemUniverse;
+                    context.selection.universe = getUniverseFrom(context.selection.nebula) ?? context.data.isolatedUniverse;
                 }})(">"),
-            ),
-            btn({onclick: async () => {
-                if (!context.selection.content) return;
-                const nebulaName = await receiveMessage("새 네뷸라의 이름을 입력해주세요.");
-                if (nebulaName === "") return;
-                context.selection.universe = context.data.systemUniverse;
-                context.selection.nebula = context.data.addNebula(new Nebula({name: nebulaName}))
-                context.selection.nebula!.tree.insert(new TreeNode(context.selection.content))
-            }})("현재 컨텐츠로 네뷸라 시작하기"),
-            btn({
-                onclick: async () => {
-                    const content = context.selection.content;
-                    if (!content) return;
-                    const contents = (await new Promise<Content[]>(resolve => document.body.append(MentionSelector(resolve)))).sort((a, b) => a.title.length - b.title.length);
-                    for (const dust of content.dusts.traverse().map(i => i.node.data)){
-                        const pieces = splitIntoPieces(dust.claim);
-                        for (const c of contents){
-                            dust.claim = pieces.map(p => {
-                                if (p.kind === "text") return p.text.replaceAll(c.title, `[[${c.title}]]`);
-                                else return p.text
-                            }).join("")
-                        }
-                    }
-                }
-            })("언급 연결하기")
+            )
         )
     )
 }
