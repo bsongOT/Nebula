@@ -1,4 +1,5 @@
 import { div, button } from "@/funcObject";
+import context from "../../context";
 
 export function QueryButton(){
     return (
@@ -10,6 +11,9 @@ export function QueryButton(){
                     fontWeight: "1000",
                     color: "white",
                     fontSize: "30px",
+                },
+                onclick: () => {
+                    context.popupPage = "query"
                 }
             })("Q")
         )

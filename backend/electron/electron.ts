@@ -28,6 +28,61 @@ const createWindow = async () => {
         fs.writeFileSync(store.get("workspace-path") + "/.gitignore", ".DS_Store", {flag: "w"});
     }
 
+    ipcMain.handle('get-git-changed-lines', async (_, contentName) => {
+        const filePath = path.join(store.get("workspace-path"), `./contents/${contentName}.md`);
+        const diffs = await git.diff(["--unified=0", filePath]);
+        const dlines = diffs.split("\n");
+        const lines = dlines.slice(dlines.findIndex(l => l.startsWith("@@")));
+        const fileLines = fs.readFileSync(filePath, "utf8").toString().split("\n");
+        const totalLines = new Array<{line: string, index: number, state: "no-change" | "inserted" | "deleted"}>()
+        const lineInfos = ( lines
+            .map((line, index) => ({line, index}))
+            .filter(l => l.line.startsWith("@@"))
+            .map(
+                l => {
+                    const parts = l.line.split(" ");
+                    const deletedPart = (parts.find(p => p.startsWith("-")) ?? "-0,0").slice(1).split(",");
+                    const insertedPart = (parts.find(p => p.startsWith("+")) ?? "+0,0").slice(1).split(",");
+                    const deleteStart = Number(deletedPart[0]);
+                    const deleteCount = (deletedPart.length > 1 ? Number(deletedPart[1]) : 1);
+                    return {
+                        deletedLines: lines.slice(l.index, l.index + deleteCount).map((str, i) => ({
+                            line: str.slice(1),
+                            index: deleteStart + i
+                        })),
+                        insertStart: Number(insertedPart[0]),
+                        insertEnd: Number(insertedPart[0]) + (insertedPart.length > 1 ? Number(insertedPart[1]) : 1)
+                    }
+                }
+            )
+        )
+        let i = 0;
+        for (const lineInfo of lineInfos){
+            totalLines.push(...fileLines.slice(i, lineInfo.insertStart).map((l, index) => ({
+                line: l,
+                index: i + index,
+                state: "no-change" as const
+            })))
+            totalLines.push(...lineInfo.deletedLines.map(li => ({
+                line: li.line,
+                index: li.index,
+                state: "deleted" as const
+            })))
+            totalLines.push(...fileLines.slice(lineInfo.insertStart, lineInfo.insertEnd).map((l, index) => ({
+                line: l,
+                index: lineInfo.insertStart + index,
+                state: "inserted" as const
+            })))
+            i = lineInfo.insertEnd;
+        }
+        totalLines.push(...fileLines.slice(lineInfos[lineInfos.length - 1].insertEnd).map((l, index) => ({
+            line: l,
+            index: i + index,
+            state: "no-change" as const
+        })))
+        
+        return totalLines;
+    })
     ipcMain.handle('get-git-changes', async (_, contentName) => {
         const diffs = await git.diff(['--unified=0']);
         const lines = diffs.split("\n");

@@ -5,17 +5,7 @@ import context from "../context";
 export function ClipboardPage(){
     let selectedOption = "content" as "content" | "nebula" | "universe";
 
-    const style:Attribute<"div">["inlineStyle"] = U(() => ({
-        position: "fixed",
-        left: "0",
-        width: "100%",
-        height: "100%",
-        zIndex: "1",
-        backdropFilter: "blur(5px) brightness(80%)",
-        display: context.popupPage === "clipboard" ? "flex" : "none",
-        justifyContent: "center",
-        alignItems: "center",
-    }))
+    const style:Attribute<"div">["inlineStyle"] = U(() => ({ display: context.popupPage === "clipboard" ? "flex" : "none" }))
     const sideTitleStyle = {
         padding: "10px"
     }
@@ -25,7 +15,7 @@ export function ClipboardPage(){
         transition: "0.2s"
     }
     return (
-        div({inlineStyle: style, onclick: () => context.popupPage = ""})(
+        div({class: "popup-page-wrapper", inlineStyle: style, onclick: () => context.popupPage = ""})(
             div({
                 inlineStyle: {
                     width: "90%",

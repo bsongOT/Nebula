@@ -1,5 +1,5 @@
 import { one, Repeat, U, Updated } from "@/engine";
-import { Attribute, button, div, h1, h2, hr, inputText } from "@/funcObject";
+import { Attribute, button, div, h1, h2, hr, inputText, span } from "@/funcObject";
 import context from "../context";
 import { Content, Nebula } from "../../backend/data/Data";
 import { receiveMessage } from "../utils/utils";
@@ -9,15 +9,7 @@ export function NoticePage(){
     let selectedOption = "isolated-content" as "isolated-content" | "isolated-nebula" | "status" | "routine";
 
     const style:Attribute<"div">["inlineStyle"] = U(() => ({
-        position: "fixed",
-        left: "0",
-        width: "100%",
-        height: "100%",
-        zIndex: "1",
-        backdropFilter: "blur(5px) brightness(80%)",
-        display: context.popupPage === "notice" ? "flex" : "none",
-        justifyContent: "center",
-        alignItems: "center",
+        display: context.popupPage === "notice" ? "flex" : "none"
     }))
     const sideTitleStyle = {
         padding: "10px"
@@ -25,10 +17,11 @@ export function NoticePage(){
     const sideMenuStyle = {
         padding: "5px 10px",
         borderRadius: "5px",
-        transition: "0.2s"
+        transition: "0.2s",
+        display: "flex"
     }
     return (
-        div({inlineStyle: style, onclick: () => context.popupPage = ""})(
+        div({class: "popup-page-wrapper", inlineStyle: style, onclick: () => context.popupPage = ""})(
             div({
                 inlineStyle: {
                     width: "90%",
@@ -44,18 +37,37 @@ export function NoticePage(){
                 div({
                     inlineStyle: {
                         padding: "15px",
-                        background: "wheat"
+                        background: "wheat",
+                        width: "150px"
                     }
                 })(
                     h2({inlineStyle: sideTitleStyle})("알림"),
                     div({
                         inlineStyle: U(() => ({...sideMenuStyle, background: selectedOption === "isolated-content" ? "floralwhite" : ""})),
                         onclick: () => selectedOption = "isolated-content"
-                    })("소속 없는 컨텐츠"),
+                    })(
+                        span()("소속 없는 컨텐츠"),
+                        span({inlineStyle: {
+                            marginLeft: "auto",
+                            background: "red",
+                            color: "white",
+                            padding: "0 3px",
+                            borderRadius: "2px"
+                        }})(() => context.data.notifications.isolatedContents.length + "")
+                    ),
                     div({
                         inlineStyle: U(() => ({...sideMenuStyle, background: selectedOption === "isolated-nebula" ? "floralwhite" : ""})),
                         onclick: () => selectedOption = "isolated-nebula"
-                    })("소속 없는 네뷸라"),
+                    })(
+                        span()("소속 없는 네뷸라"),
+                        span({inlineStyle: {
+                            marginLeft: "auto",
+                            background: "red",
+                            color: "white",
+                            padding: "0 3px",
+                            borderRadius: "2px"
+                        }})(() => context.data.notifications.isolatedNebulas.length + "")
+                    ),
                     div({
                         inlineStyle: U(() => ({...sideMenuStyle, background: selectedOption === "status" ? "floralwhite" : ""})),
                         onclick: () => selectedOption = "status"
@@ -106,6 +118,7 @@ function IsolatedContentsPage(){
             ),
             div()(
                 button({
+                    class: "one-click-button",
                     onclick: async () => {
                         const nebulaName = await receiveMessage("새 네뷸라의 이름을 입력해주세요.")
                         if (nebulaName === "") return alert("네뷸라 이름은 빈 문자열일 수 없습니다.")
@@ -115,6 +128,7 @@ function IsolatedContentsPage(){
                     }
                 })("새 네뷸라에 담기"),
                 button({
+                    class: "one-click-button",
                     onclick: () => {
                         const neb = context.selection.nebula;
                         if (!neb) return alert("현재 열려있는 네뷸라가 없습니다.");

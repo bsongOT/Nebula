@@ -20,11 +20,10 @@ const context = {
     iframeOnload: "",
     currentNebulaPageNumber: 0,
 
-    searching: false,
     searchString: "",
     searchIndex: 0,
     
-    popupPage: "" as "" | "notice" | "clipboard" | "query" | "random" | "git",
+    popupPage: "" as "" | "notice" | "clipboard" | "query" | "random" | "git" | "search",
     currentPieceElement: undefined as HTMLElement | undefined,
     isSideActive: false,
     isOpenedPageNavigator: false,

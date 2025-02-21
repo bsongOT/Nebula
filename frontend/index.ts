@@ -12,7 +12,6 @@ import { NotificationButton } from "./Components/PageOpeners/NotificationButton"
 import { RelationPage } from "./Pages/RelationPage";
 import { ClipboardButton } from "./Components/PageOpeners/ClipboardButton";
 import { Carousel } from "./Components/SideMenus/Carousel";
-import { SearchBar } from "./Components/SearchBar";
 import { RandomButton } from "./Components/PageOpeners/RandomButton";
 import { SettingButton } from "./Components/PageOpeners/SettingButton";
 import { QueryButton } from "./Components/PageOpeners/QueryButton";
@@ -23,6 +22,7 @@ import { mentionContextMenu } from "./Components/MentionContextMenu";
 import { SearchButton } from "./Components/PageOpeners/SearchButton";
 import { GitButton } from "./Components/PageOpeners/GitButton";
 import { GitPage } from "./Pages/GitPage";
+import { QueryPage } from "./Pages/QueryPage";
 
 document.addEventListener("click", () => {
   mentionContextMenu.remove();
@@ -39,12 +39,15 @@ document.addEventListener("keydown", e => {
     context.tabs.push(newTab);
     return;
   }
-  else if ((e.ctrlKey || e.metaKey) && e.code === "KeyO"){
-    context.searching = true;
+  else if ((e.ctrlKey || e.metaKey) && e.code === "KeyB"){
+    e.preventDefault();
+    context.popupPage = "notice";
+  }
+  else if ((e.ctrlKey || e.metaKey) && e.code === "KeyF"){
+    context.popupPage = "search";
   }
   else if(e.code === "Escape") {
     context.popupPage = "";
-    context.searching = false;
     context.searchString = "";
     context.searchIndex = 0;
     if (document.activeElement instanceof HTMLInputElement){
@@ -135,5 +138,6 @@ body(
   SearchPage(),
   NoticePage(),
   ClipboardPage(),
+  QueryPage(),
   GitPage()
 );
