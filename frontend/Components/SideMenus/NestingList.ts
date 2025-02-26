@@ -106,6 +106,8 @@ function ContentItem(i:{depth: number, node: TreeNode<Content>}){
                 background: background(isFixed),
                 position: isFixed ? "sticky" : "",
                 top: isFixed ? `${i.depth * (item.scrollHeight - 0.5)}px` : "",
+                boxShadow: !context.scrollVisibleContentNodes.has(i.node) && i.node.children.some(c => context.scrollVisibleContentNodes.has(c))
+                    ? "0 2px 2px #ccc" : ""
             }
         }),
         className: "hover-ccc",

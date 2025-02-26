@@ -23,13 +23,19 @@ import { SearchButton } from "./Components/PageOpeners/SearchButton";
 import { GitButton } from "./Components/PageOpeners/GitButton";
 import { GitPage } from "./Pages/GitPage";
 import { QueryPage } from "./Pages/QueryPage";
+import { Tree, TreeNode } from "@/data-structure/tree";
 
 document.addEventListener("click", () => {
   mentionContextMenu.remove();
 })
-document.addEventListener("keydown", e => {
+document.addEventListener("keydown", async e => {
   if ((e.ctrlKey || e.metaKey) && e.code === 'Slash'){
     context.screenSplit = !context.screenSplit;
+    context.secondSelection = {
+      universe: context.selection.universe,
+      nebula: context.selection.nebula,
+      content: context.selection.content
+    }
     return;
   }
   else if ((e.ctrlKey || e.metaKey) && e.code === 'KeyT'){
@@ -42,6 +48,32 @@ document.addEventListener("keydown", e => {
   else if ((e.ctrlKey || e.metaKey) && e.code === "KeyB"){
     e.preventDefault();
     context.popupPage = "notice";
+  }
+  else if ((e.ctrlKey || e.metaKey) && e.code === "KeyG"){
+    context.popupPage = "git";
+    context.gitStatusTree = new Tree();
+    const statuses = await window.electron.gitStatus();
+    const statusArr = [
+        ...statuses.untracked.map(s => ({status: "untracked" as const, str: s})),
+        ...statuses.modified.map(s => ({status: "modified" as const, str:s})),
+        ...statuses.modified.map(s => ({status: "deleted" as const, str:s})),
+    ]
+    for (const path of statusArr){
+        let target = context.gitStatusTree.root;
+        const pathParts = path.str.split("/");
+        for (const pathPart of pathParts.slice(0, -1)){
+            target = target.children.find(c => c.data.name === pathPart) ?? context.gitStatusTree.insert(new TreeNode({
+                status: "dir",
+                name: pathPart,
+                path: path.str
+            }), target)
+        }
+        target = target.children.find(c => c.data.name === pathParts[pathParts.length - 1]) ?? context.gitStatusTree.insert(new TreeNode({
+            status: path.status,
+            name: pathParts[pathParts.length - 1],
+            path: path.str
+        }), target)
+    }              
   }
   else if ((e.ctrlKey || e.metaKey) && e.code === "KeyF"){
     context.popupPage = "search";
@@ -68,7 +100,6 @@ async function loadWorkspace(){
   const exists = await window.electron.workspaceExists();
   if (!exists) {
     alert("Workspace가 없습니다. 선택해주세요.");
-    window.location.href = 'workspace-select.html';
   }
 }
 

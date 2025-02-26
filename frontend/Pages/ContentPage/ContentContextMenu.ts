@@ -3,23 +3,14 @@ import context from "../../context";
 import { receiveMessage } from "../../utils/utils";
 import { TreeNode } from "@/data-structure/tree";
 import { Nebula } from "../../../backend/data/Data";
+import { U } from "@/engine";
 
-export function ContentContextMenu(){
+export function ContentContextMenu(info:{opened:boolean}){
     const contextMenuAttr:Attribute<"div"> = {
-        inlineStyle: {
-            display: "flex",
-            flexDirection: "column",
-            border: "1px solid #ddd",
-            borderRadius: "5px",
-            position: "absolute",
-            top: "50px",
-            right: "20px",
-            background: "white",
-            boxShadow: "2px 2px 4px #ccc"
-        }
-    }
-    const menuStyle:Attribute<"div">["inlineStyle"] = {
-        padding: "10px 15px"
+        class: "context-menu content-context-menu",
+        inlineStyle: U(() => ({
+            display: info.opened ? "" : "none"
+        }))
     }
 
     const putIntoNewNebula = async () => {
@@ -30,11 +21,23 @@ export function ContentContextMenu(){
         context.selection.nebula = context.data.addNebula(new Nebula({name: nebulaName}))
         context.selection.nebula!.tree.insert(new TreeNode(context.selection.content.data))
     }
+
+    document.addEventListener("click", () => {
+        info.opened = false;
+    })
+    document.addEventListener("keydown", e => {
+        if (e.code === "Escape") info.opened = false;
+    })
     
     return (
         div(contextMenuAttr)(
-            div({className: "hover-ddd", inlineStyle: menuStyle, onclick: putIntoNewNebula})("새 네뷸라에 담기"),
-            div({className: "hover-ddd", inlineStyle: menuStyle})("삭제하기")
+            div({className: "context-menu-item hover-ddd", onclick: putIntoNewNebula})("새 네뷸라에 담기"),
+            div({className: "context-menu-item hover-ddd", onclick: () => {
+                if (!context.selection.content) return;
+                context.data.removeContent(context.selection.content.data)
+                context.selection.content = undefined;
+            }
+            })("삭제하기")
         )
     )
 }

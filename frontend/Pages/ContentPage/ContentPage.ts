@@ -13,6 +13,7 @@ import { mentionContextMenu } from "../../Components/MentionContextMenu"
 import { LucideIcon } from "../../Components/utils/Icon"
 import { Dot, Ellipsis, Scale } from "lucide"
 import { ContentContextMenu } from "./ContentContextMenu"
+import { ContentRuleMenu } from "./ContentRuleMenu"
 
 function DustBlock(index:number){
     const block:HTMLLIElement = (
@@ -210,24 +211,27 @@ export function ContentEditor(){
     let newRefContents = new Array<string>();
     let cursorWaitingTime = 2;
 
+    let isContextMenuOpened = false;
     let gitCompleted = true;
 
     engine.updater.register(() => {
         if (!gitCompleted) return;
         if (!context.selection.content) return;
 
-        const dustBlocks = <HTMLElement[]>[...contentBody.children].sort((a, b) => Number((<HTMLElement>a).dataset.index) - Number((<HTMLElement>b).dataset.index));
- 
-        if (dustBlocks.length !== context.selection.content.data.dusts.length) return;
-
         gitCompleted = false;
         window.electron.write(`./contents/${context.selection.content.data.title}.md`, context.selection.content.data.dusts.traverse().map(i => "\t".repeat(i.depth) + "- " + i.node.data.claim).join("\n"))
         .then(() => {
         window.electron.getGitChanges(context.selection.content!.data.title).then(arr => {
-            console.log(arr)
-            dustBlocks.forEach(b => delete b.dataset.gitUpdated)
-            for (const index of arr){
-                dustBlocks[index - 1].dataset.gitUpdated = "";
+            if (context.selection.content){
+                const dustBlocks = <HTMLElement[]>[...contentBody.children].sort((a, b) => Number((<HTMLElement>a).dataset.index) - Number((<HTMLElement>b).dataset.index));
+    
+                if (dustBlocks.length === context.selection.content.data.dusts.length) {
+                    dustBlocks.forEach(b => delete b.dataset.gitUpdated)
+                    
+                    for (const index of arr){
+                        dustBlocks[index - 1].dataset.gitUpdated = "";
+                    }
+                }
             }
             gitCompleted = true;
         })})
@@ -368,11 +372,18 @@ export function ContentEditor(){
 
     return (
         div({ class: "page" })(
-            div({inlineStyle: {position: "absolute", top: "20px", right: "20px", display: "flex", gap: "15px"}})(
-                div()(LucideIcon(Scale, 24)),
-                div()(LucideIcon(Ellipsis, 24))
+            div({inlineStyle: {position: "absolute", top: "20px", right: "20px", display: "flex", gap: "10px", height: "30px"}})(
+                div({class: "content-tool-button"})(LucideIcon(Scale, 24)),
+                div({
+                    class: "content-tool-button",
+                    onclick: e => {
+                        e.stopPropagation();
+                        isContextMenuOpened = true
+                    }
+                })(LucideIcon(Ellipsis, 24))
             ),
-            ContentContextMenu(),
+            ContentRuleMenu({get opened(){return true}}),
+            ContentContextMenu({get opened(){return isContextMenuOpened}, set opened(v){isContextMenuOpened = v}}),
             div({inlineStyle: {marginLeft: "5px", color: "#999"}})(() => `${context.selection.universe?.name ?? ""} / ${context.selection.nebula?.name ?? ""}`),
             div({ className: U(() => `content-editor ${context.selection.content ? "" : "hidden"}`.trim())})(
                 Title({
@@ -389,6 +400,7 @@ export function ContentEditor(){
                 ContentDivisionLines(),
                 textarea({
                     class: "content-text",
+                    spellcheck: false,
                     inlineStyle: {
                         height: "0",
                         position: "fixed",
@@ -708,7 +720,8 @@ export function ContentEditor(){
                             cursor.style.left = (cursorRect.left - dustBlockRect.left) + "px";
                             cursor.style.top = (cursorRect.top - dustBlockRect.top) + "px";
                             tempCursor.remove();
-
+                            text.style.translate = `0 calc(170px + ${(dustBlocks[cursorPosition.line] as HTMLElement).style.top})`;
+                            console.log(text.style.translate)
                             /**
                              * TODO: SelectionDirection에 따라 커서 위치 바꿀 것!
                              */

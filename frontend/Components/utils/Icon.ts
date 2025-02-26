@@ -25,7 +25,7 @@ export function LucideIcon(icon:[tag:string, attrs:SVGProps][], size?:number){
         height: size ? `${size}px` : "1em",
         viewBox: "0 0 24 24",
         fill: "none",
-        stroke: "black",
+        stroke: "currentColor",
         "stroke-width": "2",
         "stroke-linecap": "round"
     } as Record<string, string>

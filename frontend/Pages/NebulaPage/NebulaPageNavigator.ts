@@ -1,6 +1,8 @@
 import { U } from "@/engine"
 import { div, button, Attribute } from "@/funcObject"
 import context from "../../context"
+import { LucideIcon } from "../../Components/utils/Icon"
+import { ChevronDown } from "lucide"
 
 export function NebulaPageNavigator(){
     const containerAttr:Attribute<"div"> = {
@@ -25,7 +27,8 @@ export function NebulaPageNavigator(){
         height: "20px",
         background: "#ccc",
         borderRadius: "0 0 10px 10px",
-        border: "1px solid #bbb"
+        border: "1px solid #bbb",
+        color: "#999"
       })),
       onclick: () => context.isOpenedPageNavigator = true
     }
@@ -73,7 +76,7 @@ export function NebulaPageNavigator(){
   
     return (
       div(containerAttr)(
-        div(openerAttr)("V"),
+        div(openerAttr)(LucideIcon(ChevronDown)),
         button({
             inlineStyle: U(() => ({
                 display: context.isOpenedPageNavigator ? "" : "none",

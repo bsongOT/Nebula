@@ -1,4 +1,4 @@
-import { TreeNode } from "@/data-structure/tree";
+import { Tree, TreeNode } from "@/data-structure/tree";
 import { Content, Data, Nebula } from "../backend/data/Data";
 import { Relation } from "../backend/data/components/Relation";
 import { Universe } from "../backend/data/components/Universe";
@@ -10,6 +10,8 @@ export type Selection = {
     content?: TreeNode<Content>,
 }
 const context = {
+    workspaces: await window.electron.getWorkspaces(),
+    currentWorkspace: await window.electron.getWorkspace(),
     data: await Data.create(),
     tabs: new Array<Selection>(),
     selection: {} as Selection,
@@ -38,11 +40,9 @@ const context = {
             return this.content.length + this.nebula.length + this.universe.length;
         }
     },
-    drageeStar: undefined as TreeNode<Content> | undefined,
-    dragStartY: 0,
-    dragProgress: 0,
     waitingContents: new Array<TreeNode<Content>>(),
-    noticeSelectedContents: new Array<Content>()
+    noticeSelectedContents: new Array<Content>(),
+    gitStatusTree: new Tree<{status: "dir" | "untracked" | "modified" | "deleted", name:string, path:string}>()
 }
 
 export default context;

@@ -92,7 +92,7 @@ export function UniverseSelector(){
         const attr:Attribute<"div"> = {
             className: "hover-eee",
             inlineStyle: U(() => ({
-                display: "flex",
+                display: context.data.isolatedUniverse.nebulas.length <= 0 ? "none" : "flex",
                 padding: "3px 20px",
                 background: collapsed ? "" : "#eee"
             })),

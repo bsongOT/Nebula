@@ -1,5 +1,5 @@
 import { U } from "@/engine";
-+import { div } from "@/funcObject";
+import { div } from "@/funcObject";
 import context from "../context";
 
 export function QueryPage(){

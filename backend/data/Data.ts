@@ -108,6 +108,8 @@ export class Data {
   public readonly notifications;
   public readonly fileAliases;
 
+  private saving:boolean;
+
   public static async create(){
     const loadedData = await DataLoader.load();
     return new Data(loadedData)
@@ -131,9 +133,11 @@ export class Data {
     DataSaver.saveContentsExport(this.contents);
     DataSaver.saveNebulasExport(this.nebulas);
 
+    this.saving = true;
     let saveCompleted = true;
     engine.updater.register(() => {
       if (!saveCompleted) return;
+      if (!this.saving) return;
       saveCompleted = false;
       DataSaver.save(this).then(() => saveCompleted = true);
     });
@@ -143,6 +147,13 @@ export class Data {
         this.nebulas.filter(n => universes.every(u => !u.nebulas.includes(n)))
       )
     })
+  }
+
+  public stopSave(){
+    this.saving = false;
+  }
+  public resumeSave(){
+    this.saving = true;
   }
 
   public addContent(content:Content){
@@ -162,6 +173,12 @@ export class Data {
     const addNode = dayNode.children.find(n => n.data.title === "추가") ?? dayNebula.tree.insert(new TreeNode(new Content({title: "추가"})), dayNode);
     
     dayNebula.tree.insert(new TreeNode(content), addNode);
+
+    window.electron.write(`./contents/${content.title}.md`, (
+      content.dusts.traverse()
+        .map(d => "\t".repeat(d.depth) + "- " + d.node.data.claim)
+        .join("\n")
+    ))
 
     return content;
   }
@@ -183,7 +200,24 @@ export class Data {
   }
 
   public removeContent(content:Content){
-    this.contents.remove(content.id)
+    const dayNebula = this.systemUniverse.dayNebula;
+    for (const node of dayNebula.tree.traverse().map(i => i.node)){
+      if (node.data === content){
+        if (node.parent?.children.length === 1){
+          dayNebula.tree.remove(node.parent);
+        }
+        dayNebula.tree.remove(node);
+      }
+    }
+    for (const nebulaTree of this.nebulas.map(n => n.tree)){
+      for (const node of nebulaTree.traverse().map(i => i.node)){
+        if (node.data === content){
+          dayNebula.tree.remove(node);
+        }
+      }
+    }
+    window.electron.removeFile(`./contents/${content.title}.md`)
+    this.contents.remove(content.id);
   }
 
   public addNebula(nebula:Nebula){

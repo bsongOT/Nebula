@@ -1,10 +1,10 @@
-import { U } from "@/engine";
+import { Repeat, U } from "@/engine";
 import { Attribute, button, div, hr, span } from "@/funcObject";
 import context from "../../context";
 import { NestingList } from "./NestingList";
 import { UniverseSelector } from "./UniverseSelector";
 import { LucideIcon } from "../utils/Icon";
-import { Network, NotebookText } from "lucide";
+import { ChevronDown, CirclePlus, Database, Network, NotebookText } from "lucide";
 
 export function Carousel() {
     let mode = "nebula" as "nebula" | "content"
@@ -24,31 +24,67 @@ export function Carousel() {
             padding: "5px 0"
         }
     }
-    const modeButtonStyle:Attribute<"div">["inlineStyle"] = {
-        padding: "5px 15px",
-        margin: "2px 10px",
-        borderRadius: "5px"
+    const workspaceChangerAttr:Attribute<"div"> = {
+        className: "left-side-mode-button hover-eee",
+        onclick: e => {
+            e.stopPropagation();
+            isOpenedContextMenu = !isOpenedContextMenu;
+        }
     }
     const nebulaModeButtonAttr:Attribute<"div"> = {
-        className: "hover-eee", 
+        className: "left-side-mode-button hover-eee", 
         onclick: () => mode = "nebula", 
         inlineStyle: U(() => ({
             background: mode === "nebula" ? "lightcoral" : "",
-            ...modeButtonStyle
         }))
     }
     const contentModeButtonAttr:Attribute<"div"> = {
-        className: "hover-eee", 
+        className: "left-side-mode-button hover-eee", 
         onclick: () => mode = "content", 
         inlineStyle: U(() => ({
             background: mode === "content" ? "lightcoral" : "",
-            ...modeButtonStyle
         }))
     }
+
+    let isOpenedContextMenu = false;
+
+    document.addEventListener("click", () => {
+        isOpenedContextMenu = false
+    });
 
     return (
         div({ class: "carousel" })(
             div(modeChangerAttr)(
+                div(workspaceChangerAttr)(
+                    span({ inlineStyle: {translate: "0 2px", display: "inline-block"} })(LucideIcon(Database)),
+                    span({ inlineStyle: {marginLeft: "10px"} })("작업 공간"),
+                    span({ inlineStyle: {marginLeft: "5px", translate: "0 3px", display: "inline-block"}})(LucideIcon(ChevronDown, 17))
+                ),
+                div({class: "workspace-context-menu", inlineStyle: U(() => ({display: isOpenedContextMenu ? "" : "none"}))})(
+                    div()(
+                        context.workspaces.map(w => (
+                            div({
+                                class: "context-menu-item hover-eee",
+                                onclick: async () => {
+                                    context.data.stopSave();
+                                    await window.electron.setWorkspace(w);
+                                    location.reload()
+                                }
+                            })(w)
+                        ))
+                    ),
+                    div({
+                        class: "context-menu-item side-context-menu-item hover-eee",
+                        onclick: async () => {
+                            context.data.stopSave();
+                            await window.electron.selectWorkspace();
+                            location.reload();
+                        }
+                    })(
+                        span({ inlineStyle: {translate: "0 2px", display: "inline-block", marginRight: "5px"} })(LucideIcon(CirclePlus)),
+                        span()("추가하기")
+                    )
+                ),
                 div(nebulaModeButtonAttr)(
                     span({ inlineStyle: {translate: "0 1px", display: "inline-block"} })(LucideIcon(Network)),
                     span({ inlineStyle: {marginLeft: "10px"} })("네뷸라")

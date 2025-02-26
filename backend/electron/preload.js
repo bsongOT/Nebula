@@ -7,6 +7,7 @@ class ElectronAPI {
         this.workspaceExists = () => electron_1.ipcRenderer.invoke('workspace-exists');
         this.setWorkspace = (path) => electron_1.ipcRenderer.invoke('set-workspace', path);
         this.getWorkspace = () => electron_1.ipcRenderer.invoke("get-workspace");
+        this.getWorkspaces = () => electron_1.ipcRenderer.invoke("get-workspaces");
         this.selectWorkspace = () => electron_1.ipcRenderer.invoke('select-workspace');
         this.read = (path) => electron_1.ipcRenderer.invoke('read', path);
         this.write = (path, text) => electron_1.ipcRenderer.invoke('write', path, text);
@@ -14,8 +15,10 @@ class ElectronAPI {
         this.openDialogFile = () => electron_1.ipcRenderer.invoke("open-dialog-file");
         this.getGitChanges = (contentName) => electron_1.ipcRenderer.invoke("get-git-changes", contentName);
         this.gitListFiles = () => electron_1.ipcRenderer.invoke("git-list-files");
-        this.gitCommit = () => electron_1.ipcRenderer.invoke("git-commit");
+        this.gitCommit = (message) => electron_1.ipcRenderer.invoke("git-commit", message);
+        this.gitCommitHistory = () => electron_1.ipcRenderer.invoke("git-commit-history");
         this.gitStatus = () => electron_1.ipcRenderer.invoke("git-status");
+        this.gitDiffLines = (path) => electron_1.ipcRenderer.invoke("git-diff-lines", path);
         this.getDirectory = (path) => electron_1.ipcRenderer.invoke("get-directory", path);
         this.removeFile = (path) => electron_1.ipcRenderer.invoke("remove-file", path);
     }

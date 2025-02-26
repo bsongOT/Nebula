@@ -1,4 +1,7 @@
 import { Attribute, button, div } from "@/funcObject";
+import context from "../context";
+import { Universe } from "../../backend/data/components/Universe";
+import { Nebula } from "../../backend/data/Data";
 
 export function NoSelectionPage(){
     const buttonAttr:Attribute<'button'> = {
@@ -11,10 +14,10 @@ export function NoSelectionPage(){
         }
     }
     const createUniverse = () => {
-
+        context.selection.universe = context.data.universes.add(new Universe({name: "제목없음"}))
     }
     const createNebula = () => {
-
+        context.selection.nebula = context.data.nebulas.add(new Nebula({}))
     }
     const createContent = () => {
         

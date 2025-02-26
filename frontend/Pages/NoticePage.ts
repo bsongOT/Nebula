@@ -47,7 +47,9 @@ export function NoticePage(){
                         onclick: () => selectedOption = "isolated-content"
                     })(
                         span()("소속 없는 컨텐츠"),
-                        span({inlineStyle: {
+                        span({
+                            class: U(() => context.data.notifications.isolatedContents.length === 0 ? "hidden" : ""),
+                            inlineStyle: {
                             marginLeft: "auto",
                             background: "red",
                             color: "white",
@@ -140,7 +142,13 @@ function IsolatedContentsPage(){
                         }
                         context.noticeSelectedContents = [];
                     }
-                })("현재 네뷸라에 담기")
+                })("현재 네뷸라에 담기"),
+                button({
+                    class: "one-click-button delete-button",
+                    onclick: () => {
+                        context.noticeSelectedContents.forEach(c => context.data.removeContent(c));
+                    }
+                })("삭제")
             )
         )
     )
@@ -153,8 +161,18 @@ function IsolatedNebulasPage(){
                 () => context.data.notifications.isolatedNebulas.map(nebula => ({nebula}))
             )),
             div()(
-                button()("새 유니버스에 담기"),
-                button()("현재 유니버스에 담기")
+                button({
+                    class: "one-click-button"
+                })("새 유니버스에 담기"),
+                button({
+                    class: "one-click-button"
+                })("현재 유니버스에 담기"),
+                button({
+                    class: "one-click-button delete-button",
+                    onclick: () => {
+                    
+                    }
+                })("삭제")
             )
         )
     )

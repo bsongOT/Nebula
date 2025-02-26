@@ -89,19 +89,66 @@ textarea {
 .hidden {
     display: none !important;
 }
+.commit-button {
+    border: none;
+    background: skyblue;
+    padding: 5px 60px;
+    border-radius: 5px;
+    margin: 5px 10px;
+}
+.commit-message-input {
+    outline: none;
+    margin: 5px 10px;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 5px;
+}
 .one-click-button {
     border: none;
-    background: limegreen;
-    color: white;
+    background: white;
+    color: limegreen;
+    border: 1px solid limegreen;
     border-radius: 5px;
     margin-right: 5px;
     padding: 5px 10px;
 }
 .one-click-button:hover {
-    background: mediumseagreen;
+    background: limegreen;
+    color: white;
+}
+.one-click-button.delete-button {
+    color: crimson;
+    border: 1px solid crimson;
+}
+.one-click-button.delete-button:hover {
+    background: crimson;
+    color: white;
 }
 .button:hover {
     background: #ddd;
+}
+.content-tool-button {
+    border-radius: 3px;
+    padding: 3px;
+}
+.content-tool-button:hover {
+    background: #ddd;
+}
+.context-menu {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    position: absolute;
+    background: white;
+    box-shadow: 2px 2px 4px #ccc;
+}
+.context-menu-item { 
+    padding: 10px 15px;
+}
+.content-context-menu {
+    top: 55px;
+    right: 20px;
 }
 .hover-sandybrown:hover {
     background: sandybrown;
@@ -151,17 +198,37 @@ textarea {
     border-top: none;
     border-bottom: none;
     overflow-y: auto;
-    > .carousel {
-        width: 100%;
-        flex-grow: 1;
-        overflow-x: hidden;
-        > .row {
-            display: flex;
-            width: 200%;
-            position: relative;
-            transition: 0.2s;
-        }
-    }
+}
+.carousel {
+    width: 100%;
+    flex-grow: 1;
+    overflow-x: hidden;
+}
+.row {
+    display: flex;
+    width: 200%;
+    position: relative;
+    transition: 0.2s;
+}
+.side-context-menu-item {
+    display: flex;
+    align-items: center;
+}
+.left-side-mode-button {
+    padding: 5px 15px;
+    margin: 2px 10px;
+    border-radius: 5px;
+}
+.workspace-context-menu {
+    position: absolute;
+    top: 75px;
+    left: 50px;
+    width: 228px;
+    border-radius: 5px;
+    border: 1px solid #bbb;
+    background: white;
+    z-index: 1;
+    overflow: hidden;
 }
 * {
     font-family: sans-serif;
@@ -254,10 +321,6 @@ textarea {
 .relation-table .selected {
     background: yellowgreen;
 }
-.content-tool-box > :hover, .content-tool-box > .selected {
-    translate: -15px;
-    background: skyblue !important;
-}
 .relation-dust-title {
     transition: 0.2s;
     padding: 2px;
@@ -265,4 +328,40 @@ textarea {
 }
 .content-text::selection {
     background: none;
+}
+.git-page-tab-container {
+    display: flex;
+    border: 1px solid #ccc;
+    border-left: none;
+    border-right: none;
+}
+.git-page-tab {
+    text-align: center;
+    flex-grow: 1;
+    padding: 5px 0;
+}
+.git-page-tab:first-child {
+    border-right: 1px solid #ccc;
+}
+.git-page-tab.selected {
+    background: #eee;
+}
+.git-page-side-main {
+    flex-grow: 1;
+    overflow: auto;
+}
+.git-commit-history-item {
+    display: flex;
+    justify-content: space-between;
+}
+.git-commit-message {
+    padding-left: 5px;
+}
+.git-hash {
+    color: #ccc;
+}
+.clipboard-page-main {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }

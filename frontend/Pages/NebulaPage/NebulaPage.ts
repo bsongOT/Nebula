@@ -10,7 +10,7 @@ import { Title } from "../../Components/Title";
 import { r3 } from "@/utils/math/consts";
 import { NebulaPageNavigator } from "./NebulaPageNavigator";
 
-export function NebulaPage(info:{nebula?:Nebula, pageAddition?: number}){
+export function NebulaPage(info:{nebula?:Nebula}){
     const attr:Attribute<"div"> = {
         className: "page",
     }
@@ -40,13 +40,13 @@ export function NebulaPage(info:{nebula?:Nebula, pageAddition?: number}){
     }
 
     function pageNum(){
-        return context.currentNebulaPageNumber + (info.pageAddition ?? 0);
+        return context.currentNebulaPageNumber;
     }
 
     return (
         div(attr)(
+            NebulaPageNavigator(),
             div(mainPageAttr)(
-                NebulaPageNavigator(),
                 nebulaTitle,
                 div({
                     inlineStyle: U(() => ({
@@ -124,7 +124,6 @@ class ContentPoint {
     ){}
     private getColor(){
         if (this.node.data.id < 0) return "white"
-        if (context.drageeStar === this.node) return "green";
         if (context.selection.content === this.node) return "red";
         if (context.scrollVisibleContentNodes.has(this.node)) return "black";
         return "#bbb";
@@ -177,20 +176,6 @@ class ContentPoint {
             context.waitingContents.push(this.node)
         }
     }
-    public onmousedown(mouseX:number, mouseY:number){
-        const {x, y} = this.position;
-        if ((mouseX - x) ** 2 + (mouseY - y) ** 2 >= 64) return;
-        if (this.node.data.id < 0) return;
-        context.drageeStar = this.node;
-        context.dragStartY = mouseY;
-        context.dragProgress = Math.max(Math.min((mouseY - context.dragStartY) / (this.side * 1.732), 1), -1)
-    }
-    public onmousemove(mouseX:number, mouseY:number){
-        if (this.node.data.id < 0) return;
-        if (!context.drageeStar) return;
-        if (this.node !== context.drageeStar) return;
-        context.dragProgress = Math.max(Math.min((mouseY - context.dragStartY) / (this.side * 1.732), 1), -1)
-    }
 }
 
 export class NebulaPath {
@@ -209,7 +194,6 @@ export class NebulaPath {
         for (let i = 0; i < this.path.length; i++){
             const pos = path[i].pos.toCoord(side).add(position);
             
-            if (path[i].node === context.drageeStar) pos.y -= context.dragProgress * side * 3
             if (i === 0) ctx.moveTo(pos.x, pos.y);
             else ctx.lineTo(pos.x, pos.y);
 
@@ -249,39 +233,10 @@ export function NebulaModel(info:{nebula?:Nebula}){
     cv.onclick = () => {
         for (const star of stars) star.onclick(mouseX, mouseY);
     }
-    cv.onmousedown = () => {
-        for (const star of stars) star.onmousedown(mouseX, mouseY);
-    }    
     document.addEventListener("mousemove", e => {
         const r =  cv.getBoundingClientRect();
         mouseX = e.clientX - r.left;
         mouseY = e.clientY - r.top;
-        for (const star of stars) star.onmousemove(mouseX, mouseY);
-    })
-    document.addEventListener("mouseup", () => {
-        if (!context.drageeStar) return;
-        if (!info.nebula) return;
-
-        const nebs = context.data.nebulas.filter(n => n.tree.traverse().some(i => i.node.data === context.drageeStar!.data))
-        if (context.dragProgress > 0.8) {
-            const neb = nebs[nebs.indexOf(info.nebula) + 1];
-            if (!neb) return;
-            context.selection.universe = context.data.universes.find(
-                u => u.nebulas.includes(neb)
-            )
-            info.nebula = neb;
-        }
-        else if (context.dragProgress < -0.8){
-            const neb = nebs[nebs.indexOf(info.nebula) - 1];
-            if (!neb) return;
-            context.selection.universe = context.data.universes.find(
-                u => u.nebulas.includes(neb)
-            )
-            info.nebula = neb;
-        }
-        
-        context.drageeStar = undefined;
-        context.dragProgress = 0;
     })
 
     function update(){
@@ -310,7 +265,7 @@ export function NebulaModel(info:{nebula?:Nebula}){
             scrollInside = true;
 
             const pathObj = new NebulaPath(path)
-            pathObj.render(ctx, P(side, side).add(P(0, totalHeight)).add(P(0, context.dragProgress * side * 3)), side)
+            pathObj.render(ctx, P(side, side).add(P(0, totalHeight)), side)
             stars.push(...pathObj.stars)
             totalHeight += Math.max(...path.map(i => i.pos.toCoord(side).y)) + 6 * side
         }
@@ -335,53 +290,53 @@ export function NebulaModel(info:{nebula?:Nebula}){
             star.render(ctx, mouseX, mouseY);
         }
 
-        if (!context.drageeStar) return;
+        // if (!context.drageeStar) return;
 
-        const nebs = context.data.nebulas.filter(neb => neb.tree.traverse().some(i => i.node.data === context.drageeStar!.data));
-        const currentIndex = nebs.indexOf(info.nebula);
-        const scrolledStar = stars.find(s => s.node === context.drageeStar);
-        const scrolledStarHexPos = paths.flat().find(i => i.node === context.drageeStar)?.pos;
+        // const nebs = context.data.nebulas.filter(neb => neb.tree.traverse().some(i => i.node.data === context.drageeStar!.data));
+        // const currentIndex = nebs.indexOf(info.nebula);
+        // const scrolledStar = stars.find(s => s.node === context.drageeStar);
+        // const scrolledStarHexPos = paths.flat().find(i => i.node === context.drageeStar)?.pos;
 
-        if (currentIndex === -1) return;
-        if (!scrolledStar) return;
-        if (!scrolledStarHexPos) return;
+        // if (currentIndex === -1) return;
+        // if (!scrolledStar) return;
+        // if (!scrolledStarHexPos) return;
 
-        const toWorldPos = (hexPos:HexCoord)=>{
-            const pos = hexPos.sub(pivot).toCoord(side).add(canvasCenter);
-            return pos.add(P(0, context.dragProgress * side * 3));
-        }
+        // const toWorldPos = (hexPos:HexCoord)=>{
+        //     const pos = hexPos.sub(pivot).toCoord(side).add(canvasCenter);
+        //     return pos.add(P(0, context.dragProgress * side * 3));
+        // }
 
-        for (let i = 0; i < nebs.length; i++){
-            if (i === currentIndex) continue;
-            const otherPath = toPaths(nebs[i].tree).flat();
-            const matchedStarIndex = otherPath.findIndex(p => p.node.data === context.drageeStar!.data);
-            const matchedStar  = otherPath[matchedStarIndex];
-            if (!otherPath) continue;
-            if (otherPath.length <= 0) continue;
-            if (matchedStarIndex === -1) continue;
+        // for (let i = 0; i < nebs.length; i++){
+        //     if (i === currentIndex) continue;
+        //     const otherPath = toPaths(nebs[i].tree).flat();
+        //     const matchedStarIndex = otherPath.findIndex(p => p.node.data === context.drageeStar!.data);
+        //     const matchedStar  = otherPath[matchedStarIndex];
+        //     if (!otherPath) continue;
+        //     if (otherPath.length <= 0) continue;
+        //     if (matchedStarIndex === -1) continue;
 
-            const adjuster = H(1, 0, -1).scale(i - currentIndex).add(matchedStar.pos).sub(scrolledStarHexPos);
+        //     const adjuster = H(1, 0, -1).scale(i - currentIndex).add(matchedStar.pos).sub(scrolledStarHexPos);
 
-            ctx.beginPath();
-            const first = toWorldPos(otherPath[0].pos.add(adjuster));
-            ctx.moveTo(first.x, first.y);
-            for (const dot of otherPath){
-                const worldPos = toWorldPos(dot.pos.add(adjuster))
-                ctx.lineTo(worldPos.x, worldPos.y)
-            }
-            ctx.stroke()
-            ctx.fillStyle = "black";
-            for (const dot of otherPath){
-                const worldPos = toWorldPos(dot.pos.add(adjuster))
-                if (dot === matchedStar) continue;
-                ctx.beginPath();
-                ctx.moveTo(worldPos.x + 4, worldPos.y);
-                ctx.arc(worldPos.x, worldPos.y, 4, 0, 2 * Math.PI)
-                ctx.stroke();
-                ctx.fill();
-                ctx.fillText(dot.node.data.title, worldPos.x - ctx.measureText(dot.node.data.title).width / 2, worldPos.y - 10);
-            }
-        }
+        //     ctx.beginPath();
+        //     const first = toWorldPos(otherPath[0].pos.add(adjuster));
+        //     ctx.moveTo(first.x, first.y);
+        //     for (const dot of otherPath){
+        //         const worldPos = toWorldPos(dot.pos.add(adjuster))
+        //         ctx.lineTo(worldPos.x, worldPos.y)
+        //     }
+        //     ctx.stroke()
+        //     ctx.fillStyle = "black";
+        //     for (const dot of otherPath){
+        //         const worldPos = toWorldPos(dot.pos.add(adjuster))
+        //         if (dot === matchedStar) continue;
+        //         ctx.beginPath();
+        //         ctx.moveTo(worldPos.x + 4, worldPos.y);
+        //         ctx.arc(worldPos.x, worldPos.y, 4, 0, 2 * Math.PI)
+        //         ctx.stroke();
+        //         ctx.fill();
+        //         ctx.fillText(dot.node.data.title, worldPos.x - ctx.measureText(dot.node.data.title).width / 2, worldPos.y - 10);
+        //     }
+        // }
     }
 
     return cv;

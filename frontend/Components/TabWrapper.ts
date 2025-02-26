@@ -9,31 +9,41 @@ export function TabWrapper() {
     }))
 
     return (
-        div({ inlineStyle: style })(Repeat(Tab, () => context.tabs))
+        div({ inlineStyle: style })(Repeat(Tab, () => context.tabs.map(selection => ({selection}))))
     )
 }
-function Tab(info: Selection) {
+function Tab(info: {selection:Selection}) {
     return (
         div({
-            className: U(() => context.selection === info || context.secondSelection === info ? "tab selected" : "tab"),
-            inlineStyle: U(() => ({fontStyle: context.secondSelection === info ? "italic" : ""})),
-            onclick: e => {
-                if (e.metaKey || e.ctrlKey) {
-                    if (context.selection === info) return;
-                    context.screenSplit = true;
-                    if (context.secondSelection === info) context.secondSelection = undefined;
-                    else context.secondSelection = info;
-                }
-                else {
-                    if (context.secondSelection === info) return;
-                    context.selection = info;
-                }
+            className: U(() => context.selection === info.selection ? "tab selected" : "tab"),
+            onclick: () => {
+                context.selection = info.selection;
             }
         })([
-            div()(() => info.content?.data.title ?? info.nebula?.name ?? info.universe?.name ?? "Home"),
+            div()(() => info.selection.content?.data.title ?? info.selection.nebula?.name ?? info.selection.universe?.name ?? "Home"),
             span({
                 inlineStyle: {
                     marginLeft: "5px"
+                },
+                onclick: e => {
+                    e.stopPropagation();
+                    const index = context.tabs.indexOf(context.selection);
+                    if (index >= 1){
+                        context.selection = context.tabs[index - 1]
+                        context.tabs.splice(index, 1)
+                    }
+                    else if (index === 0){
+                        if (context.tabs.length <= 1){
+                            const selection = {};
+                            context.selection = selection;
+                            context.tabs.splice(0, 1);
+                            context.tabs.push(selection);
+                        }
+                        else {
+                            context.selection = context.tabs[1];
+                            context.tabs.splice(0, 1);
+                        }
+                    }
                 }
             })("×")
         ])

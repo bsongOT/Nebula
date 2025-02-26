@@ -54,55 +54,115 @@ const createWindow = () => __awaiter(void 0, void 0, void 0, function* () {
         },
         icon: path.join(__dirname, "../../logo.icns")
     });
-    const git = (0, simple_git_1.simpleGit)(store.get("workspace-path"));
-    git.addConfig("core.quotepath", "false");
-    if (!fs.existsSync(`${store.get("workspace-path")}/.git`)) {
-        yield git.init();
+    let git;
+    if (store.get("workspace-path") === undefined) {
+        store.set("workspace-path", "");
     }
-    if (!fs.existsSync(`${store.get("workspace-path")}/.gitignore`)) {
-        fs.writeFileSync(store.get("workspace-path") + "/.gitignore", ".DS_Store", { flag: "w" });
-    }
-    electron_1.ipcMain.handle('get-git-changes', (_, contentName) => __awaiter(void 0, void 0, void 0, function* () {
-        const diffs = yield git.diff(['--unified=0']);
-        const lines = diffs.split("\n");
-        const targetStart = lines.findIndex(l => l.startsWith('diff --git') && l.endsWith(`${contentName}.md`));
-        if (targetStart < 0)
-            return [];
-        const targetEndExpect = lines.findIndex((l, i) => l.startsWith('diff --git') && i > targetStart);
-        const targetEnd = targetEndExpect >= 0 ? targetEndExpect : lines.length;
-        return (lines
-            .slice(targetStart, targetEnd)
-            .filter(l => l.startsWith("@@"))
-            .map(l => {
-            const part = l.split(' ').find(p => p.startsWith("+"));
-            if (part === undefined)
+    else if (fs.existsSync(store.get("workspace-path"))) {
+        git = (0, simple_git_1.simpleGit)(store.get("workspace-path"));
+        git.addConfig("core.quotepath", "false");
+        if (!fs.existsSync(`${store.get("workspace-path")}/.git`)) {
+            yield git.init();
+        }
+        if (!fs.existsSync(`${store.get("workspace-path")}/.gitignore`)) {
+            fs.writeFileSync(store.get("workspace-path") + "/.gitignore", ".DS_Store", { flag: "w" });
+        }
+        electron_1.ipcMain.handle('git-diff-lines', (_, relativePath) => __awaiter(void 0, void 0, void 0, function* () {
+            const diffs = yield git.diff(["--unified=0", "--", relativePath]);
+            const diffLines = diffs.split("\n");
+            if (diffLines.length === 0)
                 return [];
-            const numbers = part.slice(1).split(",");
-            const startLine = Number(numbers[0]);
-            const numLines = numbers.length > 1 ? Number(numbers[1]) : 1;
-            return Array.from({ length: numLines }).fill(0).map((_, i) => startLine + i);
-        }).flat());
-    }));
+            let deletedLineNum = 0;
+            let insertedLineNum = 0;
+            return diffLines.slice(diffLines.findIndex(l => l.startsWith("@@"))).map(l => {
+                if (l.startsWith("@@")) {
+                    const parts = l.split(" ");
+                    deletedLineNum = Number(parts[1].slice(1).split(",")[0]);
+                    insertedLineNum = Number(parts[2].slice(1).split(",")[0]);
+                    const str = l.slice(l.indexOf(" @@") + 3);
+                    if (str === "") {
+                        return {
+                            state: "no-change",
+                            str: str,
+                            index: -1
+                        };
+                    }
+                    return {
+                        state: "no-change",
+                        str: str,
+                        index: insertedLineNum - 1
+                    };
+                }
+                if (l.startsWith("+")) {
+                    return {
+                        state: "insert",
+                        str: l.slice(1),
+                        index: insertedLineNum++
+                    };
+                }
+                if (l.startsWith("-")) {
+                    return {
+                        state: "delete",
+                        str: l.slice(1),
+                        index: deletedLineNum++
+                    };
+                }
+                return {
+                    state: "no-change",
+                    str: l.slice(1),
+                    index: -1
+                };
+            }).filter(i => i.index !== -1);
+        }));
+        electron_1.ipcMain.handle('get-git-changes', (_, contentName) => __awaiter(void 0, void 0, void 0, function* () {
+            const diffs = yield git.diff(['--unified=0']);
+            const lines = diffs.split("\n");
+            const targetStart = lines.findIndex(l => l.startsWith('diff --git') && l.endsWith(`${contentName}.md`));
+            if (targetStart < 0)
+                return [];
+            const targetEndExpect = lines.findIndex((l, i) => l.startsWith('diff --git') && i > targetStart);
+            const targetEnd = targetEndExpect >= 0 ? targetEndExpect : lines.length;
+            return (lines
+                .slice(targetStart, targetEnd)
+                .filter(l => l.startsWith("@@"))
+                .map(l => {
+                const part = l.split(' ').find(p => p.startsWith("+"));
+                if (part === undefined)
+                    return [];
+                const numbers = part.slice(1).split(",");
+                const startLine = Number(numbers[0]);
+                const numLines = numbers.length > 1 ? Number(numbers[1]) : 1;
+                return Array.from({ length: numLines }).fill(0).map((_, i) => startLine + i);
+            }).flat());
+        }));
+        electron_1.ipcMain.handle('git-list-files', () => __awaiter(void 0, void 0, void 0, function* () {
+            return yield git.raw(['ls-files']);
+        }));
+        electron_1.ipcMain.handle('git-status', () => __awaiter(void 0, void 0, void 0, function* () {
+            const status = yield git.status();
+            return {
+                untracked: status.not_added,
+                modified: status.modified,
+                deleted: status.deleted
+            };
+        }));
+        electron_1.ipcMain.handle('git-commit', (_, message) => __awaiter(void 0, void 0, void 0, function* () {
+            yield git.add(".");
+            yield git.commit(message === "" ? "-" : message);
+        }));
+        electron_1.ipcMain.handle('git-commit-history', () => __awaiter(void 0, void 0, void 0, function* () {
+            const log = yield git.log();
+            return log.all.map(({ date, hash, message }) => ({ date, hash, message }));
+        }));
+    }
     electron_1.ipcMain.handle('get-directory', (_, relativePath) => __awaiter(void 0, void 0, void 0, function* () {
-        return fs.readdirSync(path.join(store.get("workspace-path"), relativePath));
+        const fullPath = path.join(store.get("workspace-path"), relativePath);
+        if (!fs.existsSync(fullPath))
+            return undefined;
+        return fs.readdirSync(fullPath);
     }));
     electron_1.ipcMain.handle('remove-file', (_, relativePath) => __awaiter(void 0, void 0, void 0, function* () {
         fs.rmSync(path.join(store.get("workspace-path"), relativePath));
-    }));
-    electron_1.ipcMain.handle('git-list-files', () => __awaiter(void 0, void 0, void 0, function* () {
-        return yield git.raw(['ls-files']);
-    }));
-    electron_1.ipcMain.handle('git-status', () => __awaiter(void 0, void 0, void 0, function* () {
-        const status = yield git.status();
-        return {
-            untracked: status.not_added,
-            modified: status.modified,
-            deleted: status.deleted
-        };
-    }));
-    electron_1.ipcMain.handle('git-commit', () => __awaiter(void 0, void 0, void 0, function* () {
-        yield git.add(".");
-        yield git.commit("-");
     }));
     electron_1.ipcMain.handle('workspace-exists', () => {
         return fs.existsSync(store.get("workspace-path"));
@@ -111,16 +171,26 @@ const createWindow = () => __awaiter(void 0, void 0, void 0, function* () {
         if (path === undefined || path == '')
             return;
         store.set("workspace-path", path);
+        git = (0, simple_git_1.simpleGit)(store.get("workspace-path"));
     });
     electron_1.ipcMain.handle('get-workspace', () => store.get("workspace-path"));
+    electron_1.ipcMain.handle('get-workspaces', () => {
+        var _a, _b;
+        return (_b = (_a = store.get("workspace-paths")) === null || _a === void 0 ? void 0 : _a.split("\n")) !== null && _b !== void 0 ? _b : [];
+    });
     electron_1.ipcMain.handle('select-workspace', () => {
-        var _a;
+        var _a, _b, _c;
         const path = (_a = electron_1.dialog.showOpenDialogSync(window, {
             properties: ['openDirectory']
         })) === null || _a === void 0 ? void 0 : _a[0];
         if (!path)
             return false;
         store.set('workspace-path', path);
+        const workspaces = (_c = (_b = store.get("workspace-paths")) === null || _b === void 0 ? void 0 : _b.split("\n")) !== null && _c !== void 0 ? _c : [];
+        if (!(workspaces === null || workspaces === void 0 ? void 0 : workspaces.includes(path))) {
+            workspaces.push(path);
+            store.set("workspace-paths", workspaces.join("\n"));
+        }
         return true;
     });
     electron_1.ipcMain.handle('read', (_, relativePath) => {
@@ -160,8 +230,8 @@ const createWindow = () => __awaiter(void 0, void 0, void 0, function* () {
         const filePath = path.join(store.get("workspace-path"), req.url.slice('asset://'.length));
         return electron_1.net.fetch("file://" + filePath);
     });
-    window.loadURL("http://localhost:9000/");
-    //window.loadFile("dist/index.html");
+    //window.loadURL("http://localhost:9000/")
+    window.loadFile("dist/index.html");
 });
 main_1.app.whenReady().then(() => {
     createWindow();
@@ -171,6 +241,5 @@ main_1.app.on('activate', () => {
         createWindow();
 });
 main_1.app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin')
-        main_1.app.quit();
+    main_1.app.quit();
 });

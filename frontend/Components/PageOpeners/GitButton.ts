@@ -1,14 +1,38 @@
 import { button, div } from "@/funcObject";
 import { Icon } from "../utils/Icon";
 import context from "../../context";
+import { Tree, TreeNode } from "@/data-structure/tree";
 
 export function GitButton(){
     return (
         div()(
             button({
                 class: "button",
-                onclick: () => {
-                    context.popupPage = "git";    
+                onclick: async () => {
+                    context.popupPage = "git";
+                    context.gitStatusTree = new Tree();
+                    const statuses = await window.electron.gitStatus();
+                    const statusArr = [
+                        ...statuses.untracked.map(s => ({status: "untracked" as const, str: s})),
+                        ...statuses.modified.map(s => ({status: "modified" as const, str:s})),
+                        ...statuses.modified.map(s => ({status: "deleted" as const, str:s})),
+                    ]
+                    for (const path of statusArr){
+                        let target = context.gitStatusTree.root;
+                        const pathParts = path.str.split("/");
+                        for (const pathPart of pathParts.slice(0, -1)){
+                            target = target.children.find(c => c.data.name === pathPart) ?? context.gitStatusTree.insert(new TreeNode({
+                                status: "dir",
+                                name: pathPart,
+                                path: path.str
+                            }), target)
+                        }
+                        target = target.children.find(c => c.data.name === pathParts[pathParts.length - 1]) ?? context.gitStatusTree.insert(new TreeNode({
+                            status: path.status,
+                            name: pathParts[pathParts.length - 1],
+                            path: path.str
+                        }), target)
+                    }                            
                 }
             })(
                 Icon(

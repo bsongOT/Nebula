@@ -8,7 +8,9 @@
     "test": "webpack serve",
     "compile": "pushd backend/electron && tsc && popd",
     "start": "npm run compile && electron . && tsc --build --clean",
-    "dev": "ts-node server.js"
+    "dev": "npm-run-all start test",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win --x64"
   },
   "keywords": [],
   "author": "Songgot",
@@ -35,5 +37,20 @@
     "pixi.js": "^8.3.2",
     "simple-git": "^3.27.0",
     "ts-node": "^10.9.2"
+  },
+  "build": {
+    "productName": "Nebula",
+    "appId": "com.editor.nebula",
+    "directories": {
+      "output": "build/${platform}/${arch}"
+    },
+    "win": {
+      "target": ["zip"],
+      "icon": "logo.ico"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "icon": "logo.icns"
+    }
   }
 }

@@ -68,10 +68,9 @@ export class DataSaver {
         await this.saveFileAliases(data.fileAliases);
     }
     public static async saveContentsExport(contents:DataCollection<Content>){
-        const fileNames = await window.electron.getDirectory("./contents");
+        const fileNames = await window.electron.getDirectory("./contents") ?? [];
         const contentsArr = contents.all();
 
-        if (fileNames === undefined) return;
         for (const fileName of fileNames.filter(fn => contentsArr.every(c => `${c.title}.md` !== fn))){
             window.electron.removeFile(`./contents/${fileName}`);
         }
@@ -84,10 +83,9 @@ export class DataSaver {
         }
     }
     public static async saveNebulasExport(nebulas:DataCollection<Nebula>){
-        const fileNames = await window.electron.getDirectory("./nebulas");
+        const fileNames = await window.electron.getDirectory("./nebulas") ?? [];
         const nebulaArrs = nebulas.all();
 
-        if (fileNames === undefined) return;
         for (const fileName of fileNames.filter(fn => nebulaArrs.every(n => `${n.name}.md` !== fn))){
             window.electron.removeFile(`./nebulas/${fileName}`);
         }
