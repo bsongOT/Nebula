@@ -230,8 +230,8 @@ const createWindow = () => __awaiter(void 0, void 0, void 0, function* () {
         const filePath = path.join(store.get("workspace-path"), req.url.slice('asset://'.length));
         return electron_1.net.fetch("file://" + filePath);
     });
-    //window.loadURL("http://localhost:9000/")
-    window.loadFile("dist/index.html");
+    window.loadURL("http://localhost:9000/");
+    //window.loadFile("dist/index.html");
 });
 main_1.app.whenReady().then(() => {
     createWindow();

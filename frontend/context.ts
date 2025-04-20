@@ -31,6 +31,7 @@ const context = {
     isOpenedPageNavigator: false,
     isRecordingContent: false,
     isTextFocused: false,
+    isRenaming: false,
     scrollVisibleContentNodes: new Set<TreeNode<Content>>(),
     clipboardLists: {
         content: new Array<Content>(),

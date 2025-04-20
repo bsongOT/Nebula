@@ -62,7 +62,7 @@ export function GitPage(){
                                             lines = await window.electron.gitDiffLines(i.path);
                                         }
                                     })(
-                                        span({inlineStyle: {flexGrow: "1"}})(() => i.name),
+                                        span({inlineStyle: {flexGrow: "1", overflowX: "hidden", textOverflow: "ellipsis", marginRight: "5px", textWrapMode: "nowrap"}})(() => i.name),
                                         span({inlineStyle: {marginRight: "25px"}})(() => i.status === "dir" ? "" : i.status[0].toUpperCase())
                                     )
                                 )

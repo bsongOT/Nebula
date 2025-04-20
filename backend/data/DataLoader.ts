@@ -56,6 +56,13 @@ type PackedDayNebula = {
         data:number
     }[]
 }
+type PackedQuery = {
+    name:string,
+    calculation: {
+        parent:number,
+        data: "or" | "and" | "andnot" | number
+    }[]
+}
 export class DataSaver {
     private constructor(){}
     public static async save(data:Data){
@@ -182,6 +189,7 @@ export class DataLoader {
         const universes = await this.loadUniverses();
         const dayNebula = await this.loadDayNebula();
         const fileAliases = await this.loadFileAliases();
+        const queries = await this.loadQueries();
         
         for (const content of contents.all()){
             content.dusts = content.dusts.map(d => dusts.get(d.id) ?? d);
@@ -219,7 +227,8 @@ export class DataLoader {
             relations,
             universes,
             dayNebula,
-            fileAliases
+            fileAliases,
+            queries
         }
     }
     private static async loadDusts(){
@@ -317,5 +326,14 @@ export class DataLoader {
         const electron = window.electron;
         const text = await electron.read("./nebula/file-aliases.json");
         return JSON.parse(text === "" ? "{}" : text) as Record<string, string>;
+    }
+    private static async loadQueries(){
+        const electron = window.electron;
+        const text = await electron.read("./nebula/queries.json");
+        const json = JSON.parse(text === "" ? "[]" : text) as PackedQuery[];
+
+        return json.map(pq => ({
+
+        }))
     }
 }

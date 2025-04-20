@@ -9,6 +9,7 @@ import { div, inputText, btn, Attribute, ul, li } from "@/funcObject";
 import { Title } from "../../Components/Title";
 import { r3 } from "@/utils/math/consts";
 import { NebulaPageNavigator } from "./NebulaPageNavigator";
+import { receiveMessage } from "../../utils/utils";
 
 export function NebulaPage(info:{nebula?:Nebula}){
     const attr:Attribute<"div"> = {
@@ -59,12 +60,12 @@ export function NebulaPage(info:{nebula?:Nebula}){
                     div()(() => `새 네뷸라 구성 중 (${context.waitingContents.length})`),
                     btn({ onclick: () => context.waitingContents = [] })("취소"),
                     btn({
-                        onclick: () => {
-                            const name = prompt("네뷸라 이름을 입력하십시오.") ?? undefined;
+                        onclick: async () => {
+                            const name = await receiveMessage("네뷸라 이름을 입력하십시오.") ?? undefined;
                             const tree = new Tree<Content>()
                             for (const contentNode of context.waitingContents)
                                 tree.insert(new TreeNode(contentNode.data));
-                            context.data.addNebula(new Nebula({ name, tree }))
+                            context.selection.nebula = context.data.addNebula(new Nebula({ name, tree }))
                             context.waitingContents = [];
                         }
                     })("완료")
@@ -153,7 +154,10 @@ class ContentPoint {
         ctx.font = `${Math.max(this.side, 10)}px arial`
         ctx.arc(x, y, 4, 0, 2 * Math.PI);
         ctx.fill();
-        if (this.node.data.id < 0) ctx.stroke();
+        if (this.node.data.id < 0) {
+            ctx.strokeStyle = "#aaa"
+            ctx.stroke();
+        }
         ctx.fillStyle = "black";
         if (this.textDisplay !== "none") {
             ctx.translate(x, y);

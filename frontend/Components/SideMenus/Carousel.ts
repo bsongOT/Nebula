@@ -52,6 +52,12 @@ export function Carousel() {
         isOpenedContextMenu = false
     });
 
+    document.addEventListener("keydown", e => {
+        if (e.code === "Escape"){
+            isOpenedContextMenu = false;
+        }
+    })
+
     return (
         div({ class: "carousel" })(
             div(modeChangerAttr)(

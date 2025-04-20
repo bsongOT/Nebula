@@ -192,8 +192,8 @@ const createWindow = async () => {
         return net.fetch("file://" + filePath);
     })
 
-    //window.loadURL("http://localhost:9000/")
-    window.loadFile("dist/index.html");
+    window.loadURL("http://localhost:9000/")
+    //window.loadFile("dist/index.html");
 }
 
 app.whenReady().then(() => {

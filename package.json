@@ -8,7 +8,7 @@
     "test": "webpack serve",
     "compile": "pushd backend/electron && tsc && popd",
     "start": "npm run compile && electron . && tsc --build --clean",
-    "dev": "npm-run-all start test",
+    "dev": "npm-run-all -p test start",
     "build:mac": "electron-builder --mac",
     "build:win": "electron-builder --win --x64"
   },

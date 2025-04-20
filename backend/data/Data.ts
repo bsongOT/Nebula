@@ -107,6 +107,7 @@ export class Data {
   public readonly routines;
   public readonly notifications;
   public readonly fileAliases;
+  public readonly queries;
 
   private saving:boolean;
 
@@ -129,6 +130,7 @@ export class Data {
     this.isolatedUniverse = new Universe({id: -1, name: "무소속 네뷸라"});
     this.notifications = new Notify(this);
     this.fileAliases = loadedData.fileAliases;
+    this.queries = loadedData.queries;
 
     DataSaver.saveContentsExport(this.contents);
     DataSaver.saveNebulasExport(this.nebulas);
@@ -203,10 +205,18 @@ export class Data {
     const dayNebula = this.systemUniverse.dayNebula;
     for (const node of dayNebula.tree.traverse().map(i => i.node)){
       if (node.data === content){
-        if (node.parent?.children.length === 1){
-          dayNebula.tree.remove(node.parent);
+        if ((node.parent?.children.length ?? 0) >= 2){
+          dayNebula.tree.remove(node);
         }
-        dayNebula.tree.remove(node);
+        else if ((node.parent?.parent?.children.length ?? 0) >= 2){
+          dayNebula.tree.remove(node.parent!);
+        }
+        else if ((node.parent?.parent?.parent?.children.length ?? 0) >= 2){
+          dayNebula.tree.remove(node.parent!.parent!);
+        }
+        else {
+          dayNebula.tree.remove(node.parent!.parent!.parent!);
+        }
       }
     }
     for (const nebulaTree of this.nebulas.map(n => n.tree)){

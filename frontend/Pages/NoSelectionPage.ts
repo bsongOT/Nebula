@@ -1,7 +1,7 @@
 import { Attribute, button, div } from "@/funcObject";
 import context from "../context";
 import { Universe } from "../../backend/data/components/Universe";
-import { Nebula } from "../../backend/data/Data";
+import { Content, Nebula } from "../../backend/data/Data";
 
 export function NoSelectionPage(){
     const buttonAttr:Attribute<'button'> = {
@@ -20,7 +20,10 @@ export function NoSelectionPage(){
         context.selection.nebula = context.data.nebulas.add(new Nebula({}))
     }
     const createContent = () => {
-        
+        context.selection.universe = context.data.systemUniverse;
+        context.selection.nebula = context.data.systemUniverse.dayNebula;
+        const content = context.data.addContent(new Content({}));
+        context.selection.content = context.data.systemUniverse.dayNebula.tree.traverse().find(i => i.node.data === content)?.node;
     }
     return (
         div({ className: "page", inlineStyle: {display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center"} })(

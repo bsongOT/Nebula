@@ -4,16 +4,15 @@ import context from "../context";
 import { Content, Nebula } from "../../backend/data/Data";
 import { receiveMessage } from "../utils/utils";
 import { TreeNode } from "@/data-structure/tree";
+import { Universe } from "../../backend/data/components/Universe";
 
 export function NoticePage(){
     let selectedOption = "isolated-content" as "isolated-content" | "isolated-nebula" | "status" | "routine";
+    const selectedNebulas = new Array<Nebula>();
 
     const style:Attribute<"div">["inlineStyle"] = U(() => ({
         display: context.popupPage === "notice" ? "flex" : "none"
     }))
-    const sideTitleStyle = {
-        padding: "10px"
-    }
     const sideMenuStyle = {
         padding: "5px 10px",
         borderRadius: "5px",
@@ -34,41 +33,25 @@ export function NoticePage(){
                 },
                 onclick: e => e.stopPropagation()
             })(
-                div({
-                    inlineStyle: {
-                        padding: "15px",
-                        background: "wheat",
-                        width: "150px"
-                    }
-                })(
-                    h2({inlineStyle: sideTitleStyle})("알림"),
+                div({ class: "notice-side" })(
+                    h2({ class: "notice-side-title" })("알림"),
                     div({
                         inlineStyle: U(() => ({...sideMenuStyle, background: selectedOption === "isolated-content" ? "floralwhite" : ""})),
                         onclick: () => selectedOption = "isolated-content"
                     })(
                         span()("소속 없는 컨텐츠"),
                         span({
-                            class: U(() => context.data.notifications.isolatedContents.length === 0 ? "hidden" : ""),
-                            inlineStyle: {
-                            marginLeft: "auto",
-                            background: "red",
-                            color: "white",
-                            padding: "0 3px",
-                            borderRadius: "2px"
-                        }})(() => context.data.notifications.isolatedContents.length + "")
+                            class: U(() => context.data.notifications.isolatedContents.length === 0 ? "hidden" : "notice-side-item-count"),
+                        })(() => context.data.notifications.isolatedContents.length + "")
                     ),
                     div({
                         inlineStyle: U(() => ({...sideMenuStyle, background: selectedOption === "isolated-nebula" ? "floralwhite" : ""})),
                         onclick: () => selectedOption = "isolated-nebula"
                     })(
                         span()("소속 없는 네뷸라"),
-                        span({inlineStyle: {
-                            marginLeft: "auto",
-                            background: "red",
-                            color: "white",
-                            padding: "0 3px",
-                            borderRadius: "2px"
-                        }})(() => context.data.notifications.isolatedNebulas.length + "")
+                        span({
+                            class: U(() => selectedNebulas.length === 0 ? "hidden" : "notice-side-item-count")
+                        })(() => context.data.notifications.isolatedNebulas.length + "")
                     ),
                     div({
                         inlineStyle: U(() => ({...sideMenuStyle, background: selectedOption === "status" ? "floralwhite" : ""})),
@@ -84,7 +67,7 @@ export function NoticePage(){
                     then: IsolatedContentsPage()  
                 },{
                     if: () => selectedOption === "isolated-nebula",
-                    then: IsolatedNebulasPage()
+                    then: IsolatedNebulasPage({selectedNebulas})
                 },{
                     if: () => selectedOption === "status",
                     then: StatusPage()
@@ -153,24 +136,36 @@ function IsolatedContentsPage(){
         )
     )
 }
-function IsolatedNebulasPage(){
+function IsolatedNebulasPage(info: {selectedNebulas:Nebula[]}){
+    const { selectedNebulas } = info;
     return (
         div()(
             div()(Repeat(
                 NoticeNebulaLine,
-                () => context.data.notifications.isolatedNebulas.map(nebula => ({nebula}))
+                () => context.data.notifications.isolatedNebulas.map(nebula => ({nebula, selectedNebulas}))
             )),
             div()(
                 button({
-                    class: "one-click-button"
+                    class: "one-click-button",
+                    onclick: () => {
+                        const univ = context.data.universes.add(new Universe());
+                        univ.nebulas.push(...selectedNebulas);
+                        selectedNebulas.splice(0, selectedNebulas.length);
+                    }
                 })("새 유니버스에 담기"),
                 button({
-                    class: "one-click-button"
+                    class: "one-click-button",
+                    onclick: () => {
+                        const univ = context.selection.universe;
+                        if (!univ) return;
+                        univ.nebulas.push(...selectedNebulas);
+                        selectedNebulas.splice(0, selectedNebulas.length);
+                    }
                 })("현재 유니버스에 담기"),
                 button({
                     class: "one-click-button delete-button",
                     onclick: () => {
-                    
+                        selectedNebulas.splice(0, selectedNebulas.length);
                     }
                 })("삭제")
             )
@@ -194,12 +189,9 @@ function RoutinePage(){
     )
 }
 function NoticeContentLine(info:{content:Content}){
-    const style:Partial<HTMLElement["style"]> = {
-        display: "flex"
-    }
     return (
         div({
-            inlineStyle: style,
+            class: "notice-content-line",
             onclick: () => {
                 if (context.noticeSelectedContents.includes(info.content)) context.noticeSelectedContents = context.noticeSelectedContents.filter(c => c !== info.content);
                 else context.noticeSelectedContents.push(info.content)
@@ -213,13 +205,22 @@ function NoticeContentLine(info:{content:Content}){
         )
     )
 }
-function NoticeNebulaLine(info:{nebula:Nebula}){
-    const style:Partial<HTMLElement["style"]> = {
-        display: "flex"
-    }
+function NoticeNebulaLine(info:{nebula:Nebula, selectedNebulas:Nebula[]}){
     return (
-        div({inlineStyle: style})(
-            inputText({type: "checkbox"})(),
+        div({
+            class: "notice-nebula-line",
+            onclick: () => {
+                if (info.selectedNebulas.includes(info.nebula)) {
+                    info.selectedNebulas.splice(0, info.selectedNebulas.length);
+                    info.selectedNebulas.push(...info.selectedNebulas.filter(n => n !== info.nebula));
+                }
+                else info.selectedNebulas.push(info.nebula)
+            }
+        })(
+            inputText({
+                type: "checkbox",
+                checked: U(() => info.selectedNebulas.includes(info.nebula))
+            })(),
             div()(() => info.nebula.name)
         )
     )

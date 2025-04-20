@@ -1,5 +1,5 @@
 import { Repeat, U } from "@/engine";
-import { Attribute, div, hr, span } from "@/funcObject";
+import { Attribute, div, hr, inputText, span } from "@/funcObject";
 import context from "../../context";
 import { Universe } from "../../../backend/data/components/Universe";
 import { Nebula } from "../../../backend/data/Data";
@@ -8,39 +8,19 @@ import { ChevronRight } from "lucide";
 import { LucideIcon } from "../utils/Icon";
 
 export function UniverseSelector(){
-    function NebulaSelectorLine(info:{universe:Universe, nebula:Nebula}){
-        return (
-            div({
-                className: "hover-eee",
-                onclick: () => {
-                    context.selection.universe = info.universe;
-                    context.selection.nebula = info.nebula;
-                    context.selection.content = undefined;
-                },
-                inlineStyle: U(() => ({
-                    padding: "2px 50px",
-                    background: context.selection.universe === info.universe && context.selection.nebula === info.nebula ? "skyblue" : ""
-                }))
-            })(() => info.nebula.name)
-        )
+    let renamedName = "";
+    const rename = function(e:KeyboardEvent){
+        if (e.code === "Enter"){
+            if (!context.isSideActive) return;
+            if (e.isComposing) return;
+            context.isRenaming = !context.isRenaming;
+            if (!context.selection.universe) return;
+            if (!context.isRenaming){
+                context.selection.universe.name = renamedName;
+            }
+        }
     }
-    function RelationSelectorLine(info:{universe:Universe, relation:Relation}){
-        return (
-            div()(
-                div()(() => info.relation.mainTree.name + " - " + info.relation.secondTree.name),
-                div()(
-                    NebulaSelectorLine({
-                        get universe(){ return info.universe },
-                        get nebula(){ return info.relation.mainTree }
-                    }),
-                    NebulaSelectorLine({
-                        get universe(){ return info.universe },
-                        get nebula(){ return info.relation.secondTree }
-                    })
-                )
-            )
-        )
-    }
+    document.addEventListener("keydown", rename);
     function Line(info:{universe: Universe}){
         let collapsed = true;
         const attr:Attribute<"div"> = {
@@ -48,22 +28,27 @@ export function UniverseSelector(){
             inlineStyle: U(() => ({
                 display: "flex",
                 padding: "3px 20px",
-                background: collapsed ? "" : "#eee"
+                background: context.selection.universe === info.universe && !context.selection.nebula ? "skyblue" : ""
             })),
             onclick: () => {
+                context.selection.universe = info.universe;
+                context.selection.nebula = undefined;
+                context.selection.content = undefined;
                 collapsed = !collapsed;
             }
         }
         const nebulaListAttr:Attribute<"div"> = {
             inlineStyle: U(list => {
-                if (collapsed) return { transition: "0.2s", overflow: "hidden", height: "0" }
                 list.style.height = "0";
-                return { transition: "0.2s", overflow: "hidden", height: list.scrollHeight + "px" };
+                return { 
+                    transition: "0.2s", 
+                    overflow: "hidden", 
+                    height: collapsed ? "0" : list.scrollHeight + "px" };
             })
         }
 
         return (
-            div()(
+            div({inlineStyle: {position: "relative"}})(
                 div(attr)(
                     span({
                         inlineStyle: U(() => ({
@@ -71,13 +56,26 @@ export function UniverseSelector(){
                             display: "inline-flex",
                             alignItems: "center",
                             transition: "0.1s",
-                            rotate: collapsed ? "" : "90deg"
+                            rotate: collapsed ? "" : "90deg",
+                            marginRight: "5px"
                         }))
                     })(
                         LucideIcon(ChevronRight, 16)
                     ),
                     span({inlineStyle: {display: "inline-flex", justifyContent: "center"}})(() => info.universe.name)
                 ),
+                inputText({
+                    class: U(() => (context.selection.universe === info.universe) && context.isRenaming ? "rename-text" : "hidden"),
+                    value: U(text => {
+                        if ((context.selection.universe === info.universe) && context.isRenaming) {
+                            renamedName = text.value;
+                            text.focus();
+                            return text.value;
+                        }
+                        return info.universe.name;
+                    }),
+                    onblur: () => context.isRenaming = false
+                })(),
                 div(nebulaListAttr)(
                     Repeat(NebulaSelectorLine, () => info.universe.nebulas.map(n => ({universe: info.universe, nebula: n})))
                 ),
@@ -102,9 +100,12 @@ export function UniverseSelector(){
         }
         const nebulaListAttr:Attribute<"div"> = {
             inlineStyle: U(list => {
-                if (collapsed) return { transition: "0.2s", overflow: "hidden", height: "0" }
                 list.style.height = "0";
-                return { transition: "0.2s", overflow: "hidden", height: list.scrollHeight + "px" };
+                return { 
+                    transition: "0.2s", 
+                    overflow: "hidden", 
+                    height: collapsed ? "0" : list.scrollHeight + "px" 
+                };
             })
         }
         return (
@@ -149,4 +150,37 @@ export function UniverseSelector(){
           )
       ])
     )
-  }
+}
+function NebulaSelectorLine(info:{universe:Universe, nebula:Nebula}){
+    return (
+        div({
+            className: "hover-eee",
+            onclick: () => {
+                context.selection.universe = info.universe;
+                context.selection.nebula = info.nebula;
+                context.selection.content = undefined;
+            },
+            inlineStyle: U(() => ({
+                padding: "2px 50px",
+                background: context.selection.universe === info.universe && context.selection.nebula === info.nebula ? "skyblue" : ""
+            }))
+        })(() => info.nebula.name)
+    )
+}
+function RelationSelectorLine(info:{universe:Universe, relation:Relation}){
+    return (
+        div()(
+            div()(() => info.relation.mainTree.name + " - " + info.relation.secondTree.name),
+            div()(
+                NebulaSelectorLine({
+                    get universe(){ return info.universe },
+                    get nebula(){ return info.relation.mainTree }
+                }),
+                NebulaSelectorLine({
+                    get universe(){ return info.universe },
+                    get nebula(){ return info.relation.secondTree }
+                })
+            )
+        )
+    )
+}
