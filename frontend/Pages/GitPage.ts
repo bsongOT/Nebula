@@ -143,7 +143,8 @@ export function GitPage(){
                                                 insert: "green",
                                                 delete: "red"
                                             }[i.state],
-                                            flexGrow: '1',
+                                            flexGrow: "1",
+                                            textWrapMode: "nowrap",
                                             wordBreak: "keep-all"
                                         }))
                                     })(() => i.str.replaceAll(" ", "\u00A0").replaceAll("\t", "\u00A0".repeat(5)))

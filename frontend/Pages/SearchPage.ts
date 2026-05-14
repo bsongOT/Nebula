@@ -4,7 +4,7 @@ import context from "../context";
 import { Content, Nebula } from "../../backend/data/Data";
 import { hangulSeperate } from "@/utils/utils";
 import { Universe } from "../../backend/data/components/Universe";
-import { LucideIcon } from "../Components/utils/Icon";
+import { Icon, LucideIcon } from "../Components/utils/Icon";
 import { Boxes, Network, NotebookText } from "lucide";
 
 export function SearchPage(){
@@ -70,7 +70,7 @@ export function SearchPage(){
                         Repeat(
                             SearchContentItem,
                             () => {
-                                searchedList.contents = context.data.contents.filter(c => hangulSeperate(c.title).includes(hangulSeperate(context.searchString))).slice(0, upperLength);
+                                searchedList.contents = context.data.contents.filter(c => hangulSeperate(c.title).includes(hangulSeperate(context.searchString))).slice(-upperLength).reverse();
                                 return searchedList.contents.map((content, index) => ({content, index}));
                             }
                         )
@@ -82,7 +82,7 @@ export function SearchPage(){
                         Repeat(
                             SearchNebulaItem,
                             () => {
-                                searchedList.nebulas = [context.data.systemUniverse.dayNebula, ...context.data.nebulas.all()].filter(n => hangulSeperate(n.name).includes(hangulSeperate(context.searchString))).slice(0, upperLength)
+                                searchedList.nebulas = [context.data.systemUniverse.dayNebula, ...context.data.nebulas.all()].filter(n => hangulSeperate(n.name).includes(hangulSeperate(context.searchString))).slice(-upperLength).reverse()
                                 return searchedList.nebulas.map((nebula, i) => ({nebula, index: i + searchedList.contents.length}));
                             }
                         )
@@ -94,7 +94,7 @@ export function SearchPage(){
                         Repeat(
                             SearchUniverseItem,
                             () => {
-                                searchedList.universes = [context.data.systemUniverse, ...context.data.universes.all()].filter(u => hangulSeperate(u.name).includes(hangulSeperate(context.searchString))).slice(0, upperLength)
+                                searchedList.universes = [context.data.systemUniverse, ...context.data.universes.all()].filter(u => hangulSeperate(u.name).includes(hangulSeperate(context.searchString))).slice(-upperLength).reverse()
                                 return searchedList.universes.map((universe, i) => ({universe, index: i + searchedList.contents.length + searchedList.nebulas.length}));
                             }
                         )
@@ -138,10 +138,17 @@ function SearchUniverseItem(info:{universe:Universe, index:number}){
     )
 }
 function SearchBar(info:{current:{action:string} | Content | Nebula | Universe}){
+    const icon = Icon(`
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <circle cx="10" cy="10" r="6"></circle>
+            <line x1="21" y1="21" x2="15" y2="15"></line>
+        `)
+    icon.setAttribute("stroke-width", "1.5px")
+    icon.setAttribute("fill", "none");
     let focused = false;
     return (
         div({ class: "search-bar" })(
-            span({ class: "icon material-symbols-outlined" })("search"),
+            span({inlineStyle: {padding: "0 5px", translate: "0 1px"}})(icon),
             inputText({
                 class: U(text => {
                     if (!focused) text.focus();

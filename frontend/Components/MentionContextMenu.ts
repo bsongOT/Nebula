@@ -1,23 +1,11 @@
 import { div } from "@/funcObject";
 import context from "../context";
-import { Content } from "../../backend/data/Data";
 import { splitIntoPieces } from "../utils/utils";
 
-const menuStyle:Partial<HTMLElement["style"]> = {
-    padding: "5px 10px"
-}
 export const mentionContextMenu = (
-    div({inlineStyle: {
-        position: "absolute",
-        width: "200px",
-        background: "white",
-        boxShadow: "2px 2px 4px #ccc",
-        borderRadius: "3px",
-        border: "1px solid #eee"
-    }})(
+    div({ className: "context-menu" })(
         div({
-            className: "hover-ccc",
-            inlineStyle: menuStyle,
+            className: "context-menu-item",
             onclick: () => {
                 const content = context.selection.content?.data;
                 const mentionedContent = context.data.contents.find(c => c.title === mentionContextMenu.dataset.contentTitle);
@@ -35,8 +23,7 @@ export const mentionContextMenu = (
             }
         })("언급 연결하기"),
         div({
-            className: "hover-ccc",
-            inlineStyle: menuStyle,
+            className: "context-menu-item",
             onclick: () => {
                 const content = context.selection.content?.data;
                 if (!content) return;

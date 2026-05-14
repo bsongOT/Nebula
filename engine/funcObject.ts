@@ -13,6 +13,7 @@ export type UpdatedAttribute<T extends Tag> = Partial<{
     [key in keyof HTMLElementTagNameMap[T]]: Updated<HTMLElementTagNameMap[T], HTMLElementTagNameMap[T][key]>
 }> & {
     inlineStyle?: Updated<HTMLElementTagNameMap[T], Partial<CSSStyleDeclaration>>
+    update?:(element:HTMLElementTagNameMap[T]) => void
 }
 export type Tag = keyof HTMLElementTagNameMap;
 export type ChildrenAttribute<T extends HTMLElement, C extends HTMLElement = HTMLElement> = 
@@ -150,6 +151,10 @@ export const slider = (attrs?:Attribute<"input">) => {
   obj.type = "range"
   return obj;
 }
+export const img = independentElement("img");
+export const audio = independentElement("audio");
+export const video = independentElement("video");
+export const iframe = independentElement("iframe");
 export const select = element<"select", HTMLOptionElement>("select");
 export const option = element<"option", never>("option")
 export const span = element("span");

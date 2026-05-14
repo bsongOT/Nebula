@@ -3,7 +3,7 @@ import { body, btn, button, div } from "@/funcObject";
 import { ContentEditor } from "./Pages/ContentPage/ContentPage";
 import { NebulaPage } from "./Pages/NebulaPage/NebulaPage";
 import { engine, U } from "@/engine";
-import context from "./context";
+import context, { Selection } from "./context";
 import { TabWrapper } from "./Components/TabWrapper";
 import { SearchPage } from "./Pages/SearchPage";
 import { NoticePage } from "./Pages/NoticePage";
@@ -17,13 +17,13 @@ import { SettingButton } from "./Components/PageOpeners/SettingButton";
 import { QueryButton } from "./Components/PageOpeners/QueryButton";
 import { FilePage } from "./Pages/ContentPage/FilePage";
 import { ClipboardPage } from "./Pages/ClipboardPage";
-import { ChevronRight, createIcons, icons } from "lucide";
 import { mentionContextMenu } from "./Components/MentionContextMenu";
 import { SearchButton } from "./Components/PageOpeners/SearchButton";
 import { GitButton } from "./Components/PageOpeners/GitButton";
 import { GitPage } from "./Pages/GitPage";
 import { QueryPage } from "./Pages/QueryPage";
 import { Tree, TreeNode } from "@/data-structure/tree";
+import { closeCurrentTab, createNebulaByStart } from "./features";
 
 document.addEventListener("click", () => {
   mentionContextMenu.remove();
@@ -31,10 +31,9 @@ document.addEventListener("click", () => {
 document.addEventListener("keydown", async e => {
   if ((e.ctrlKey || e.metaKey) && e.code === 'Slash'){
     context.screenSplit = !context.screenSplit;
-    context.secondSelection = {
-      universe: context.selection.universe,
-      nebula: context.selection.nebula,
-      content: context.selection.content
+    if (!context.screenSplit){
+      context.secondSelection = undefined;
+      context.secondTabs = [];
     }
     return;
   }
@@ -78,13 +77,30 @@ document.addEventListener("keydown", async e => {
   else if ((e.ctrlKey || e.metaKey) && e.code === "KeyF"){
     context.popupPage = "search";
   }
-  else if(e.code === "Escape") {
+  else if (e.code === "Escape") {
     context.popupPage = "";
     context.searchString = "";
     context.searchIndex = 0;
     if (document.activeElement instanceof HTMLInputElement){
       document.activeElement.blur()
     }
+  }
+  else if (e.altKey && e.code === "KeyR"){
+    if (!context.selection.content) return;
+    context.isRecordingContent = !context.isRecordingContent;
+  }
+  else if (e.altKey && e.code === "KeyN") {
+    createNebulaByStart()
+  }
+  else if ((e.ctrlKey || e.metaKey) && e.code === "ArrowRight"){
+    if (!context.selection.content) return;
+    if (!context.selection.nebula) return;
+    if (!context.selection.universe) return;
+    const closingSelection = context.selection;
+    context.secondTabs.push(context.selection as Required<Selection>);
+    closeCurrentTab();
+    context.secondSelection = closingSelection;
+    context.screenSplit = true;
   }
 })
 document.addEventListener("click", e => {
@@ -125,12 +141,12 @@ body(
     (() => {
       const arr = new Array<HTMLElement>();
       const filePage = FilePage();
-      const contentPage = ContentEditor();
+      const contentPage = ContentEditor({content: context.selection.content?.data});
       const nebulaPage = NebulaPage({get nebula(){return context.selection.nebula}});
       const relationPage = RelationPage();
       const noSelectionPage = NoSelectionPage();
 
-      const secondContentPage = ContentEditor();
+      const secondContentPage = ContentEditor({content: context.secondSelection?.content?.data});
 
       engine.updater.register(() => {
         arr.splice(0, arr.length);

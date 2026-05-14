@@ -7,66 +7,35 @@ import { LucideIcon } from "../utils/Icon";
 import { ChevronDown, CirclePlus, Database, Network, NotebookText } from "lucide";
 
 export function Carousel() {
-    let mode = "nebula" as "nebula" | "content"
     const attr:Attribute<"div"> = {
         class: "row",
         inlineStyle: U(() => ({
             left: {
                 nebula: "0",
                 content: "-100%"
-            }[mode]
+            }[context.windowMode]
         }))
-    }
-    const modeChangerAttr:Attribute<"div"> = {
-        inlineStyle: {
-            display: "flex",
-            flexDirection: "column",
-            padding: "5px 0"
-        }
-    }
-    const workspaceChangerAttr:Attribute<"div"> = {
-        className: "left-side-mode-button hover-eee",
-        onclick: e => {
-            e.stopPropagation();
-            isOpenedContextMenu = !isOpenedContextMenu;
-        }
     }
     const nebulaModeButtonAttr:Attribute<"div"> = {
-        className: "left-side-mode-button hover-eee", 
-        onclick: () => mode = "nebula", 
-        inlineStyle: U(() => ({
-            background: mode === "nebula" ? "lightcoral" : "",
-        }))
+        className: U(() => "left-side-mode-button hover-eee" + (context.windowMode === "nebula" ? " selected" : "")), 
+        onclick: () => context.windowMode = "nebula"
     }
     const contentModeButtonAttr:Attribute<"div"> = {
-        className: "left-side-mode-button hover-eee", 
-        onclick: () => mode = "content", 
-        inlineStyle: U(() => ({
-            background: mode === "content" ? "lightcoral" : "",
-        }))
+        className: U(() => "left-side-mode-button hover-eee" + (context.windowMode === "content" ? " selected" : "")), 
+        onclick: () => context.windowMode = "content"
     }
-
-    let isOpenedContextMenu = false;
-
-    document.addEventListener("click", () => {
-        isOpenedContextMenu = false
-    });
 
     document.addEventListener("keydown", e => {
         if (e.code === "Escape"){
-            isOpenedContextMenu = false;
+            context.isOpenedContextMenu = false;
         }
     })
 
     return (
         div({ class: "carousel" })(
-            div(modeChangerAttr)(
-                div(workspaceChangerAttr)(
-                    span({ inlineStyle: {translate: "0 2px", display: "inline-block"} })(LucideIcon(Database)),
-                    span({ inlineStyle: {marginLeft: "10px"} })("작업 공간"),
-                    span({ inlineStyle: {marginLeft: "5px", translate: "0 3px", display: "inline-block"}})(LucideIcon(ChevronDown, 17))
-                ),
-                div({class: "workspace-context-menu", inlineStyle: U(() => ({display: isOpenedContextMenu ? "" : "none"}))})(
+            div({ class: "carousel-tab" })(
+                WorkspaceChangeButton(),
+                div({class: U(() => context.isOpenedContextMenu ? "workspace-context-menu" : "hidden")})(
                     div()(
                         context.workspaces.map(w => (
                             div({
@@ -87,17 +56,17 @@ export function Carousel() {
                             location.reload();
                         }
                     })(
-                        span({ inlineStyle: {translate: "0 2px", display: "inline-block", marginRight: "5px"} })(LucideIcon(CirclePlus)),
+                        span({ class: "workspace-insert-icon" })(LucideIcon(CirclePlus)),
                         span()("추가하기")
                     )
                 ),
                 div(nebulaModeButtonAttr)(
-                    span({ inlineStyle: {translate: "0 1px", display: "inline-block"} })(LucideIcon(Network)),
-                    span({ inlineStyle: {marginLeft: "10px"} })("네뷸라")
+                    span({ class: "nebula-mode-icon" })(LucideIcon(Network)),
+                    span({ class: "left-side-button-text" })("네뷸라")
                 ),
                 div(contentModeButtonAttr)(
-                    span({ inlineStyle: {translate: "0 2px", display: "inline-block"} })(LucideIcon(NotebookText)),
-                    span({ inlineStyle: {marginLeft: "10px"} })("컨텐츠")
+                    span({ class: "content-mode-icon" })(LucideIcon(NotebookText)),
+                    span({ class: "left-side-button-text" })("컨텐츠")
                 ),
                 hr()()
             ),
@@ -105,6 +74,27 @@ export function Carousel() {
                 UniverseSelector(),
                 NestingList()
             )
+        )
+    )
+}
+function WorkspaceChangeButton(){
+    const workspaceChangerAttr:Attribute<"div"> = {
+        className: "left-side-mode-button hover-eee",
+        onclick: e => {
+            e.stopPropagation();
+            context.isOpenedContextMenu = !context.isOpenedContextMenu;
+        }
+    }
+
+    document.addEventListener("click", () => {
+        context.isOpenedContextMenu = false
+    });
+
+    return (
+        div(workspaceChangerAttr)(
+            span({ class: "workspace-icon" })(LucideIcon(Database)),
+            span({ class: "left-side-button-text" })("작업 공간"),
+            span({ class: "workspace-chevron" })(LucideIcon(ChevronDown, 17))
         )
     )
 }

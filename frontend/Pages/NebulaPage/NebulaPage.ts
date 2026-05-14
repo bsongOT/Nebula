@@ -234,9 +234,7 @@ export function NebulaModel(info:{nebula?:Nebula}){
     let mouseY = 0;
     let stars = new Array<ContentPoint>();
     
-    cv.onclick = () => {
-        for (const star of stars) star.onclick(mouseX, mouseY);
-    }
+    cv.onclick = () => { for (const star of stars) star.onclick(mouseX, mouseY); }
     document.addEventListener("mousemove", e => {
         const r =  cv.getBoundingClientRect();
         mouseX = e.clientX - r.left;
@@ -244,19 +242,17 @@ export function NebulaModel(info:{nebula?:Nebula}){
     })
 
     function update(){
-        if (!info.nebula) return;
         cv.width = cv.scrollWidth;
-        cv.height = 0;
         cv.height = cv.scrollHeight;
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        
+        if (!info.nebula) return;
 
         const grid = new HexGrid(H(1,1,1).scale(boardSize))
         const paths = toPaths(info.nebula.tree);
         const size = grid.size.x;
-        const pivot = H(1, 0, 1).scale(size - 1);
-        const canvasCenter = P(cv.width / 2, cv.height / 2);
         const side = Math.min((cv.width - 10) / (r3 * (size + 1)), (cv.height - 10) / 42);
 
-        ctx.clearRect(0, 0, cv.width, cv.height);
         ctx.strokeStyle = "#ccc";
         ctx.fillStyle = "#f0f0f0";
         
@@ -275,20 +271,20 @@ export function NebulaModel(info:{nebula?:Nebula}){
         }
 
         if (context.waitingContents.length > 0){
-            const first = stars.find(s => s.node === context.waitingContents[0])?.position;
-            if (!first) return;
+            const waitingPath = stars.filter(s => context.waitingContents.includes(s.node));
+            
+            if (waitingPath.length < 1) return;
             ctx.strokeStyle = "green";
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(first.x, first.y);
-            for (const node of context.waitingContents){
-                const star = stars.find(s => s.node === node);
-                if (!star) break;
+            ctx.moveTo(waitingPath[0].position.x, waitingPath[0].position.y);
+            for (const star of waitingPath.slice(1)){
                 ctx.lineTo(star.position.x, star.position.y)
             }
             ctx.stroke()
-            ctx.lineWidth = 1;
         }
+        
+        ctx.lineWidth = 1;
 
         for (const star of stars){
             star.render(ctx, mouseX, mouseY);

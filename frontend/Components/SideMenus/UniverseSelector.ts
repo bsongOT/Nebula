@@ -21,7 +21,7 @@ export function UniverseSelector(){
         }
     }
     document.addEventListener("keydown", rename);
-    function Line(info:{universe: Universe}){
+    function Line(info:{universe: Universe, isDisplayedSize?:boolean}){
         let collapsed = true;
         const attr:Attribute<"div"> = {
             className: "hover-eee",
@@ -48,7 +48,7 @@ export function UniverseSelector(){
         }
 
         return (
-            div({inlineStyle: {position: "relative"}})(
+            div({ class: "universe-selector" })(
                 div(attr)(
                     span({
                         inlineStyle: U(() => ({
@@ -62,7 +62,17 @@ export function UniverseSelector(){
                     })(
                         LucideIcon(ChevronRight, 16)
                     ),
-                    span({inlineStyle: {display: "inline-flex", justifyContent: "center"}})(() => info.universe.name)
+                    span({inlineStyle: {display: "inline-flex", justifyContent: "center"}})(() => info.universe.name),
+                    span({
+                        className: info.isDisplayedSize ? "" : "hidden",
+                        inlineStyle: {
+                            marginLeft: "5px",
+                            padding: "0 2px",
+                            background: "red",
+                            color: "white",
+                            borderRadius: "3px"
+                        }
+                    })(() => context.data.isolatedUniverse.nebulas.length + "")
                 ),
                 inputText({
                     class: U(() => (context.selection.universe === info.universe) && context.isRenaming ? "rename-text" : "hidden"),
@@ -85,65 +95,11 @@ export function UniverseSelector(){
             )
         );
     }
-    function IsolatedUniverseLine(){
-        let collapsed = true;
-        const attr:Attribute<"div"> = {
-            className: "hover-eee",
-            inlineStyle: U(() => ({
-                display: context.data.isolatedUniverse.nebulas.length <= 0 ? "none" : "flex",
-                padding: "3px 20px",
-                background: collapsed ? "" : "#eee"
-            })),
-            onclick: () => {
-                collapsed = !collapsed;
-            }
-        }
-        const nebulaListAttr:Attribute<"div"> = {
-            inlineStyle: U(list => {
-                list.style.height = "0";
-                return { 
-                    transition: "0.2s", 
-                    overflow: "hidden", 
-                    height: collapsed ? "0" : list.scrollHeight + "px" 
-                };
-            })
-        }
-        return (
-            div()(
-                div(attr)(
-                    span({
-                        inlineStyle: U(() => ({
-                            translate: "0 -2px",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            transition: "0.1s",
-                            rotate: collapsed ? "" : "90deg"
-                        }))
-                    })(
-                        LucideIcon(ChevronRight, 16)
-                    ),
-                    span({inlineStyle: {display: "inline-flex", justifyContent: "center"}})(context.data.isolatedUniverse.name),
-                    span({
-                        inlineStyle: {
-                            marginLeft: "5px",
-                            padding: "0 2px",
-                            background: "red",
-                            color: "white",
-                            borderRadius: "3px"
-                        }
-                    })(() => context.data.isolatedUniverse.nebulas.length + "")
-                ),
-                div(nebulaListAttr)(
-                    Repeat(NebulaSelectorLine, () => context.data.isolatedUniverse.nebulas.map(n => ({universe: context.data.isolatedUniverse, nebula: n})))
-                )
-            )
-        );
-    }
 
     return (
       div({inlineStyle:{width: "250px"}})([
           Line({universe: context.data.systemUniverse}),
-          IsolatedUniverseLine(),
+          Line({universe: context.data.isolatedUniverse, isDisplayedSize: true}),
           hr()(),
           div()(
               Repeat(Line, () => context.data.universes.map(u => ({universe: u})))

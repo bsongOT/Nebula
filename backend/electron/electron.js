@@ -42,6 +42,13 @@ const path = __importStar(require("path"));
 const electron_store_1 = __importDefault(require("electron-store"));
 const simple_git_1 = require("simple-git");
 main_1.app.commandLine.appendSwitch('disable-site-isolation-trials');
+electron_1.protocol.registerSchemesAsPrivileged([{
+        scheme: "asset",
+        privileges: {
+            bypassCSP: true,
+            stream: true
+        }
+    }]);
 const createWindow = () => __awaiter(void 0, void 0, void 0, function* () {
     const store = new electron_store_1.default();
     const window = new main_1.BrowserWindow({

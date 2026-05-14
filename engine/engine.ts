@@ -55,20 +55,27 @@ export function one(cases:{if: () => any, then: HTMLElement}[]){
 }
 class Updater {
     private list:(()=>void)[] = []
+    private afterList:((()=>void) & {called?:boolean})[] = [];
     private loop: NodeJS.Timeout | undefined;
+    public log:boolean = false;
     register(func:()=>void){
         this.list.push(func)
         if (this.loop) return;
         this.loop = setInterval(() => {
             const list = [...this.list];
-            for (const l of list) l()
-            console.log(`현재 돌고 있는 루프의 개수는 ${this.list.length}`)
+            for (const l of list) l();
+            for (const l of this.afterList) l();
+            this.afterList = this.afterList.filter(l => !l.called);
+            if (this.log) console.log(`현재 돌고 있는 루프의 개수는 ${this.list.length}`)
         }, 100)
     }
     unregister(func:()=>void){
         const index = this.list.indexOf(func);
         if (index < 0) return;
         this.list.splice(index, 1);
+    }
+    postProcess(func:()=>void){
+        this.afterList.push(func);
     }
 }
 

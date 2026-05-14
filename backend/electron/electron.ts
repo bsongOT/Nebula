@@ -6,6 +6,13 @@ import Store from "electron-store";
 import { SimpleGit, simpleGit } from "simple-git";
 
 app.commandLine.appendSwitch('disable-site-isolation-trials')
+protocol.registerSchemesAsPrivileged([{
+    scheme: "asset",
+    privileges: {
+        bypassCSP: true,
+        stream: true
+    }
+}])
 const createWindow = async () => {
     const store = new Store<Record<string, string>>();
     const window = new BrowserWindow({

@@ -215,11 +215,38 @@ textarea {
     flex-grow: 1;
     overflow-x: hidden;
 }
+.carousel-tab {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 0;
+}
 .row {
     display: flex;
     width: 200%;
     position: relative;
     transition: 0.2s;
+}
+.nesting-list-wrapper {
+    width: 250px;
+}
+.nesting-list {
+    background: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+.workspace-icon {
+    translate: 0 2px;
+    display: inline-block;
+}
+.left-side-button-text {
+    margin-left: 10px;
+}
+.workspace-chevron {
+    margin-left: 5px;
+    translate: 0 3px;
+    display: inline-block;
 }
 .rename-text {
     position: absolute;
@@ -238,6 +265,9 @@ textarea {
     margin: 2px 10px;
     border-radius: 5px;
 }
+.left-side-mode-button.selected {
+    background: lightcoral;
+}
 .workspace-context-menu {
     position: absolute;
     top: 75px;
@@ -248,6 +278,23 @@ textarea {
     background: white;
     z-index: 1;
     overflow: hidden;
+}
+.workspace-insert-icon {
+    translate: 0 2px;
+    display: inline-block;
+    margin-right: 5px;
+}
+.universe-selector {
+    position: relative;
+}
+
+.nebula-mode-icon {
+    translate: 0 1px;
+    display: inline-block;
+}
+.content-mode-icon {
+    translate: 0 2px;
+    display: inline-block;
 }
 * {
     font-family: sans-serif;
@@ -298,6 +345,11 @@ textarea {
     min-height: 1rem;
     display: inline-block;
     vertical-align: top;
+}
+.dust-block-button-part {
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 .dust-block-git-stick-container {
     position: relative;
@@ -355,6 +407,14 @@ textarea {
     padding: 2px;
     outline: none;
 }
+.tab-container {
+    display: flex;
+}
+.main-tab-container, .second-tab-container {
+    display: flex;
+    width: 50%;
+    transition: 0.2s;
+}
 .tab {
     display: flex;
     background: white;
@@ -374,6 +434,18 @@ textarea {
 .tab.selected {
     background: white;
     border-bottom: 1px solid white;
+}
+.tab-record {
+    width: 10px;
+    height: 10px;
+    background: red;
+    margin: auto 0;
+    translate: 0 -1px;
+    border-radius: 50%;
+    border: 4px double white;
+}
+.tab-close-button {
+    margin-left: 5px;
 }
 .relation-view {
     flex-basis: 100%;
@@ -417,7 +489,6 @@ textarea {
     position: absolute;
     width: 0;
     border-right: 1px solid #ccc;
-    
 }
 .git-page-tab-container {
     display: flex;
@@ -449,6 +520,31 @@ textarea {
 }
 .git-hash {
     color: #ccc;
+}
+.action-opener {
+    position: relative;
+    line-height: 17px;
+}
+.action-notice {
+    position: absolute;
+    right: 12px;
+    top: 0;
+    translate: 50% 2px;
+    border-radius: 8.5px;
+    background: red;
+    min-width: 11px;
+    height: 17px;
+    padding: 0 3px;
+    color: white;
+    font-size: 11px;
+    text-align: center;
+    pointer-events: none;
+}
+.query-button {
+    -webkit-text-stroke: 1.5px black;
+    font-weight: 1000;
+    color: white;
+    font-size: 30px;
 }
 .clipboard-page-main {
     display: flex;
@@ -487,4 +583,18 @@ textarea {
     align-items: center;
     background: white;
     border-radius: 5px;
+}
+.context-menu {
+    position: absolute;
+    width: 200px;
+    background: white;
+    box-shadow: 2px 2px 4px #ccc;
+    border-radius: 3px;
+    border: 1px solid #eee;
+}
+.context-menu-item {
+    padding: 5px 10px;
+}
+.context-menu-item:hover {
+    background: #ccc;
 }

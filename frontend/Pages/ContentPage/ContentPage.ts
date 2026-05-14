@@ -1,4 +1,4 @@
-import { Attribute, div, li, span, textarea, ul } from "@/funcObject"
+import { Attribute, audio, button, div, iframe, img, li, span, textarea, ul, video } from "@/funcObject"
 import context from "../../context"
 import { Content } from "../../../backend/data/Data"
 import { engine, Repeat, U } from "@/engine"
@@ -11,10 +11,11 @@ import { NebulaInfoArea } from "./NebulaInfoArea"
 import { FileAliasPage } from "./FileAliasPage"
 import { mentionContextMenu } from "../../Components/MentionContextMenu"
 import { LucideIcon } from "../../Components/utils/Icon"
-import { Ellipsis, Scale } from "lucide"
+import { Ellipsis, MapPlus, Scale } from "lucide"
 import { ContentContextMenu } from "./ContentContextMenu"
 import { ContentRuleMenu } from "./ContentRuleMenu"
 import { ContentDivisionLineContainer } from "./EditorPart/ContentDivisionLineContainer"
+import { createNebulaByStart } from "../../features"
 
 type TextAnalyzedInfo = {
     selectionStartLine:number,
@@ -35,9 +36,9 @@ class TextAnalyzer {
 
     }
 }
-export function ContentEditor(){    
+export function ContentEditor(info:{content?:Content}){    
     let isContextMenuOpened = false;
-    let updateNeeded = false;
+    let updateNeeded = true;
     
     const contentBody = ul({class: "content-body"})();
 
@@ -64,6 +65,10 @@ export function ContentEditor(){
     return (
         div({ class: "page" })(
             div({ class: "content-tool-container" })(
+                div({ 
+                    class: "content-tool-button",
+                    onclick: createNebulaByStart
+                })(LucideIcon(MapPlus, 24)),
                 div({ class: "content-tool-button" })(LucideIcon(Scale, 24)),
                 div({ 
                     class: "content-tool-button",
@@ -121,6 +126,7 @@ function ContentText(contentBody:HTMLElement){
     })
 
     const cursor = div({class: U(() => cursorWaitingTime >= 2 ? "text-cursor blink" : "text-cursor")})();
+    const tempCursor = span()();
     const cursorStartHighlightBegin = span({inlineStyle: {color: "#00000000"}})();
     const cursorStartHighlightEnd = span({inlineStyle: {color: "#00000000", background: "var(--text-selection-color)"}})();
     const cursorStartHighlight = (
@@ -460,6 +466,21 @@ function ContentText(contentBody:HTMLElement){
                     }
                 });
 
+                // get info
+
+                const selectionBeforeLines = text.value.slice(0, text.selectionStart).split("\n");
+                const selectionEndBeforeLines = text.value.slice(0, text.selectionEnd).split("\n");
+                const selectionLine = selectionBeforeLines[selectionBeforeLines.length - 1];
+                const selectionEndLine = selectionEndBeforeLines[selectionEndBeforeLines.length - 1];
+                const cursorPosition = {
+                    line: selectionBeforeLines.length - 1,
+                    index: selectionLine.length - 1
+                }
+                const cursorEndPosition = {
+                    line: selectionEndBeforeLines.length - 1,
+                    index: selectionEndLine.length - 1
+                }
+
                 // element update
 
                 adjustDustBlocks(lineInfos.length);
@@ -470,31 +491,27 @@ function ContentText(contentBody:HTMLElement){
                     const block = dustBlocks[i];
                     
                     block.dataset.index = i + "";
-                    block.dataset.claim = lineInfos[i].claim;
+                    block.dataset.id = lineInfos[i].id + "";
+                    block.dataset.claim = lineInfos[i].claim.replace(/(?<!\\)\\(?!\\)/g, "");
                     block.dataset.depth = lineInfos[i].depth + "";
                     block.style.top = `${currentHeight}px`                            
                     block.style.marginLeft = `${lineInfos[i].depth * 2}rem`;
                     (<HTMLElement>block.children[0]).style.backgroundColor = "";
                     currentHeight += Math.floor(block.scrollHeight) + 10;
                 }
-                contentBody.style.height = currentHeight + "px"
+
+                //
+                if (textFocused){
+                    if (dustBlocks[cursorPosition.line])
+                        dustBlocks[cursorPosition.line].dataset.claim = lineInfos[cursorPosition.line].claim;
+                }
+                //
+
+                contentBody.style.height = currentHeight + "px";
 
                 // determine cursor position
 
                 if (textFocused){
-                    const selectionBeforeLines = text.value.slice(0, text.selectionStart).split("\n");
-                    const selectionEndBeforeLines = text.value.slice(0, text.selectionEnd).split("\n");
-                    const selectionLine = selectionBeforeLines[selectionBeforeLines.length - 1];
-                    const selectionEndLine = selectionEndBeforeLines[selectionEndBeforeLines.length - 1];
-                    const cursorPosition = {
-                        line: selectionBeforeLines.length - 1,
-                        index: selectionLine.length - 1
-                    }
-                    const cursorEndPosition = {
-                        line: selectionEndBeforeLines.length - 1,
-                        index: selectionEndLine.length - 1
-                    }
-
                     const measureTarget = selectionLine.slice(selectionLine.indexOf("]") + 1);
                     if (measureTarget !== textWidthMeasure.innerText.replaceAll(" ", " ")){
                         textWidthMeasure.innerText = selectionLine.slice(selectionLine.indexOf("]") + 1).replaceAll(" ", "\u00A0");
@@ -502,7 +519,6 @@ function ContentText(contentBody:HTMLElement){
                     if (!dustBlocks[cursorPosition.line].contains(cursor)){
                         dustBlocks[cursorPosition.line].append(cursor, textWidthMeasure)
                     }
-                    const tempCursor = span()();
                     textWidthMeasure.append(tempCursor);
                     textWidthMeasure.append(document.createTextNode(text.value.slice(text.selectionStart).split("\n")[0].replaceAll(" ", "\u00A0")))
                     const cursorRect = tempCursor.getBoundingClientRect();
@@ -511,7 +527,6 @@ function ContentText(contentBody:HTMLElement){
                     cursor.style.top = (cursorRect.top - dustBlockRect.top) + "px";
                     tempCursor.remove();
                     text.style.translate = `0 calc(170px + ${dustBlocks[cursorPosition.line].style.top})`;
-                    console.log(text.style.translate)
                     /**
                      * TODO: SelectionDirection에 따라 커서 위치 바꿀 것!
                      */
@@ -628,17 +643,17 @@ function DustBlock(index:number){
                     () => {
                         const blockIndex = Number(block.dataset.index);
 
-                        if ((block.dataset.claim?.length ?? 0) > 5){
-                            const claim = block.dataset.claim!;
-                            const similar = context.data.dusts.filter(d => d.claim.startsWith(claim))
-                            if (similar.length >= 2){
-                                return [{
-                                    kind: "parallel" as const,
-                                    text: claim,
-                                    blockIndex
-                                }]
-                            }
-                        }
+                        // if ((block.dataset.claim?.length ?? 0) > 5 && !block.dataset.claim?.startsWith("\\")){
+                        //     const claim = block.dataset.claim!;
+                        //     const similar = context.data.dusts.filter(d => d.claim.startsWith(claim))
+                        //     if (similar.length >= 2){
+                        //         return [{
+                        //             kind: "parallel" as const,
+                        //             text: claim,
+                        //             blockIndex
+                        //         }]
+                        //     }
+                        // }
                         return (
                             splitIntoPieces(block.dataset.claim ?? "").map(i => {
                                 if (i.kind !== "text") return {
@@ -668,7 +683,27 @@ function DustBlock(index:number){
                         )
                     }
                 )
-            )
+            ),
+            div({class: U(() => context.openedFile === "" ? "dust-block-embed-part" : "hidden")})(
+                Repeat(
+                    DustEmbed,
+                    () => {
+                        return splitIntoPieces(block.dataset.claim ?? "")
+                            .filter(p => p.kind === "file" && !p.text.endsWith("()}}"))
+                    }
+                )
+            ),
+            // div({class: "dust-block-button-part"})(
+            //     button({
+            //         onclick: () => {
+            //             const dust = context.data.dusts.get(Number(block.dataset.id ?? -1));
+            //             const destination = context.secondSelection?.content?.data;
+            //             if (!dust || !destination) return;
+                        
+            //             destination.dusts.insert(new TreeNode(dust));
+            //         }
+            //     })("→")
+            // )
         )
     )
     block.dataset.index = index + '';
@@ -705,11 +740,14 @@ function DustPiece(i:{kind:"text"|"ref"|"file"|"mention"|"parallel", text:string
             cursor: i.kind === "text" ? "" : "default",
             textDecoration: 
                 i.kind === "mention" ? "skyblue underline 4px" : 
-                i.kind === "parallel" ? "orange underline 4px" : ""
+                i.kind === "parallel" ? "" : ""
         })),
         onclick: async function(e) {
             if (i.kind === "text") return;
             e.stopPropagation();
+            if (i.kind === "parallel") {
+                return;
+            }
             if (i.kind === "mention") {
                 const pieceElement = this as HTMLElement;
                 document.body.append(mentionContextMenu)
@@ -759,7 +797,7 @@ function DustPiece(i:{kind:"text"|"ref"|"file"|"mention"|"parallel", text:string
                     }
                     context.openedFile = originalFileName;
 
-                    (frames[0] as any)?.[functionName]?.()
+                    (frames[context.screenSplit ? 1 : 0] as any)?.[functionName]?.()
                 }
                 else if (!isValidFile){
                     context.data.fileAliases[i.text.slice(2, -2)] = ""                                        
@@ -773,6 +811,38 @@ function DustPiece(i:{kind:"text"|"ref"|"file"|"mention"|"parallel", text:string
             }
         }
     })(() => i.text.replaceAll(" ", "\u00A0"))
+}
+function DustEmbed(info:{text:string}){
+    const getValidations = () => {
+        const src = info.text.slice(2, -2);
+        const extension = src.slice(src.lastIndexOf(".") + 1);
+        return {
+            img: ["jpg", "png", "gif"].includes(extension),
+            audio: ["mp3", "wav"].includes(extension),
+            video: ["mp4", "avi"].includes(extension),
+            iframe: ["html"].includes(extension)
+        }
+    }
+    return (
+        div()(
+            img({src: U((i) => {
+                if (getValidations().img) return `asset://${info.text.slice(2, -2)}`;
+                i.removeAttribute("src");
+                return i.src;
+            }), class: U(() => getValidations().img ? "" : "hidden")})(),
+            audio({src: U(a => {
+                if (getValidations().audio) return `asset://${info.text.slice(2, -2)}`;
+                a.removeAttribute("src");
+                return a.src;
+            }), class: U(() => getValidations().audio ? "" : "hidden")})(),
+            video({src: U(v => {
+                if (getValidations().video) return "asset://" + info.text.slice(2, -2);
+                v.removeAttribute("src");
+                return v.src;
+            }), class: U(() => getValidations().video ? "" : "hidden")})(),
+            iframe({src: U(() =>  getValidations().iframe ? ("asset://" + info.text.slice(2, -2)) : ""), class: U(() => getValidations().iframe ? "" : "hidden")})()
+        )
+    )
 }
 function DustBlockGitStickContainer(info:{totalHeight:number, dustBlocks:HTMLElement[]}){
     function getGitInfos(){

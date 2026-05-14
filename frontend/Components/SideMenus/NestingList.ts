@@ -6,24 +6,16 @@ import { Content } from "../../../backend/data/Data";
 
 export function NestingList(){
     const attr:Attribute<"ul"> = {
-        inlineStyle: {
-            background: "white", 
-            margin: "0", 
-            padding: "0", 
-            display: "flex",
-            flexDirection: "column"
-        },
         className: U(list => {
-            const bcr = list.getBoundingClientRect();
-            const scrollTop = 123 - bcr.top;
+            const bcr = list.parentElement?.getBoundingClientRect() ?? {top: 0};
+            const scrollTop = (list.parentElement?.parentElement?.parentElement?.getBoundingClientRect().top ?? 0) - bcr.top;
             let currentHeight = 0;
-            for (const item of list.children){
-                const itemt = item as HTMLElement;
-                if (currentHeight + item.scrollHeight >= scrollTop && currentHeight - item.scrollHeight <= scrollTop + (list.parentElement?.clientHeight ?? 0)) itemt.dataset.scrollArea = 'true';
-                else itemt.dataset.scrollArea = 'false';
+            for (const item of list.children as Iterable<HTMLLIElement>){
+                if (currentHeight + item.scrollHeight >= scrollTop && currentHeight - item.scrollHeight <= scrollTop + (list.parentElement?.clientHeight ?? 0)) item.dataset.scrollArea = 'true';
+                else item.dataset.scrollArea = 'false';
                 currentHeight += item.scrollHeight;
             }
-            return ""
+            return "nesting-list";
         })
     }
     document.addEventListener("keyup", e => {
@@ -65,7 +57,7 @@ export function NestingList(){
         }
     })
     return (
-        div({ inlineStyle: { width: "250px" } })(
+        div({ className: "nesting-list-wrapper" })(
             ul(attr)(Repeat(ContentItem,
                 () => {
                     if (!context.selection.nebula) return []
